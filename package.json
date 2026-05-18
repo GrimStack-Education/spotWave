@@ -1,0 +1,25 @@
+{
+  "name": "spotwave",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:backend": "turbo run dev --filter=@spotwave/backend",
+    "dev:frontend": "turbo run dev --filter=@spotwave/frontend",
+    "build": "turbo run build",
+    "build:backend": "turbo run build --filter=@spotwave/backend",
+    "build:frontend": "turbo run build --filter=@spotwave/frontend",
+    "lint:fix": "turbo run lint:fix && pnpm format",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "prettier": "^3.4.2",
+    "turbo": "^2.9.14"
+  }
+}
