@@ -6,7 +6,7 @@
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js)](https://nextjs.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs)](https://nestjs.com/)
-[![Prisma](https://img.shields.io/badge/prisma-5-5A67D8?logo=prisma)](https://www.prisma.io/)
+[![Prisma](https://img.shields.io/badge/prisma-7-5A67D8?logo=prisma)](https://www.prisma.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
 
 </div>
@@ -55,7 +55,7 @@ flowchart LR
     end
 
     subgraph Storage["Хранилище"]
-        DB[("PostgreSQL")]
+        DB[("PostgreSQL<br/>+ Prisma v7")]
     end
 
     User --> Router

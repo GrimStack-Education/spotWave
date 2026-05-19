@@ -21,3 +21,16 @@ services:
       - '3000:3000'
     depends_on:
       - backend
+
+  b2b-admin:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/b2b-admin.Dockerfile
+    restart: unless-stopped
+    environment:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NODE_ENV: development
+    ports:
+      - '3001:3001'
+    depends_on:
+      - backend
