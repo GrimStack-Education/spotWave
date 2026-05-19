@@ -1,8 +1,6 @@
-import { Button as HeroUIButton, ButtonProps } from "@heroui/react";
+import { Button as HeroUIButton, ButtonProps as HeroUIButtonProps } from '@heroui/react';
 
-interface ButtonProps extends ButtonProps {
-  // Add custom props here if needed
-}
+type ButtonProps = HeroUIButtonProps;
 
 export const Button = ({ children, ...props }: ButtonProps) => {
   return <HeroUIButton {...props}>{children}</HeroUIButton>;

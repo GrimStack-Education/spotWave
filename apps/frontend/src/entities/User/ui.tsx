@@ -1,5 +1,9 @@
-import { User } from '@/shared/types'; // Assuming types exist
+type UserCardProps = {
+  user: {
+    name?: string;
+  };
+};
 
-export const UserCard = ({ user }: { user: any }) => {
+export const UserCard = ({ user }: UserCardProps) => {
   return <div className="p-4 border rounded">User: {user.name}</div>;
 };

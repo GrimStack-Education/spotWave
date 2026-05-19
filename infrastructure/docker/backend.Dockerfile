@@ -9,6 +9,7 @@ RUN apk add --no-cache python3 make g++ git && \
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/backend ./apps/backend
 COPY apps/frontend ./apps/frontend
+COPY packages ./packages
 
 RUN pnpm install --frozen-lockfile
 

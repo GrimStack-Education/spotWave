@@ -17,6 +17,7 @@ docker compose -f infrastructure/docker/docker-compose.yml up --build
 ```
 
 Замените значения в `DATABASE_URL` и паролях на реальные через переменные окружения или секрет-менеджер.
+
 <div align="center">
 
 # starterKit Docker
