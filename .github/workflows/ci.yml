@@ -37,7 +37,7 @@ jobs:
       - name: Smoke check API
         run: |
           for i in {1..30}; do
-            code=$(curl -s -o /tmp/smoke_root.txt -w "%{http_code}" http://localhost:3333/)
+            code=$(curl -s -o /tmp/smoke_root.txt -w "%{http_code}" http://localhost:3333/ || true)
             if [ "$code" = "200" ]; then
               break
             fi
