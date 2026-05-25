@@ -1,5 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../generated/prisma';
 
 const defaultDatabaseUrl = 'postgresql://spotwave:changeme@localhost:5432/spotwave';
 const adapter = new PrismaPg({
@@ -14,4 +14,4 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
-export * from '@prisma/client';
+export * from '../../generated/prisma';

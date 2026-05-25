@@ -79,3 +79,7 @@ vite.config.ts.timestamp-*
 # AI generated files with specific extensions
 *.QWEN.md
 *.CLAUDE.md
+
+# Prisma generated files
+/generated/prisma
+/packages/generated/prisma
