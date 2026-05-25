@@ -8,7 +8,7 @@ import {
 	ReportSeverity,
 	ReportStatus,
 	UserRole
-} from "./generated/prisma/client.ts";
+} from "@prisma/client";
 
 const defaultDatabaseUrl = "postgresql://spotwave:changeme@localhost:5432/spotwave";
 const adapter = new PrismaPg({
