@@ -1,0 +1,9 @@
+model Organization {
+	id           String  @id @default(uuid())
+	name         String
+	description  String
+	industry     String
+	contactEmail String
+	isVerified   Boolean
+	users        User[]
+}

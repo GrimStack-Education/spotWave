@@ -1,6 +1,7 @@
 type EnvConfig = {
   PORT: number;
   DATABASE_URL: string;
+  JWT_SECRET: string;
   CORS_ORIGIN?: string;
   NODE_ENV: string;
 };
@@ -41,10 +42,12 @@ function parsePort(value: string | undefined): number {
 
 export function validateEnv(config: Record<string, unknown>): EnvConfig {
   const databaseUrl = parseRequiredString(config.DATABASE_URL, 'DATABASE_URL');
+  const jwtSecret = parseRequiredString(config.JWT_SECRET, 'JWT_SECRET');
 
   return {
     PORT: parsePort(config.PORT as string | undefined),
     DATABASE_URL: databaseUrl,
+    JWT_SECRET: jwtSecret,
     CORS_ORIGIN: parseOptionalString(config.CORS_ORIGIN),
     NODE_ENV: parseOptionalString(config.NODE_ENV) ?? 'development',
   };

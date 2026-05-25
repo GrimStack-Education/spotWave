@@ -30,11 +30,54 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
+      JWT_SECRET: spotwave-dev-secret
     ports:
       - '3333:3333'
     depends_on:
       postgres:
         condition: service_healthy
+
+  migrator:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/backend.Dockerfile
+      target: deps
+      cache_from:
+        - type=local,src=.docker-cache/backend
+      cache_to:
+        - type=local,dest=.docker-cache/backend,mode=max
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
+      JWT_SECRET: spotwave-dev-secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - sh
+      - -lc
+      - pnpm --filter @spotwave/database exec prisma db push --schema ./prisma/schema.prisma
+
+  backend-test:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/backend.Dockerfile
+      target: build
+      cache_from:
+        - type=local,src=.docker-cache/backend
+      cache_to:
+        - type=local,dest=.docker-cache/backend,mode=max
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
+      JWT_SECRET: spotwave-dev-secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - sh
+      - -lc
+      - pnpm --filter @spotwave/backend test:e2e
 
   frontend:
     build:

@@ -6,13 +6,18 @@
   "scripts": {
     "postinstall": "prisma generate"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "pg": "^8.16.3"
   },
   "devDependencies": {
+    "dotenv": "^17.4.2",
     "prisma": "^7.0.0",
+    "tsx": "^4.22.3",
     "typescript": "^5.0.0"
   }
 }

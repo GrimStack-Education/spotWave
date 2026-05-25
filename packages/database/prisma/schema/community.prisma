@@ -1,0 +1,42 @@
+enum CommunityVisibility {
+	PUBLIC
+	PRIVATE
+	INVITE_ONLY
+}
+
+enum MemberRole {
+	OWNER
+	ADMIN
+	MODERATOR
+	MEMBER
+}
+
+enum MemberStatus {
+	ACTIVE
+	PENDING
+	BANNED
+	LEFT
+}
+
+model Community {
+	id          String              @id @default(uuid())
+	name        String
+	description String
+	avatarUrl   String
+	city        String
+	visibility  CommunityVisibility
+	ownerId     String
+	owner       User                @relation(fields: [ownerId], references: [id])
+	members     CommunityMember[]
+}
+
+model CommunityMember {
+	id          String       @id @default(uuid())
+	communityId String
+	userId      String
+	role        MemberRole
+	status      MemberStatus
+	joinedAt    DateTime
+	community   Community   @relation(fields: [communityId], references: [id])
+	user        User        @relation(fields: [userId], references: [id])
+}

@@ -15,6 +15,12 @@
 docker compose -f infrastructure/docker/docker-compose.yml up --build
 ```
 
+Применить схему БД (Docker-only):
+
+```bash
+docker compose -f infrastructure/docker/docker-compose.yml run --rm migrator
+```
+
 По умолчанию в compose поднимается локальный Postgres:
 
 - `POSTGRES_DB=spotwave`

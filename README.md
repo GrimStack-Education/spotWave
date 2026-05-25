@@ -176,4 +176,10 @@ docker compose -f infrastructure/docker/docker-compose.yml logs -f
 
 # Пересборка образов без кеша
 docker compose -f infrastructure/docker/docker-compose.yml build --no-cache
+
+# Применить схему БД (Prisma) через Docker
+docker compose -f infrastructure/docker/docker-compose.yml run --rm migrator
+
+# Запустить backend e2e-тесты через Docker
+docker compose -f infrastructure/docker/docker-compose.yml run --rm backend-test
 ```
