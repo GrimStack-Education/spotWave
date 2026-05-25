@@ -1,18 +1,47 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: spotwave
+      POSTGRES_USER: spotwave
+      POSTGRES_PASSWORD: spotwave
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U spotwave -d spotwave']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ../..
       dockerfile: infrastructure/docker/backend.Dockerfile
+      cache_from:
+        - type=local,src=.docker-cache/backend
+      cache_to:
+        - type=local,dest=.docker-cache/backend,mode=max
     restart: unless-stopped
     environment:
       NODE_ENV: development
+      DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
     ports:
       - '3333:3333'
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
       context: ../..
       dockerfile: infrastructure/docker/frontend.Dockerfile
+      cache_from:
+        - type=local,src=.docker-cache/frontend
+      cache_to:
+        - type=local,dest=.docker-cache/frontend,mode=max
     restart: unless-stopped
     environment:
       NEXT_TELEMETRY_DISABLED: '1'
@@ -26,6 +55,10 @@ services:
     build:
       context: ../..
       dockerfile: infrastructure/docker/b2b-admin.Dockerfile
+      cache_from:
+        - type=local,src=.docker-cache/b2b-admin
+      cache_to:
+        - type=local,dest=.docker-cache/b2b-admin,mode=max
     restart: unless-stopped
     environment:
       NEXT_TELEMETRY_DISABLED: '1'
@@ -34,3 +67,6 @@ services:
       - '3001:3001'
     depends_on:
       - backend
+
+volumes:
+  postgres_data:

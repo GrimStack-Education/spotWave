@@ -6,8 +6,6 @@
 - `backend.Dockerfile` — сборка и запуск backend-пакета из монорепо.
 - `frontend.Dockerfile` — сборка и запуск frontend-пакета из монорепо.
 
-Примечание: в текущей локальной конфигурации сервис `postgres` удалён (локальная БД не поднимается автоматически). Если потребуется поднять Postgres в составе compose — добавьте соответствующий сервис в `docker-compose.yml` или используйте внешний хост/managed БД.
-
 Запуск из корня репозитория:
 
 ```bash
@@ -16,7 +14,14 @@
 docker compose -f infrastructure/docker/docker-compose.yml up --build
 ```
 
-Замените значения в `DATABASE_URL` и паролях на реальные через переменные окружения или секрет-менеджер.
+По умолчанию в compose поднимается локальный Postgres:
+
+- `POSTGRES_DB=spotwave`
+- `POSTGRES_USER=spotwave`
+- `POSTGRES_PASSWORD=spotwave`
+- `DATABASE_URL=postgresql://spotwave:spotwave@postgres:5432/spotwave`
+
+Для реального окружения замените эти значения через переменные окружения или секрет-менеджер.
 
 <div align="center">
 
