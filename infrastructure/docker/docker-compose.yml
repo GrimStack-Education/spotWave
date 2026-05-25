@@ -22,10 +22,6 @@ services:
     build:
       context: ../..
       dockerfile: infrastructure/docker/backend.Dockerfile
-      cache_from:
-        - type=local,src=.docker-cache/backend
-      cache_to:
-        - type=local,dest=.docker-cache/backend,mode=max
     restart: unless-stopped
     environment:
       NODE_ENV: development
@@ -42,10 +38,6 @@ services:
       context: ../..
       dockerfile: infrastructure/docker/backend.Dockerfile
       target: deps
-      cache_from:
-        - type=local,src=.docker-cache/backend
-      cache_to:
-        - type=local,dest=.docker-cache/backend,mode=max
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
@@ -63,10 +55,6 @@ services:
       context: ../..
       dockerfile: infrastructure/docker/backend.Dockerfile
       target: build
-      cache_from:
-        - type=local,src=.docker-cache/backend
-      cache_to:
-        - type=local,dest=.docker-cache/backend,mode=max
     environment:
       NODE_ENV: test
       DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
@@ -83,10 +71,6 @@ services:
     build:
       context: ../..
       dockerfile: infrastructure/docker/frontend.Dockerfile
-      cache_from:
-        - type=local,src=.docker-cache/frontend
-      cache_to:
-        - type=local,dest=.docker-cache/frontend,mode=max
     restart: unless-stopped
     environment:
       NEXT_TELEMETRY_DISABLED: '1'
@@ -100,10 +84,6 @@ services:
     build:
       context: ../..
       dockerfile: infrastructure/docker/b2b-admin.Dockerfile
-      cache_from:
-        - type=local,src=.docker-cache/b2b-admin
-      cache_to:
-        - type=local,dest=.docker-cache/b2b-admin,mode=max
     restart: unless-stopped
     environment:
       NEXT_TELEMETRY_DISABLED: '1'
