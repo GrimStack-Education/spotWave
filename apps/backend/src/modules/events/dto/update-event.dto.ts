@@ -1,13 +1,7 @@
-import { EventVisibility } from '@spotwave/database';
-import { Type } from 'class-transformer';
 import {
   IsDateString,
-  IsEnum,
-  IsNumber,
   IsOptional,
   IsString,
-  Max,
-  Min,
   MinLength,
 } from 'class-validator';
 
@@ -30,30 +24,14 @@ export class UpdateEventDto {
   endsAt?: string;
 
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
-  lat?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
-  lng?: number;
+  @IsString()
+  firebaseEventId?: string;
 
   @IsOptional()
   @IsString()
-  addressText?: string;
+  categoryId?: string;
 
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
-  capacity?: number;
-
-  @IsOptional()
-  @IsEnum(EventVisibility)
-  visibility?: EventVisibility;
+  @IsString()
+  venueId?: string;
 }

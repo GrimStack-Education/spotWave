@@ -1,25 +1,23 @@
-import { ReportTargetType } from '@spotwave/database';
 import {
   IsEnum,
-  IsOptional,
+  IsIn,
   IsString,
-  IsUUID,
   MinLength,
 } from 'class-validator';
+import { ReportSeverity } from '@spotwave/database';
 
 export class CreateReportDto {
-  @IsEnum(ReportTargetType)
-  targetType!: ReportTargetType;
+  @IsString()
+  @IsIn(['EVENT', 'USER', 'COMMUNITY'])
+  targetType!: string;
 
-  @IsOptional()
-  @IsUUID()
-  targetEventId?: string;
+  @IsString()
+  targetId!: string;
 
-  @IsOptional()
-  @IsUUID()
-  targetUserId?: string;
+  @IsEnum(ReportSeverity)
+  severity!: ReportSeverity;
 
   @IsString()
   @MinLength(5)
-  reason!: string;
+  action!: string;
 }

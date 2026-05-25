@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EventVisibility } from '@spotwave/database';
 import { DatabaseService } from '../../core/database/database.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -13,24 +12,22 @@ export class EventsService {
   constructor(private readonly db: DatabaseService) {}
 
   create(userId: string, dto: CreateEventDto) {
-    return this.db.client.event.create({
+    return this.db.client.eventArchive.create({
       data: {
         creatorId: userId,
+        firebaseEventId: dto.firebaseEventId,
         title: dto.title,
         description: dto.description,
-        startsAt: new Date(dto.startsAt),
-        endsAt: dto.endsAt ? new Date(dto.endsAt) : null,
-        lat: dto.lat,
-        lng: dto.lng,
-        addressText: dto.addressText,
-        capacity: dto.capacity,
-        visibility: dto.visibility ?? EventVisibility.NEIGHBORHOOD,
+        startTime: new Date(dto.startsAt),
+        endTime: new Date(dto.endsAt),
+        categoryId: dto.categoryId,
+        venueId: dto.venueId,
       },
     });
   }
 
   async update(eventId: string, userId: string, userRole: string, dto: UpdateEventDto) {
-    const event = await this.db.client.event.findUnique({
+    const event = await this.db.client.eventArchive.findUnique({
       where: { id: eventId },
       select: { id: true, creatorId: true },
     });
@@ -38,24 +35,22 @@ export class EventsService {
     if (!event) throw new NotFoundException(`Event with id "${eventId}" was not found`);
     this.assertCanModify(event.creatorId, userId, userRole);
 
-    return this.db.client.event.update({
+    return this.db.client.eventArchive.update({
       where: { id: eventId },
       data: {
+        firebaseEventId: dto.firebaseEventId,
         title: dto.title,
         description: dto.description,
-        startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
-        endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
-        lat: dto.lat,
-        lng: dto.lng,
-        addressText: dto.addressText,
-        capacity: dto.capacity,
-        visibility: dto.visibility,
+        startTime: dto.startsAt ? new Date(dto.startsAt) : undefined,
+        endTime: dto.endsAt ? new Date(dto.endsAt) : undefined,
+        categoryId: dto.categoryId,
+        venueId: dto.venueId,
       },
     });
   }
 
   async remove(eventId: string, userId: string, userRole: string) {
-    const event = await this.db.client.event.findUnique({
+    const event = await this.db.client.eventArchive.findUnique({
       where: { id: eventId },
       select: { id: true, creatorId: true },
     });
@@ -63,7 +58,7 @@ export class EventsService {
     if (!event) throw new NotFoundException(`Event with id "${eventId}" was not found`);
     this.assertCanModify(event.creatorId, userId, userRole);
 
-    await this.db.client.event.delete({ where: { id: eventId } });
+    await this.db.client.eventArchive.delete({ where: { id: eventId } });
     return { deleted: true };
   }
 

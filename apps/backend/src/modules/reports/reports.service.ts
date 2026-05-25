@@ -1,10 +1,9 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ReportStatus, ReportTargetType } from '@spotwave/database';
+import { ReportStatus } from '@spotwave/database';
 import { DatabaseService } from '../../core/database/database.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { GetReportsQueryDto } from './dto/get-reports-query.dto';
@@ -15,16 +14,13 @@ export class ReportsService {
   constructor(private readonly db: DatabaseService) {}
 
   async create(reporterUserId: string, dto: CreateReportDto) {
-    this.validateTarget(dto);
-
     const duplicate = await this.db.client.report.findFirst({
       where: {
-        reporterUserId,
+        reporterId: reporterUserId,
         targetType: dto.targetType,
-        targetEventId: dto.targetEventId ?? null,
-        targetUserId: dto.targetUserId ?? null,
+        targetId: dto.targetId,
         status: {
-          in: [ReportStatus.OPEN, ReportStatus.REVIEWING],
+          in: [ReportStatus.PENDING, ReportStatus.INVESTIGATING],
         },
       },
       select: { id: true },
@@ -36,11 +32,11 @@ export class ReportsService {
 
     return this.db.client.report.create({
       data: {
-        reporterUserId,
+        reporterId: reporterUserId,
         targetType: dto.targetType,
-        targetEventId: dto.targetEventId,
-        targetUserId: dto.targetUserId,
-        reason: dto.reason,
+        targetId: dto.targetId,
+        severity: dto.severity,
+        status: ReportStatus.PENDING,
       },
     });
   }
@@ -53,7 +49,7 @@ export class ReportsService {
     const [items, total] = await this.db.client.$transaction([
       this.db.client.report.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { id: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -79,23 +75,4 @@ export class ReportsService {
     });
   }
 
-  private validateTarget(dto: CreateReportDto) {
-    if (dto.targetType === ReportTargetType.EVENT && !dto.targetEventId) {
-      throw new BadRequestException('targetEventId is required for EVENT reports');
-    }
-
-    if (dto.targetType === ReportTargetType.USER && !dto.targetUserId) {
-      throw new BadRequestException('targetUserId is required for USER reports');
-    }
-
-    if (dto.targetType === ReportTargetType.EVENT && dto.targetUserId) {
-      throw new BadRequestException('targetUserId must not be set for EVENT reports');
-    }
-
-    if (dto.targetType === ReportTargetType.USER && dto.targetEventId) {
-      throw new BadRequestException(
-        'targetEventId must not be set for USER reports',
-      );
-    }
-  }
 }
