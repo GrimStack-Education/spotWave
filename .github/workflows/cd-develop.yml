@@ -2,7 +2,7 @@ name: CD Develop
 
 on:
   push:
-    branches: ["develop"]
+    branches: ['develop']
   workflow_dispatch:
 
 jobs:
