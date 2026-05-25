@@ -50,7 +50,7 @@ jobs:
         run: pnpm --filter @spotwave/b2b-admin lint
 
       - name: Run backend tests
-        run: pnpm --filter @spotwave/backend test -- --runInBand
+        run: pnpm --filter @spotwave/backend exec jest --runInBand
 
       - name: Build all apps
         run: pnpm build
