@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
+  backend-docker:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -19,38 +19,46 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.33.0
+      - name: Build backend image
+        run: docker compose -f infrastructure/docker/docker-compose.yml build backend
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
+      - name: Start postgres
+        run: docker compose -f infrastructure/docker/docker-compose.yml up -d postgres
 
-      - name: Install dependencies
+      - name: Apply database schema
+        run: docker compose -f infrastructure/docker/docker-compose.yml run --rm migrator
+
+      - name: Run backend e2e tests (Docker-only)
+        run: docker compose -f infrastructure/docker/docker-compose.yml run --rm backend-test
+
+      - name: Start backend
+        run: docker compose -f infrastructure/docker/docker-compose.yml up -d backend
+
+      - name: Smoke check API
         run: |
-          pnpm config set fetch-retries 5
-          pnpm config set fetch-retry-factor 2
-          pnpm config set fetch-timeout 120000
-          pnpm install --frozen-lockfile
+          for i in {1..30}; do
+            code=$(curl -s -o /tmp/smoke_root.txt -w "%{http_code}" http://localhost:3333/)
+            if [ "$code" = "200" ]; then
+              break
+            fi
+            sleep 2
+          done
+          test "$code" = "200"
 
-      - name: Check formatting
-        run: pnpm format:check
+      - name: Collect docker logs on failure
+        if: failure()
+        run: |
+          mkdir -p .ci-logs
+          docker compose -f infrastructure/docker/docker-compose.yml ps > .ci-logs/compose-ps.txt
+          docker compose -f infrastructure/docker/docker-compose.yml logs > .ci-logs/compose-logs.txt
 
-      - name: Lint backend
-        run: pnpm --filter @spotwave/backend lint
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-logs
+          path: .ci-logs
 
-      - name: Lint frontend
-        run: pnpm --filter @spotwave/frontend lint
-
-      - name: Lint b2b-admin
-        run: pnpm --filter @spotwave/b2b-admin lint
-
-      - name: Run backend tests
-        run: pnpm --filter @spotwave/backend exec jest --runInBand
-
-      - name: Build all apps
-        run: pnpm build
+      - name: Teardown
+        if: always()
+        run: docker compose -f infrastructure/docker/docker-compose.yml down -v
