@@ -1,5 +1,5 @@
-import { AdminSidebar } from '@/widgets/AdminSidebar';
 import { UserRow } from '@/entities/User';
+import { AdminSidebar } from '@/widgets/AdminSidebar';
 
 export const DashboardPage = () => {
   return (

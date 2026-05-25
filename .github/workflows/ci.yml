@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: ['main', 'develop']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: |
+          pnpm config set fetch-retries 5
+          pnpm config set fetch-retry-factor 2
+          pnpm config set fetch-timeout 120000
+          pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm format:check
+
+      - name: Lint backend
+        run: pnpm --filter @spotwave/backend lint
+
+      - name: Lint frontend
+        run: pnpm --filter @spotwave/frontend lint
+
+      - name: Lint b2b-admin
+        run: pnpm --filter @spotwave/b2b-admin lint
+
+      - name: Run backend tests
+        run: pnpm --filter @spotwave/backend exec jest --runInBand
+
+      - name: Build all apps
+        run: pnpm build
