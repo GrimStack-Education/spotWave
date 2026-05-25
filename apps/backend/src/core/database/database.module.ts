@@ -1,10 +1,5 @@
-import { Injectable, Global, Module } from '@nestjs/common';
-import { prisma } from '@spotwave/database';
-
-@Injectable()
-export class DatabaseService {
-  public readonly client = prisma;
-}
+import { Global, Module } from '@nestjs/common';
+import { DatabaseService } from './database.service';
 
 @Global()
 @Module({

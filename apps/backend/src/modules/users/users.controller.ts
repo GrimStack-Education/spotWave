@@ -1,4 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { GetUserParamsDto } from './dto/get-user-params.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -11,7 +12,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  async getOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async getOne(@Param() params: GetUserParamsDto) {
+    return this.usersService.findOne(params.id);
   }
 }
