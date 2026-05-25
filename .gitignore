@@ -81,5 +81,4 @@ vite.config.ts.timestamp-*
 *.CLAUDE.md
 
 # Prisma generated files
-/generated/prisma
-/packages/generated/prisma
+/packages/database/prisma/generated/prisma
