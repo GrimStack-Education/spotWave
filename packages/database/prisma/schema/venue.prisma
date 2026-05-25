@@ -1,0 +1,8 @@
+model Venue {
+	id          String        @id @default(uuid())
+	name        String
+	address     String
+	coordinates String
+	capacity    Int
+	events      EventArchive[]
+}

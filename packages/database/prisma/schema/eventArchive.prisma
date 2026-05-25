@@ -1,0 +1,14 @@
+model EventArchive {
+	id              String   @id @default(uuid())
+	firebaseEventId String   @unique
+	title           String
+	description     String
+	startTime       DateTime
+	endTime         DateTime
+	creatorId       String
+	categoryId      String
+	venueId         String
+	creator         User     @relation(fields: [creatorId], references: [id])
+	category        Category @relation(fields: [categoryId], references: [id])
+	venue           Venue    @relation(fields: [venueId], references: [id])
+}

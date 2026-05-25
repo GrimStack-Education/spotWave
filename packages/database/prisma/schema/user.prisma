@@ -1,0 +1,26 @@
+enum UserRole {
+	USER
+	ADMIN
+	MODERATOR
+	B2B_ADMIN
+}
+
+model User {
+	id             String   @id @default(uuid())
+	firebaseUid   String   @unique
+	email          String   @unique
+	displayName    String
+	avatarUrl      String?
+	bio            String?
+	role           UserRole @default(USER)
+	organizationId String?
+	organization   Organization? @relation(fields: [organizationId], references: [id])
+	ownedCommunities     Community[]
+	communityMemberships CommunityMember[]
+	createdEvents        EventArchive[]
+	reports              Report[]
+	moderationActions    ModerationAction[]
+	interests            UserInterest[]
+	createdAt      DateTime @default(now())
+	updatedAt      DateTime @updatedAt
+}

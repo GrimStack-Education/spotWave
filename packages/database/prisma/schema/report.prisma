@@ -1,0 +1,34 @@
+enum ReportStatus {
+	PENDING
+	INVESTIGATING
+	RESOLVED
+	DISMISSED
+}
+
+enum ReportSeverity {
+	LOW
+	MEDIUM
+	HIGH
+	CRITICAL
+}
+
+model Report {
+	id         String         @id @default(uuid())
+	reporterId String
+	targetType String
+	targetId   String
+	severity   ReportSeverity
+	status     ReportStatus
+	reporter   User           @relation(fields: [reporterId], references: [id])
+	actions    ModerationAction[]
+}
+
+model ModerationAction {
+	id          String @id @default(uuid())
+	reportId    String
+	moderatorId String
+	action      String
+	notes       String
+	report      Report @relation(fields: [reportId], references: [id])
+	moderator   User   @relation(fields: [moderatorId], references: [id])
+}
