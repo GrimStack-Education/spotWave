@@ -1,21 +1,31 @@
 FROM node:22-alpine AS base
 WORKDIR /app
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
-# Install pnpm
-RUN apk add --no-cache python3 make g++ git && \
-    npm install -g pnpm@latest
-
-# Copy root manifests to leverage pnpm workspace install
+FROM base AS deps
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/backend/package.json ./apps/backend/package.json
+COPY packages/types/package.json ./packages/types/package.json
+COPY packages/database/package.json ./packages/database/package.json
+COPY packages/database/prisma ./packages/database/prisma
+COPY packages/database/prisma.config.ts ./packages/database/prisma.config.ts
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile
+
+FROM deps AS build
 COPY apps/backend ./apps/backend
-COPY apps/frontend ./apps/frontend
 COPY packages ./packages
+RUN pnpm --filter @spotwave/backend build
 
-RUN pnpm install --frozen-lockfile
-
-WORKDIR /app/apps/backend
-RUN pnpm build
-
+FROM base AS runner
+ENV NODE_ENV=production
+ENV PORT=3333
+WORKDIR /app
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/apps/backend ./apps/backend
+COPY --from=build /app/packages ./packages
+USER node
 EXPOSE 3333
-ENV DATABASE_URL="postgres://spotwave:changeme@postgres:5432/spotwave"
-CMD ["pnpm", "--filter", "@spotwave/backend", "start:prod"]
+CMD ["node", "apps/backend/dist/main"]

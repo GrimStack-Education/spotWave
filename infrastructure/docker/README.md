@@ -2,9 +2,10 @@
 
 Содержит Docker-артефакты для локальной разработки и сборки:
 
-- `docker-compose.yml` — compose-файл для локального запуска (Postgres, backend, frontend).
+- `docker-compose.yml` — compose-файл для локального запуска (Postgres, backend, frontend, b2b-admin).
 - `backend.Dockerfile` — сборка и запуск backend-пакета из монорепо.
 - `frontend.Dockerfile` — сборка и запуск frontend-пакета из монорепо.
+- `b2b-admin.Dockerfile` — сборка и запуск admin-интерфейса из монорепо.
 
 Запуск из корня репозитория:
 
@@ -20,6 +21,12 @@ docker compose -f infrastructure/docker/docker-compose.yml up --build
 - `POSTGRES_USER=spotwave`
 - `POSTGRES_PASSWORD=spotwave`
 - `DATABASE_URL=postgresql://spotwave:spotwave@postgres:5432/spotwave`
+
+Порты сервисов:
+
+- backend — `3333`
+- frontend — `3000`
+- b2b-admin — `3001`
 
 Для реального окружения замените эти значения через переменные окружения или секрет-менеджер.
 

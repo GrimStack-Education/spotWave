@@ -14,12 +14,14 @@ apps/*/build/
 packages/*/dist/
 packages/*/build/
 
+
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
 *.egg
+
 
 # Virtual Environment
 .venv/
@@ -58,6 +60,7 @@ coverage/
 # Cache
 .turbo/
 .cache/
+.docker-cache/
 
 # TypeScript
 *.tsbuildinfo
