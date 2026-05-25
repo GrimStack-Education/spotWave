@@ -48,7 +48,7 @@ services:
     command:
       - sh
       - -lc
-      - pnpm --filter @spotwave/database exec prisma db push --schema prisma/schema/schema.prisma
+      - pnpm --filter @spotwave/database exec prisma db push --schema prisma/schema
 
   backend-test:
     build:

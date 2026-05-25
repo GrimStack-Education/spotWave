@@ -1,4 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
+import { hash } from "bcryptjs";
 import {
 	CommunityVisibility,
 	MemberRole,
@@ -378,6 +379,8 @@ const moderationActionData = [
 ];
 
 async function main() {
+	const defaultPassword = await hash("password123", 10);
+
 	for (const category of categoryData) {
 		await prisma.category.upsert({
 			where: { slug: category.slug },
@@ -415,6 +418,7 @@ async function main() {
 			where: { email: user.email },
 			update: {
 				firebaseUid: user.firebaseUid,
+				password: defaultPassword,
 				displayName: user.displayName,
 				avatarUrl: user.avatarUrl,
 				bio: user.bio,
@@ -424,6 +428,7 @@ async function main() {
 			create: {
 				email: user.email,
 				firebaseUid: user.firebaseUid,
+				password: defaultPassword,
 				displayName: user.displayName,
 				avatarUrl: user.avatarUrl,
 				bio: user.bio,

@@ -36,6 +36,21 @@ describe('AppController (e2e)', () => {
     const u1 = `e2e-u1-${ts}@test.local`;
     const u2 = `e2e-u2-${ts}@test.local`;
     const password = 'password123';
+    const category = await prisma.category.create({
+      data: {
+        name: `E2E Category ${ts}`,
+        slug: `e2e-category-${ts}`,
+        icon: 'calendar',
+      },
+    });
+    const venue = await prisma.venue.create({
+      data: {
+        name: `E2E Venue ${ts}`,
+        address: '123 Test Street',
+        coordinates: '43.2389,76.8897',
+        capacity: 100,
+      },
+    });
 
     const register1 = await request(app.getHttpServer())
       .post('/auth/register')
@@ -67,9 +82,12 @@ describe('AppController (e2e)', () => {
       .set('Authorization', `Bearer ${t1}`)
       .send({
         title: 'E2E Event',
+        description: 'E2E event description',
+        endsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        firebaseEventId: `e2e-event-${ts}`,
         startsAt: new Date().toISOString(),
-        lat: 43.2389,
-        lng: 76.8897,
+        categoryId: category.id,
+        venueId: venue.id,
       })
       .expect(201);
 
@@ -86,8 +104,9 @@ describe('AppController (e2e)', () => {
       .set('Authorization', `Bearer ${t2}`)
       .send({
         targetType: 'EVENT',
-        targetEventId: eventId,
-        reason: 'Spam event',
+        targetId: eventId,
+        severity: 'MEDIUM',
+        action: 'Spam event',
       })
       .expect(201);
 
