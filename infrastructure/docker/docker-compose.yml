@@ -57,6 +57,7 @@ services:
       target: build
     environment:
       NODE_ENV: test
+      NODE_OPTIONS: --experimental-vm-modules
       DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
       JWT_SECRET: spotwave-dev-secret
     depends_on:
