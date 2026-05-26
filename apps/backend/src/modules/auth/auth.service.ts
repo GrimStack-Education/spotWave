@@ -6,6 +6,7 @@ import {
 import { randomUUID } from 'node:crypto';
 import { compare, hash } from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { UserRole } from '@spotwave/database';
 import { DatabaseService } from '../../core/database/database.service';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { LoginDto } from './dto/login.dto';
@@ -29,13 +30,20 @@ export class AuthService {
     }
 
     const passwordHash = await hash(dto.password, 10);
+    const displayName = dto.name?.trim() || dto.email.split('@')[0];
 
     const user = await this.db.client.user.create({
       data: {
         firebaseUid: `local-${randomUUID()}`,
         email: dto.email,
         password: passwordHash,
-        displayName: dto.name?.trim() || dto.email.split('@')[0],
+        displayName,
+        role: UserRole.USER,
+        profile: {
+          create: {
+            displayName,
+          },
+        },
       },
       select: { id: true, email: true, role: true },
     });
@@ -53,6 +61,10 @@ export class AuthService {
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException('Password login is not available for this user');
     }
 
     const isPasswordValid = await compare(dto.password, user.password);
@@ -73,6 +85,16 @@ export class AuthService {
         id: true,
         email: true,
         role: true,
+        profile: {
+          select: {
+            displayName: true,
+            avatarUrl: true,
+            bio: true,
+            homeLat: true,
+            homeLng: true,
+            radiusKm: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },

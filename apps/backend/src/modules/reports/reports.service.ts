@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ReportStatus } from '@spotwave/database';
+import { ReportStatus, ReportTargetType } from '@spotwave/database';
 import { DatabaseService } from '../../core/database/database.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { GetReportsQueryDto } from './dto/get-reports-query.dto';
@@ -14,13 +14,18 @@ export class ReportsService {
   constructor(private readonly db: DatabaseService) {}
 
   async create(reporterUserId: string, dto: CreateReportDto) {
+    await this.assertTargetExists(dto.targetType, dto.targetId);
+
     const duplicate = await this.db.client.report.findFirst({
       where: {
-        reporterId: reporterUserId,
+        reporterUserId,
         targetType: dto.targetType,
-        targetId: dto.targetId,
+        targetEventId:
+          dto.targetType === ReportTargetType.EVENT ? dto.targetId : undefined,
+        targetUserId:
+          dto.targetType === ReportTargetType.USER ? dto.targetId : undefined,
         status: {
-          in: [ReportStatus.PENDING, ReportStatus.INVESTIGATING],
+          in: [ReportStatus.OPEN, ReportStatus.REVIEWING],
         },
       },
       select: { id: true },
@@ -32,11 +37,19 @@ export class ReportsService {
 
     return this.db.client.report.create({
       data: {
-        reporterId: reporterUserId,
+        reporterUserId,
         targetType: dto.targetType,
-        targetId: dto.targetId,
-        severity: dto.severity,
-        status: ReportStatus.PENDING,
+        targetEventId:
+          dto.targetType === ReportTargetType.EVENT ? dto.targetId : null,
+        targetUserId:
+          dto.targetType === ReportTargetType.USER ? dto.targetId : null,
+        reason: dto.reason.trim(),
+        status: ReportStatus.OPEN,
+      },
+      include: {
+        reporter: {
+          select: { id: true, email: true },
+        },
       },
     });
   }
@@ -45,11 +58,25 @@ export class ReportsService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
-    const where = query.status ? { status: query.status } : {};
+    const where = {
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.targetType ? { targetType: query.targetType } : {}),
+    };
     const [items, total] = await this.db.client.$transaction([
       this.db.client.report.findMany({
         where,
-        orderBy: { id: 'desc' },
+        include: {
+          reporter: {
+            select: { id: true, email: true },
+          },
+          targetEvent: {
+            select: { id: true, title: true, status: true },
+          },
+          targetUser: {
+            select: { id: true, email: true, role: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -75,4 +102,36 @@ export class ReportsService {
     });
   }
 
+  private async assertTargetExists(
+    targetType: ReportTargetType,
+    targetId: string,
+  ) {
+    if (targetType === ReportTargetType.EVENT) {
+      const event = await this.db.client.event.findUnique({
+        where: { id: targetId },
+        select: { id: true },
+      });
+
+      if (!event) {
+        throw new NotFoundException(`Event with id "${targetId}" was not found`);
+      }
+
+      return;
+    }
+
+    if (targetType === ReportTargetType.USER) {
+      const user = await this.db.client.user.findUnique({
+        where: { id: targetId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        throw new NotFoundException(`User with id "${targetId}" was not found`);
+      }
+
+      return;
+    }
+
+    throw new NotFoundException('Unsupported report target');
+  }
 }
