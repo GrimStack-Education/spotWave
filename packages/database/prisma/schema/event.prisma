@@ -1,0 +1,62 @@
+enum EventStatus {
+	DRAFT
+	ACTIVE
+	CANCELLED
+	FINISHED
+}
+
+enum EventVisibility {
+	PUBLIC
+	NEIGHBORHOOD
+	PRIVATE
+}
+
+enum ParticipantRole {
+	HOST
+	MEMBER
+}
+
+enum ParticipantStatus {
+	JOINED
+	WAITLIST
+	LEFT
+}
+
+model Event {
+	id           String             @id @default(uuid())
+	creatorId    String
+	title        String
+	description  String?
+	startsAt     DateTime
+	endsAt       DateTime?
+	status       EventStatus        @default(ACTIVE)
+	visibility   EventVisibility    @default(NEIGHBORHOOD)
+	capacity     Int?
+	lat          Decimal            @db.Decimal(9, 6)
+	lng          Decimal            @db.Decimal(9, 6)
+	addressText  String?
+	createdAt    DateTime           @default(now())
+	updatedAt    DateTime           @updatedAt
+	creator      User               @relation("EventCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+	participants EventParticipant[]
+	eventTags    EventTag[]
+	reports      Report[]
+
+	@@index([startsAt, status])
+	@@index([lat, lng])
+	@@index([creatorId])
+}
+
+model EventParticipant {
+	eventId   String
+	userId    String
+	role      ParticipantRole   @default(MEMBER)
+	status    ParticipantStatus @default(JOINED)
+	joinedAt  DateTime          @default(now())
+	event     Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+	user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	@@id([eventId, userId])
+	@@index([userId])
+	@@index([eventId, status])
+}

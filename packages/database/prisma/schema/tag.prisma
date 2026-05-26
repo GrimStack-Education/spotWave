@@ -1,0 +1,16 @@
+model Tag {
+	id        String     @id @default(uuid())
+	slug      String     @unique
+	name      String
+	eventTags EventTag[]
+}
+
+model EventTag {
+	eventId String
+	tagId   String
+	event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+	tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+	@@id([eventId, tagId])
+	@@index([tagId])
+}

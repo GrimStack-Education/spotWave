@@ -1,34 +1,31 @@
 enum ReportStatus {
-	PENDING
-	INVESTIGATING
+	OPEN
+	REVIEWING
 	RESOLVED
-	DISMISSED
+	REJECTED
 }
 
-enum ReportSeverity {
-	LOW
-	MEDIUM
-	HIGH
-	CRITICAL
+enum ReportTargetType {
+	EVENT
+	USER
 }
 
 model Report {
-	id         String         @id @default(uuid())
-	reporterId String
-	targetType String
-	targetId   String
-	severity   ReportSeverity
-	status     ReportStatus
-	reporter   User           @relation(fields: [reporterId], references: [id])
-	actions    ModerationAction[]
-}
+	id             String           @id @default(uuid())
+	reporterUserId String
+	targetType     ReportTargetType
+	targetEventId  String?
+	targetUserId   String?
+	reason         String
+	status         ReportStatus     @default(OPEN)
+	createdAt      DateTime         @default(now())
+	updatedAt      DateTime         @updatedAt
+	reporter       User             @relation("ReportReporter", fields: [reporterUserId], references: [id], onDelete: Cascade)
+	targetEvent    Event?           @relation(fields: [targetEventId], references: [id], onDelete: Cascade)
+	targetUser     User?            @relation("ReportTargetUser", fields: [targetUserId], references: [id], onDelete: Cascade)
 
-model ModerationAction {
-	id          String @id @default(uuid())
-	reportId    String
-	moderatorId String
-	action      String
-	notes       String
-	report      Report @relation(fields: [reportId], references: [id])
-	moderator   User   @relation(fields: [moderatorId], references: [id])
+	@@index([reporterUserId])
+	@@index([targetEventId])
+	@@index([targetUserId])
+	@@index([status, createdAt])
 }
