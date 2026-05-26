@@ -12,6 +12,12 @@ export class UsersService {
         id: true,
         email: true,
         role: true,
+        profile: {
+          select: {
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
@@ -27,6 +33,12 @@ export class UsersService {
         id: true,
         email: true,
         role: true,
+        profile: {
+          select: {
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
@@ -43,6 +55,10 @@ export class UsersService {
     id: string;
     email: string;
     role: string;
+    profile: {
+      displayName: string;
+      avatarUrl: string | null;
+    } | null;
     createdAt: Date;
     updatedAt: Date;
   }): UserResponseDto {
@@ -50,6 +66,8 @@ export class UsersService {
       id: user.id,
       email: user.email,
       role: user.role,
+      displayName: user.profile?.displayName ?? null,
+      avatarUrl: user.profile?.avatarUrl ?? null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

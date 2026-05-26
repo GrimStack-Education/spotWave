@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -15,14 +14,16 @@ export class ReportsService {
   constructor(private readonly db: DatabaseService) {}
 
   async create(reporterUserId: string, dto: CreateReportDto) {
-    this.validateTarget(dto);
+    await this.assertTargetExists(dto.targetType, dto.targetId);
 
     const duplicate = await this.db.client.report.findFirst({
       where: {
         reporterUserId,
         targetType: dto.targetType,
-        targetEventId: dto.targetEventId ?? null,
-        targetUserId: dto.targetUserId ?? null,
+        targetEventId:
+          dto.targetType === ReportTargetType.EVENT ? dto.targetId : undefined,
+        targetUserId:
+          dto.targetType === ReportTargetType.USER ? dto.targetId : undefined,
         status: {
           in: [ReportStatus.OPEN, ReportStatus.REVIEWING],
         },
@@ -38,9 +39,17 @@ export class ReportsService {
       data: {
         reporterUserId,
         targetType: dto.targetType,
-        targetEventId: dto.targetEventId,
-        targetUserId: dto.targetUserId,
-        reason: dto.reason,
+        targetEventId:
+          dto.targetType === ReportTargetType.EVENT ? dto.targetId : null,
+        targetUserId:
+          dto.targetType === ReportTargetType.USER ? dto.targetId : null,
+        reason: dto.reason.trim(),
+        status: ReportStatus.OPEN,
+      },
+      include: {
+        reporter: {
+          select: { id: true, email: true },
+        },
       },
     });
   }
@@ -49,10 +58,24 @@ export class ReportsService {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
-    const where = query.status ? { status: query.status } : {};
+    const where = {
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.targetType ? { targetType: query.targetType } : {}),
+    };
     const [items, total] = await this.db.client.$transaction([
       this.db.client.report.findMany({
         where,
+        include: {
+          reporter: {
+            select: { id: true, email: true },
+          },
+          targetEvent: {
+            select: { id: true, title: true, status: true },
+          },
+          targetUser: {
+            select: { id: true, email: true, role: true },
+          },
+        },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
@@ -79,23 +102,36 @@ export class ReportsService {
     });
   }
 
-  private validateTarget(dto: CreateReportDto) {
-    if (dto.targetType === ReportTargetType.EVENT && !dto.targetEventId) {
-      throw new BadRequestException('targetEventId is required for EVENT reports');
+  private async assertTargetExists(
+    targetType: ReportTargetType,
+    targetId: string,
+  ) {
+    if (targetType === ReportTargetType.EVENT) {
+      const event = await this.db.client.event.findUnique({
+        where: { id: targetId },
+        select: { id: true },
+      });
+
+      if (!event) {
+        throw new NotFoundException(`Event with id "${targetId}" was not found`);
+      }
+
+      return;
     }
 
-    if (dto.targetType === ReportTargetType.USER && !dto.targetUserId) {
-      throw new BadRequestException('targetUserId is required for USER reports');
+    if (targetType === ReportTargetType.USER) {
+      const user = await this.db.client.user.findUnique({
+        where: { id: targetId },
+        select: { id: true },
+      });
+
+      if (!user) {
+        throw new NotFoundException(`User with id "${targetId}" was not found`);
+      }
+
+      return;
     }
 
-    if (dto.targetType === ReportTargetType.EVENT && dto.targetUserId) {
-      throw new BadRequestException('targetUserId must not be set for EVENT reports');
-    }
-
-    if (dto.targetType === ReportTargetType.USER && dto.targetEventId) {
-      throw new BadRequestException(
-        'targetEventId must not be set for USER reports',
-      );
-    }
+    throw new NotFoundException('Unsupported report target');
   }
 }

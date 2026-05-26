@@ -1,15 +1,20 @@
-import { EventVisibility } from '@spotwave/database';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
   IsDateString,
   IsEnum,
-  IsNumber,
+  IsLatitude,
+  IsLongitude,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   Min,
   MinLength,
 } from 'class-validator';
+import { EventVisibility } from '@spotwave/database';
 
 export class UpdateEventDto {
   @IsOptional()
@@ -30,17 +35,23 @@ export class UpdateEventDto {
   endsAt?: string;
 
   @IsOptional()
+  @IsEnum(EventVisibility)
+  visibility?: EventVisibility;
+
+  @IsOptional()
   @Type(() => Number)
-  @IsNumber()
-  @Min(-90)
-  @Max(90)
+  @Min(1)
+  @Max(10000)
+  capacity?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsLatitude()
   lat?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
-  @Min(-180)
-  @Max(180)
+  @IsLongitude()
   lng?: number;
 
   @IsOptional()
@@ -48,12 +59,9 @@ export class UpdateEventDto {
   addressText?: string;
 
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
-  capacity?: number;
-
-  @IsOptional()
-  @IsEnum(EventVisibility)
-  visibility?: EventVisibility;
+  @IsArray()
+  @ArrayUnique()
+  @ArrayMaxSize(10)
+  @IsUUID('4', { each: true })
+  tagIds?: string[];
 }

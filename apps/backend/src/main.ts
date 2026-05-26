@@ -18,7 +18,21 @@ async function bootstrap() {
   const corsOrigin = configService.get<string>('CORS_ORIGIN');
 
   if (corsOrigin) {
-    app.enableCors({ origin: corsOrigin });
+    const allowedOrigins = corsOrigin
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+
+    app.enableCors({
+      origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error(`Origin ${origin} is not allowed by CORS`), false);
+      },
+    });
   }
 
   const port = configService.get<number>('PORT') ?? 3000;
