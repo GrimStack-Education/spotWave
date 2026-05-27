@@ -21,7 +21,7 @@ export function SettingsScreen() {
 function SettingsPanel({ icon, items, title }: { icon: ReactNode; items: string[]; title: string }) {
  return (
  <UiCard className="p-6">
- <div className="flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-3-rgb),0.16)] text-[var(--sw-accent-3)]">{icon}</span><h2 className="text-2xl tracking-[-0.04em]">{title}</h2></div>
+ <div className="flex items-center gap-3"><span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-3)]">{icon}</span><h2 className="text-2xl tracking-[-0.04em]">{title}</h2></div>
  <div className="mt-6 space-y-4">
  {items.map((item, index) => <div key={item} className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.035] p-4"><span className="flex items-center gap-2 text-white/78"><Mail size={16} className="text-white/36" />{item}</span><Switch defaultSelected={index !== items.length - 1} size="sm" /></div>)}
  </div>

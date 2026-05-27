@@ -3,15 +3,18 @@
 
 :root {
   --font-sans: 'Manrope', 'Inter', sans-serif;
-  --background: #000000;
+  --background: #121212;
   --foreground: #f4f7ff;
-  --sw-neutral-900: #000000;
+  --sw-neutral-900: #1c1c1c;
   --sw-neutral-800: #191919;
-  --sw-accent-1: #f3af54;
-  --sw-accent-2: #f79200;
-  --sw-accent-3: #ff8c00;
-  --sw-accent-4: #3b2220;
-  --sw-accent-3-rgb: 255, 140, 0;
+  --sw-brand-capsule: #161616;
+  --sw-accent-1: #ffd48a;
+  --sw-accent-2: #ff9f1f;
+  --sw-accent-3: #ff7b00;
+  --sw-accent-4: #4a2f18;
+  --sw-accent-2-rgb: 255, 159, 31;
+  --sw-accent-3-rgb: 255, 191, 0;
+  --sw-accent-4-rgb: 74, 47, 24;
 }
 
 @theme inline {

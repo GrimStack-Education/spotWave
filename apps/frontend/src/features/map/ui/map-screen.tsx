@@ -49,7 +49,7 @@ export function MapScreen() {
  <Link
  key={event.id}
  href={`/events/${event.id}`}
- className="rounded-[24px] border border-white/10 bg-[#0b0b0b] p-4 transition hover:border-[rgba(var(--sw-accent-3-rgb),0.40)]"
+ className="rounded-[24px] border border-white/10 bg-[var(--sw-neutral-800)] p-4 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.40)]"
  >
  <p className="text-xs uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">{event.category}</p>
  <p className="mt-2 text-2xl leading-tight text-white">{event.title}</p>
@@ -60,7 +60,7 @@ export function MapScreen() {
  </div>
  </div>
 
- <div className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 md:p-8">
+ <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
  <h2 className="text-[38px] leading-[0.96] tracking-[-0.06em] text-white md:text-[44px]">
  Все события
  </h2>
@@ -71,7 +71,7 @@ export function MapScreen() {
  <Link
  key={event.id}
  href={`/events/${event.id}`}
- className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#101010] px-4 py-3 text-white/84 transition hover:border-[rgba(var(--sw-accent-3-rgb),0.35)]"
+ className="flex items-center gap-3 rounded-2xl border border-white/10 bg-[#101010] px-4 py-3 text-white/84 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.35)]"
  >
  <div className="h-12 w-12 rounded-xl bg-[#0f0f0f]" />
  <div className="min-w-0 flex-1">

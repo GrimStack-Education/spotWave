@@ -20,7 +20,7 @@ export function OrganizerScreen() {
 
  <div className="grid gap-3 md:grid-cols-3">
  {stats.map((stat) => (
- <div key={stat.label} className="rounded-[24px] border border-white/10 bg-[#0b0b0b] p-5">
+ <div key={stat.label} className="rounded-[24px] border border-white/10 bg-[var(--sw-neutral-800)] p-5">
  <p className="text-xs uppercase tracking-[0.12em] text-white/52">{stat.label}</p>
  <p className="mt-3 text-5xl leading-none text-[var(--sw-accent-3)]">{stat.value}</p>
  </div>

@@ -35,7 +35,7 @@ export function CreateEventScreen() {
 
  return (
  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
- <div className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 md:p-8">
+ <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
  <h1 className="text-[52px] leading-[0.95] tracking-[-0.06em] text-white md:text-[74px]">
  Создать
  <br />
@@ -69,7 +69,7 @@ export function CreateEventScreen() {
  <UiButton className="mt-7 h-14 w-full md:w-auto" onPress={submit}>Опубликовать</UiButton>
  </div>
 
- <div className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6">
+ <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6">
  <div className="h-44 rounded-2xl bg-[#0f0f0f]" />
  <p className="mt-5 text-xs uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">Превью</p>
  <p className="mt-2 text-3xl leading-tight text-white">{title || 'Ваше следующее событие'}</p>

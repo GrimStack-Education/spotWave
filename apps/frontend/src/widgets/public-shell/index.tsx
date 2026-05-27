@@ -14,11 +14,11 @@ export function PublicShell({
  topBadge?: string;
 }) {
  return (
- <main className="min-h-screen overflow-hidden bg-[#050505] px-4 py-5 text-white md:px-8 md:py-8">
- <section className="relative mx-auto grid min-h-[calc(100vh-2.5rem)] max-w-[1460px] items-center gap-10 overflow-hidden rounded-[34px] border border-white/10 bg-[#050505] px-6 py-7 md:px-10 md:py-10 xl:grid-cols-[minmax(0,1fr)_560px] xl:px-14 xl:py-12">
+ <main className="min-h-screen overflow-hidden bg-[var(--background)] px-4 py-5 text-white md:px-8 md:py-8">
+ <section className="relative mx-auto grid min-h-[calc(100vh-2.5rem)] max-w-[1460px] items-center gap-10 overflow-hidden rounded-[34px] border border-white/10 bg-[var(--background)] px-6 py-7 md:px-10 md:py-10 xl:grid-cols-[minmax(0,1fr)_560px] xl:px-14 xl:py-12">
  <div className="relative hidden max-w-[860px] lg:block">
- <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-[#090909] px-5 py-3">
- <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority />
+ <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-[var(--sw-brand-capsule)] px-5 py-3">
+ <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority unoptimized />
  <span className="text-[30px]">
  Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
  </span>
@@ -35,10 +35,10 @@ export function PublicShell({
  </p>
  </div>
 
- <Card className="relative mx-auto w-full max-w-[560px] rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 shadow-none md:p-8">
+ <Card className="relative mx-auto w-full max-w-[560px] rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 shadow-none md:p-8">
  <div className="flex items-center justify-between gap-5">
  <div className="flex items-center gap-3">
- <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority />
+ <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority unoptimized />
  <span className="text-[32px] tracking-[-0.04em]">
  Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
  </span>

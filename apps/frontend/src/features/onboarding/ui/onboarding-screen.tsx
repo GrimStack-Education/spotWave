@@ -10,7 +10,7 @@ export function OnboardingScreen() {
   return (
     <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
       <UiCard className="space-y-6 p-6 md:p-8">
-        <UiBadge className="w-fit border-[rgba(var(--sw-accent-3-rgb),0.30)] bg-[rgba(var(--sw-accent-3-rgb),0.12)] text-[var(--sw-accent-3)]"><Sparkles size={13} /> Настройка</UiBadge>
+        <UiBadge className="w-fit border-[rgba(var(--sw-accent-2-rgb),0.30)] bg-[rgba(var(--sw-accent-4-rgb),0.12)] text-[var(--sw-accent-3)]"><Sparkles size={13} /> Настройка</UiBadge>
         <div>
           <h1 className="max-w-3xl text-5xl leading-[.95] tracking-[-0.06em] md:text-7xl">Настройте локальный ритм</h1>
           <p className="mt-4 max-w-2xl text-white/60">Выберите интересы и радиус поиска перед входом в основную ленту SpotWave.</p>
@@ -18,7 +18,7 @@ export function OnboardingScreen() {
         <div className="space-y-3">
           <h2 className="text-sm uppercase tracking-[0.1em] text-white/54">Интересы</h2>
           <div className="flex flex-wrap gap-2">
-            {interests.map((item, index) => <UiBadge key={item} className={index < 3 ? 'border-[rgba(var(--sw-accent-3-rgb),0.30)] bg-[rgba(var(--sw-accent-3-rgb),0.12)] text-[var(--sw-accent-3)]' : ''}>{item}</UiBadge>)}
+            {interests.map((item, index) => <UiBadge key={item} className={index < 3 ? 'border-[rgba(var(--sw-accent-2-rgb),0.30)] bg-[rgba(var(--sw-accent-4-rgb),0.12)] text-[var(--sw-accent-3)]' : ''}>{item}</UiBadge>)}
           </div>
         </div>
         <div className="space-y-3">

@@ -24,9 +24,9 @@ export function NotificationsScreen() {
  {items.map((item) => {
  const Icon = item.icon;
  return (
- <div key={item.title} className="rounded-[24px] border border-white/10 bg-[#0b0b0b] p-5">
+ <div key={item.title} className="rounded-[24px] border border-white/10 bg-[var(--sw-neutral-800)] p-5">
  <div className="flex items-start gap-4">
- <span className="grid h-12 w-12 place-items-center rounded-xl bg-[rgba(var(--sw-accent-3-rgb),0.14)] text-[var(--sw-accent-3)]">
+ <span className="grid h-12 w-12 place-items-center rounded-xl bg-[rgba(var(--sw-accent-4-rgb),0.14)] text-[var(--sw-accent-3)]">
  <Icon size={20} />
  </span>
  <div>

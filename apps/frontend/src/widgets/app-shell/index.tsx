@@ -20,11 +20,11 @@ export function AppShell({ children }: { children: ReactNode }) {
  const router = useRouter();
 
  return (
- <main className="min-h-screen overflow-hidden bg-[#050505] px-4 py-5 text-white md:px-8 md:py-8">
- <section className="relative mx-auto min-h-[calc(100vh-2.5rem)] max-w-[1460px] overflow-hidden rounded-[34px] border border-white/10 bg-[#050505] px-6 py-7 md:px-10 md:py-10 xl:px-14 xl:py-12">
+ <main className="min-h-screen overflow-hidden bg-[var(--background)] px-4 py-5 text-white md:px-8 md:py-8">
+ <section className="relative mx-auto min-h-[calc(100vh-2.5rem)] max-w-[1460px] overflow-hidden rounded-[34px] border border-white/10 bg-[var(--background)] px-6 py-7 md:px-10 md:py-10 xl:px-14 xl:py-12">
  <header className="relative flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
- <Link href="/home" className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-[#090909] px-5 py-3">
- <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={42} height={42} priority />
+ <Link href="/home" className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-[var(--sw-brand-capsule)] px-5 py-3">
+ <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={42} height={42} priority unoptimized />
  <span className="text-[30px] tracking-[-0.04em]">Spot<span className="text-[var(--sw-accent-3)]">Wave</span></span>
  </Link>
 
@@ -39,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
  className={[
  'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition',
  active
- ? 'border-[rgba(var(--sw-accent-3-rgb),0.35)] bg-[rgba(var(--sw-accent-3-rgb),0.12)] text-[var(--sw-accent-3)]'
+ ? 'border-[rgba(var(--sw-accent-2-rgb),0.35)] bg-[rgba(var(--sw-accent-4-rgb),0.12)] text-[var(--sw-accent-3)]'
  : 'border-white/12 text-white/70 hover:border-white/24 hover:text-white',
  ].join(' ')}
  >

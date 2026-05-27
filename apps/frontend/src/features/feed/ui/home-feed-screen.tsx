@@ -23,7 +23,7 @@ export function HomeFeedScreen() {
 
  <Link
  href={`/events/${featured.id}`}
- className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 transition hover:border-[rgba(var(--sw-accent-3-rgb),0.35)] md:p-8"
+ className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.35)] md:p-8"
  >
  <p className="text-xs uppercase tracking-[0.14em] text-[var(--sw-accent-3)]">Главное событие</p>
  <h2 className="mt-3 text-[42px] leading-[0.95] tracking-[-0.06em] text-white">{featured.title}</h2>
@@ -38,7 +38,7 @@ export function HomeFeedScreen() {
  <Link
  key={event.id}
  href={`/events/${event.id}`}
- className="rounded-[24px] border border-white/10 bg-[#0b0b0b] p-4 transition hover:border-[rgba(var(--sw-accent-3-rgb),0.35)]"
+ className="rounded-[24px] border border-white/10 bg-[var(--sw-neutral-800)] p-4 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.35)]"
  >
  <div className="h-32 rounded-2xl bg-[#0f0f0f]" />
  <p className="mt-4 text-xs uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">{event.category}</p>
