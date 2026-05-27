@@ -40,6 +40,7 @@ describe('Backend e2e', () => {
     await prisma.eventParticipant.deleteMany();
     await prisma.eventTag.deleteMany();
     await prisma.event.deleteMany();
+    await prisma.eventArchive.deleteMany();
     await prisma.profile.deleteMany();
     await prisma.user.deleteMany({
       where: {

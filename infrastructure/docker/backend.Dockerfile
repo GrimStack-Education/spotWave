@@ -17,6 +17,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 FROM deps AS build
 COPY apps/backend ./apps/backend
 COPY packages ./packages
+RUN pnpm --filter @spotwave/database exec prisma generate --schema prisma/schema
 RUN pnpm --filter @spotwave/backend build
 
 FROM base AS runner
