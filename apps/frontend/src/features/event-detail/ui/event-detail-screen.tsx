@@ -38,7 +38,7 @@ export function EventDetailScreen({ id }: { id: string }) {
  <UiCard className="overflow-hidden p-0">
  <div className="h-80 bg-[#0f0f0f]" />
  <div className="p-6 md:p-8">
- <UiBadge className="border-[rgba(var(--sw-accent-3-rgb),0.30)] bg-[rgba(var(--sw-accent-3-rgb),0.15)] text-[var(--sw-accent-3)]">{event.category}</UiBadge>
+ <UiBadge className="border-[rgba(var(--sw-accent-2-rgb),0.30)] bg-[rgba(var(--sw-accent-4-rgb),0.15)] text-[var(--sw-accent-3)]">{event.category}</UiBadge>
  <h1 className="mt-4 text-5xl leading-[.95] tracking-[-0.06em] md:text-7xl">{event.title}</h1>
  <p className="mt-4 max-w-2xl text-lg text-white/60">RSVP-first event with clear logistics and trust controls.</p>
  <div className="mt-7 grid gap-3 text-white/72 md:grid-cols-3"><Info icon={<Calendar size={17} />} text={event.datetime} /><Info icon={<MapPin size={17} />} text={event.location} /><Info icon={<Users size={17} />} text={`${event.rsvpCount} attending`} /></div>

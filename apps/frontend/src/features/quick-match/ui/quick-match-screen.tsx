@@ -12,7 +12,7 @@ export function QuickMatchScreen() {
  <UiCard className="overflow-hidden p-0">
  <div className="h-80 bg-[#0f0f0f]" />
  <div className="p-6">
- <UiBadge className="border-[rgba(var(--sw-accent-3-rgb),0.30)] bg-[rgba(var(--sw-accent-3-rgb),0.15)] text-[var(--sw-accent-3)]">{event.category}</UiBadge>
+ <UiBadge className="border-[rgba(var(--sw-accent-2-rgb),0.30)] bg-[rgba(var(--sw-accent-4-rgb),0.15)] text-[var(--sw-accent-3)]">{event.category}</UiBadge>
  <h2 className="mt-3 text-3xl tracking-[-0.045em]">{event.title}</h2>
  <p className="mt-2 flex items-center gap-2 text-white/58"><MapPin size={17} /> {event.datetime} · {event.location}</p>
  <div className="mt-6 grid grid-cols-3 gap-3"><UiButton variant="secondary"><X size={18} /> Skip</UiButton><UiButton>I am in</UiButton><UiButton variant="secondary"><Bookmark size={18} /> Save</UiButton></div>

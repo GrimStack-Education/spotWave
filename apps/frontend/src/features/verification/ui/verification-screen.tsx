@@ -6,7 +6,7 @@ const levels = ['12+', '18+', '25+'];
 export function VerificationScreen() {
  return (
  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
- <div className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 md:p-8">
+ <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
  <h1 className="text-[58px] leading-[0.96] tracking-[-0.07em] text-white md:text-[84px] xl:text-[96px]">
  Уровень
  <br />
@@ -23,7 +23,7 @@ export function VerificationScreen() {
  className={[
  'rounded-2xl border p-4 text-center',
  level === trust.verificationLevel
- ? 'border-[rgba(var(--sw-accent-3-rgb),0.35)] bg-[rgba(var(--sw-accent-3-rgb),0.10)] text-[var(--sw-accent-3)]'
+ ? 'border-[rgba(var(--sw-accent-2-rgb),0.35)] bg-[rgba(var(--sw-accent-4-rgb),0.10)] text-[var(--sw-accent-3)]'
  : 'border-white/10 bg-[#101010] text-white/78',
  ].join(' ')}
  >
@@ -45,7 +45,7 @@ export function VerificationScreen() {
 
 function Metric({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
  return (
- <div className="rounded-[24px] border border-white/10 bg-[#0b0b0b] p-5">
+ <div className="rounded-[24px] border border-white/10 bg-[var(--sw-neutral-800)] p-5">
  <div className="flex items-center gap-3 text-[var(--sw-accent-3)]">{icon}<span className="text-sm uppercase tracking-[0.12em]">{label}</span></div>
  <p className="mt-3 text-4xl text-white">{value}</p>
  </div>

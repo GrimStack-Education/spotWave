@@ -36,11 +36,11 @@ export function SignInScreen() {
  };
 
  return (
- <main className="min-h-screen overflow-hidden bg-[#050505] px-4 py-5 text-white md:px-8 md:py-8">
- <section className="relative mx-auto max-w-[1460px] overflow-hidden rounded-[34px] border border-white/10 bg-[#050505] px-6 py-7 md:px-10 md:py-10 xl:px-14 xl:py-12">
+ <main className="min-h-screen overflow-hidden bg-[var(--background)] px-4 py-5 text-white md:px-8 md:py-8">
+ <section className="relative mx-auto max-w-[1460px] overflow-hidden rounded-[34px] border border-white/10 bg-[var(--background)] px-6 py-7 md:px-10 md:py-10 xl:px-14 xl:py-12">
  <div className="relative flex items-center justify-between gap-4">
- <div className="flex items-center gap-3 rounded-full border border-white/10 bg-[#090909] px-5 py-3">
- <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority />
+ <div className="flex items-center gap-3 rounded-full border border-white/10 bg-[var(--sw-brand-capsule)] px-5 py-3">
+ <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority unoptimized />
  <span className="text-[30px]">
  Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
  </span>
@@ -64,7 +64,7 @@ export function SignInScreen() {
  </p>
  </div>
 
- <div className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 md:p-8">
+ <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
  <h2 className="text-[44px] leading-[0.95] tracking-[-0.06em] text-white">
  С возвращением
  </h2>
@@ -139,11 +139,11 @@ export function SignUpScreen() {
  };
 
  return (
- <main className="min-h-screen overflow-hidden bg-[#050505] px-4 py-5 text-white md:px-8 md:py-8">
- <section className="relative mx-auto max-w-[1460px] overflow-hidden rounded-[34px] border border-white/10 bg-[#050505] px-6 py-7 md:px-10 md:py-10 xl:px-14 xl:py-12">
+ <main className="min-h-screen overflow-hidden bg-[var(--background)] px-4 py-5 text-white md:px-8 md:py-8">
+ <section className="relative mx-auto max-w-[1460px] overflow-hidden rounded-[34px] border border-white/10 bg-[var(--background)] px-6 py-7 md:px-10 md:py-10 xl:px-14 xl:py-12">
  <div className="relative flex items-center justify-between gap-4">
- <div className="flex items-center gap-3 rounded-full border border-white/10 bg-[#090909] px-5 py-3">
- <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority />
+ <div className="flex items-center gap-3 rounded-full border border-white/10 bg-[var(--sw-brand-capsule)] px-5 py-3">
+ <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority unoptimized />
  <span className="text-[30px]">
  Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
  </span>
@@ -167,7 +167,7 @@ export function SignUpScreen() {
  </p>
  </div>
 
- <div className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 md:p-8">
+ <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
  <h2 className="text-[44px] leading-[0.95] tracking-[-0.06em] text-white">
  Создайте аккаунт
  </h2>

@@ -5,7 +5,7 @@ import { UiAvatar } from '@/shared/ui/avatar/avatar';
 export function ProfileScreen() {
  return (
  <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
- <div className="rounded-[30px] border border-white/10 bg-[#0b0b0b] p-6 md:p-8">
+ <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
  <div className="flex flex-wrap items-start justify-between gap-4">
  <div className="flex items-start gap-4">
  <UiAvatar label="Alex Carter" className="h-24 w-24 rounded-[28px] text-2xl" />
@@ -28,7 +28,7 @@ export function ProfileScreen() {
  </div>
 
  <div className="space-y-4">
- <div className="rounded-[26px] border border-white/10 bg-[#0b0b0b] p-6">
+ <div className="rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-6">
  <h2 className="text-3xl leading-tight text-white">Индекс доверия</h2>
  <div className="mt-5 grid grid-cols-3 gap-3 text-center">
  <Metric value={String(trust.rating)} label="Рейтинг" />
@@ -37,7 +37,7 @@ export function ProfileScreen() {
  </div>
  </div>
 
- <div className="rounded-[26px] border border-white/10 bg-[#0b0b0b] p-6">
+ <div className="rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-6">
  <h2 className="text-3xl leading-tight text-white">Активность</h2>
  <ul className="mt-4 space-y-3 text-white/64">
  <li className="flex gap-3"><Calendar className="text-[var(--sw-accent-3)]" size={18} /> Присоединился к Product Design Meetup</li>
