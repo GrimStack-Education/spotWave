@@ -2,24 +2,58 @@
 @import '@heroui/styles';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Manrope', 'Inter', sans-serif;
+  --background: #000000;
+  --foreground: #f4f7ff;
+  --sw-neutral-900: #000000;
+  --sw-neutral-800: #191919;
+  --sw-accent-1: #f3af54;
+  --sw-accent-2: #f79200;
+  --sw-accent-3: #e67300;
+  --sw-accent-4: #3b2220;
+  --sw-accent-3-rgb: 230, 115, 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: var(--sw-accent-3);
+  --color-brand-foreground: #ffffff;
+  --color-muted-foreground: rgba(255, 255, 255, 0.58);
+  --color-surface: rgba(255, 255, 255, 0.06);
+  --color-surface-muted: rgba(255, 255, 255, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.sw-bg {
+  background: var(--sw-neutral-900);
+}
+
+.sw-gradient-text {
+  color: var(--sw-accent-3);
 }
