@@ -9,9 +9,9 @@
   --sw-neutral-800: #191919;
   --sw-accent-1: #f3af54;
   --sw-accent-2: #f79200;
-  --sw-accent-3: #e67300;
+  --sw-accent-3: #ff8c00;
   --sw-accent-4: #3b2220;
-  --sw-accent-3-rgb: 230, 115, 0;
+  --sw-accent-3-rgb: 255, 140, 0;
 }
 
 @theme inline {
