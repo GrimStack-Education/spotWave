@@ -79,11 +79,14 @@ export class AuthService {
   }
 
   async getMe(userId: string) {
-    return this.db.client.user.findUnique({
+    const user = await this.db.client.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
         email: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true,
         role: true,
         profile: {
           select: {
@@ -95,10 +98,142 @@ export class AuthService {
             radiusKm: true,
           },
         },
+        interests: {
+          select: {
+            interest: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                icon: true,
+              },
+            },
+          },
+        },
+        createdEvents: {
+          select: {
+            id: true,
+            title: true,
+            startsAt: true,
+            capacity: true,
+            participants: {
+              select: {
+                status: true,
+              },
+            },
+            reviews: {
+              select: {
+                rating: true,
+                text: true,
+                createdAt: true,
+                author: {
+                  select: {
+                    displayName: true,
+                    email: true,
+                  },
+                },
+              },
+              orderBy: { createdAt: 'desc' },
+              take: 3,
+            },
+          },
+          orderBy: { startsAt: 'desc' },
+        },
+        eventParticipants: {
+          select: {
+            status: true,
+            event: {
+              select: {
+                id: true,
+                title: true,
+                startsAt: true,
+                addressText: true,
+              },
+            },
+          },
+          orderBy: { joinedAt: 'desc' },
+        },
+        eventCheckIns: {
+          select: {
+            id: true,
+            method: true,
+            createdAt: true,
+          },
+        },
+        reportsAgainstMe: {
+          select: { id: true, status: true },
+        },
         createdAt: true,
         updatedAt: true,
       },
     });
+
+    if (!user) return null;
+
+    const hostedEventsCount = user.createdEvents.length;
+    const joinedEventsCount = user.eventParticipants.length;
+    const checkInsCount = user.eventCheckIns.length;
+    const reviews = user.createdEvents.flatMap((event) =>
+      event.reviews.map((review) => ({
+        eventId: event.id,
+        eventTitle: event.title,
+        rating: review.rating,
+        text: review.text,
+        createdAt: review.createdAt,
+        authorName: review.author.displayName ?? review.author.email,
+      })),
+    );
+    const averageRating =
+      reviews.length > 0
+        ? Number((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1))
+        : null;
+    const resolvedReports = user.reportsAgainstMe.filter((report) => report.status === 'RESOLVED').length;
+    const openReports = user.reportsAgainstMe.length - resolvedReports;
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
+      bio: user.bio,
+      profile: user.profile
+        ? {
+            displayName: user.profile.displayName,
+            avatarUrl: user.profile.avatarUrl,
+            bio: user.profile.bio,
+            homeLat: user.profile.homeLat ? Number(user.profile.homeLat) : null,
+            homeLng: user.profile.homeLng ? Number(user.profile.homeLng) : null,
+            radiusKm: user.profile.radiusKm,
+          }
+        : null,
+      interests: user.interests.map((item) => item.interest),
+      activity: {
+        hostedEventsCount,
+        joinedEventsCount,
+        checkInsCount,
+        upcomingEvents: user.eventParticipants.slice(0, 4).map((participant) => ({
+          id: participant.event.id,
+          title: participant.event.title,
+          startsAt: participant.event.startsAt,
+          addressText: participant.event.addressText,
+          status: participant.status,
+        })),
+      },
+      trust: {
+        level: checkInsCount >= 4 && averageRating && averageRating >= 4.7 ? '25+' : '18+',
+        averageRating,
+        reviewsCount: reviews.length,
+        checkInsCount,
+        hostedEventsCount,
+        joinedEventsCount,
+        openReports,
+        resolvedReports,
+        recentReviews: reviews.slice(0, 3),
+      },
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   async refresh(userId: string): Promise<AuthResponseDto> {
