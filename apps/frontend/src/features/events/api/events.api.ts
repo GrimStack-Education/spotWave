@@ -1,14 +1,17 @@
-import { apiRequest } from '@/services/http/client';
+import { apiRequest } from '@/shared/lib/api/client';
 
-type BackendEvent = {
+export type BackendEvent = {
   id: string;
   title: string;
   description: string | null;
   startsAt: string;
-  visibility: 'PUBLIC' | 'PRIVATE' | 'UNLISTED';
+  visibility: 'PUBLIC' | 'PRIVATE' | 'NEIGHBORHOOD';
   capacity: number | null;
-  attendeesCount?: number;
-  location?: { addressText?: string | null } | null;
+  addressText?: string | null;
+  distanceKm?: number | null;
+  tags?: Array<{ id: string; slug: string; name: string }>;
+  creator?: { id: string; email: string; role: string; displayName?: string | null; avatarUrl?: string | null };
+  participants?: { joinedCount: number; waitlistCount: number };
 };
 
 export async function fetchEvents(params?: { lat?: number; lng?: number; radiusKm?: number; limit?: number }) {
@@ -18,7 +21,7 @@ export async function fetchEvents(params?: { lat?: number; lng?: number; radiusK
   if (params?.radiusKm != null) qs.set('radiusKm', String(params.radiusKm));
   if (params?.limit != null) qs.set('limit', String(params.limit));
   const q = qs.toString();
-  return apiRequest<BackendEvent[]>(`/events${q ? `?${q}` : ''}`);
+  return apiRequest<{ items: BackendEvent[]; total: number; limit: number; offset: number }>(`/events${q ? `?${q}` : ''}`);
 }
 
 export async function fetchEventById(id: string) {
