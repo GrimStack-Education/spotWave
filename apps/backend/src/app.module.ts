@@ -14,6 +14,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { UsersModule } from './modules/users/users.module';
+import { OnboardingModule } from './modules/onboarding/onboarding.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { CheckInsModule } from './modules/checkins/checkins.module';
   
 
 @Module({
@@ -37,6 +42,11 @@ import { UsersModule } from './modules/users/users.module';
     TagsModule,
     ParticipantsModule,
     ReportsModule,
+    OnboardingModule,
+    NotificationsModule,
+    ReviewsModule,
+    ChatModule,
+    CheckInsModule,
   ],
   controllers: [AppController],
   providers: [
