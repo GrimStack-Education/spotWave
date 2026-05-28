@@ -24,6 +24,10 @@ model User {
 	eventParticipants    EventParticipant[]
 	reportedByMe         Report[]           @relation("ReportReporter")
 	reportsAgainstMe     Report[]           @relation("ReportTargetUser")
+	notifications        Notification[]
+	chatMessages         EventChatMessage[]
+	eventReviews         EventReview[]
+	eventCheckIns        EventCheckIn[]
 	interests            UserInterest[]
 	createdAt            DateTime           @default(now())
 	updatedAt            DateTime           @updatedAt

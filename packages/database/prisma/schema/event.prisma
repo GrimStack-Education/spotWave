@@ -41,6 +41,9 @@ model Event {
 	participants EventParticipant[]
 	eventTags    EventTag[]
 	reports      Report[]
+	chatMessages EventChatMessage[]
+	reviews      EventReview[]
+	checkIns     EventCheckIn[]
 
 	@@index([startsAt, status])
 	@@index([lat, lng])
@@ -59,4 +62,74 @@ model EventParticipant {
 	@@id([eventId, userId])
 	@@index([userId])
 	@@index([eventId, status])
+}
+
+enum NotificationType {
+  EVENT_JOIN_REQUEST
+  EVENT_JOIN_APPROVED
+  EVENT_JOIN_REJECTED
+  EVENT_CHECKIN
+  SYSTEM
+}
+
+enum EventCheckInMethod {
+  GEO
+  QR
+  CODE
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String
+  body      String
+  readAt    DateTime?
+  meta      Json?
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model EventChatMessage {
+  id        String   @id @default(uuid())
+  eventId   String
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model EventReview {
+  id           String   @id @default(uuid())
+  eventId      String
+  authorUserId String
+  rating       Int
+  text         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  author       User     @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, authorUserId])
+  @@index([eventId, createdAt])
+}
+
+model EventCheckIn {
+  id        String             @id @default(uuid())
+  eventId   String
+  userId    String
+  method    EventCheckInMethod
+  code      String?
+  createdAt DateTime           @default(now())
+  event     Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId, createdAt])
 }
