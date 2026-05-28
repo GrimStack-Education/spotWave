@@ -32,6 +32,15 @@ export class EventsController {
     return this.eventsService.findOne(params.id);
   }
 
+  @Get(':id/requests')
+  @UseGuards(JwtAuthGuard)
+  listJoinRequests(
+    @Param() params: EventIdParamDto,
+    @CurrentUser() user: { sub: string; role: string },
+  ) {
+    return this.eventsService.listJoinRequests(params.id, user.sub, user.role);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
@@ -72,5 +81,35 @@ export class EventsController {
   @Throttle({ default: { limit: 30, ttl: 60000 } })
   leave(@Param() params: EventIdParamDto, @CurrentUser() user: { sub: string }) {
     return this.eventsService.leave(params.id, user.sub);
+  }
+
+  @Post(':id/requests/:userId/approve')
+  @UseGuards(JwtAuthGuard)
+  approveJoinRequest(
+    @Param('id') eventId: string,
+    @Param('userId') userId: string,
+    @CurrentUser() user: { sub: string; role: string },
+  ) {
+    return this.eventsService.approveJoinRequest(
+      eventId,
+      userId,
+      user.sub,
+      user.role,
+    );
+  }
+
+  @Post(':id/requests/:userId/reject')
+  @UseGuards(JwtAuthGuard)
+  rejectJoinRequest(
+    @Param('id') eventId: string,
+    @Param('userId') userId: string,
+    @CurrentUser() user: { sub: string; role: string },
+  ) {
+    return this.eventsService.rejectJoinRequest(
+      eventId,
+      userId,
+      user.sub,
+      user.role,
+    );
   }
 }

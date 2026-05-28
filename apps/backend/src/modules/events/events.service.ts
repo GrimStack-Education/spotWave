@@ -7,11 +7,13 @@ import {
 } from '@nestjs/common';
 import {
   EventStatus,
+  NotificationType,
   ParticipantRole,
   ParticipantStatus,
   Prisma,
 } from '@spotwave/database';
 import { DatabaseService } from '../../core/database/database.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { GetEventsQueryDto } from './dto/get-events-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -56,7 +58,10 @@ type EventWithRelations = Prisma.EventGetPayload<{
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(
+    private readonly db: DatabaseService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async findAll(query: GetEventsQueryDto) {
     if ((query.lat === undefined) !== (query.lng === undefined)) {
@@ -350,6 +355,16 @@ export class EventsService {
           },
         });
 
+    if (nextStatus === ParticipantStatus.WAITLIST) {
+      await this.notificationsService.push({
+        userId,
+        type: NotificationType.EVENT_JOIN_REQUEST,
+        title: 'Join request received',
+        body: 'Your request is pending host approval',
+        meta: { eventId },
+      });
+    }
+
     return {
       eventId: participant.eventId,
       userId: participant.userId,
@@ -435,6 +450,85 @@ export class EventsService {
       status: result.status,
       joinedAt: result.joinedAt,
     };
+  }
+
+  async listJoinRequests(eventId: string, userId: string, userRole: string) {
+    await this.assertCanModifyEventParticipants(eventId, userId, userRole);
+    const items = await this.db.client.eventParticipant.findMany({
+      where: {
+        eventId,
+        role: ParticipantRole.MEMBER,
+        status: ParticipantStatus.WAITLIST,
+      },
+      include: {
+        user: {
+          select: { id: true, email: true, displayName: true },
+        },
+      },
+      orderBy: { joinedAt: 'asc' },
+    });
+
+    return { items };
+  }
+
+  async approveJoinRequest(
+    eventId: string,
+    targetUserId: string,
+    userId: string,
+    userRole: string,
+  ) {
+    await this.assertCanModifyEventParticipants(eventId, userId, userRole);
+    const participant = await this.db.client.eventParticipant.findUnique({
+      where: { eventId_userId: { eventId, userId: targetUserId } },
+    });
+    if (!participant || participant.status !== ParticipantStatus.WAITLIST) {
+      throw new NotFoundException('Join request not found');
+    }
+
+    const updated = await this.db.client.eventParticipant.update({
+      where: { eventId_userId: { eventId, userId: targetUserId } },
+      data: { status: ParticipantStatus.JOINED },
+    });
+
+    await this.notificationsService.push({
+      userId: targetUserId,
+      type: NotificationType.EVENT_JOIN_APPROVED,
+      title: 'Join request approved',
+      body: 'Host approved your participation request',
+      meta: { eventId },
+    });
+
+    return updated;
+  }
+
+  async rejectJoinRequest(
+    eventId: string,
+    targetUserId: string,
+    userId: string,
+    userRole: string,
+  ) {
+    await this.assertCanModifyEventParticipants(eventId, userId, userRole);
+    const participant = await this.db.client.eventParticipant.findUnique({
+      where: { eventId_userId: { eventId, userId: targetUserId } },
+    });
+    if (!participant || participant.status !== ParticipantStatus.WAITLIST) {
+      throw new NotFoundException('Join request not found');
+    }
+
+    const updated = await this.db.client.eventParticipant.update({
+      where: { eventId_userId: { eventId, userId: targetUserId } },
+      data: { status: ParticipantStatus.LEFT },
+    });
+
+    await this.notificationsService.push({
+      userId: targetUserId,
+      type: NotificationType.EVENT_JOIN_REJECTED,
+      title: 'Join request rejected',
+      body: 'Host rejected your participation request',
+      meta: { eventId },
+    });
+
+    return updated;
   }
 
   private buildWhere(query: GetEventsQueryDto): Prisma.EventWhereInput {
@@ -576,6 +670,23 @@ export class EventsService {
     if (creatorId !== userId && userRole !== 'ADMIN') {
       throw new ForbiddenException('Only creator or admin can modify this event');
     }
+  }
+
+  private async assertCanModifyEventParticipants(
+    eventId: string,
+    userId: string,
+    userRole: string,
+  ) {
+    const event = await this.db.client.event.findUnique({
+      where: { id: eventId },
+      select: { creatorId: true },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with id "${eventId}" was not found`);
+    }
+
+    this.assertCanModify(event.creatorId, userId, userRole);
   }
 
   private validateEventDates(startsAt: string, endsAt?: string | null) {
