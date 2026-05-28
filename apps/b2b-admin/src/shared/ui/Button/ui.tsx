@@ -1,7 +1,8 @@
-import { Button as HeroUIButton, ButtonProps as HeroUIButtonProps } from '@heroui/react';
+import { Button as ShadcnButton } from '@/components/ui/button';
+import type { ComponentProps } from 'react';
 
-type ButtonProps = HeroUIButtonProps;
+type ButtonProps = ComponentProps<typeof ShadcnButton>;
 
 export const Button = ({ children, ...props }: ButtonProps) => {
-  return <HeroUIButton {...props}>{children}</HeroUIButton>;
+  return <ShadcnButton {...props}>{children}</ShadcnButton>;
 };
