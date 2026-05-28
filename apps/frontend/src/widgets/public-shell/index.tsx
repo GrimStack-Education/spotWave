@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { Card, Chip } from '@heroui/react';
+import { UiBadge } from '@/shared/ui/badge/badge';
+import { UiCard } from '@/shared/ui/card/card';
 
 export function PublicShell({
  title,
@@ -35,7 +36,7 @@ export function PublicShell({
  </p>
  </div>
 
- <Card className="relative mx-auto w-full max-w-[560px] rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 shadow-none md:p-8">
+ <UiCard className="relative mx-auto w-full max-w-[560px] rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 shadow-none md:p-8">
  <div className="flex items-center justify-between gap-5">
  <div className="flex items-center gap-3">
  <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={46} height={46} priority unoptimized />
@@ -43,17 +44,17 @@ export function PublicShell({
  Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
  </span>
  </div>
- <Chip variant="soft" className="border border-white/12 bg-transparent px-4 tracking-[0.08em] text-white/72">
+ <UiBadge className="border border-white/12 bg-transparent px-4 tracking-[0.08em] text-white/72">
  {topBadge}
- </Chip>
+ </UiBadge>
  </div>
 
  <div className="mt-10">
  <h2 className="max-w-[520px] text-[42px] leading-[0.96] tracking-[-0.06em] text-white md:text-[56px]">{title}</h2>
  <p className="mt-4 max-w-[510px] text-lg leading-8 text-white/62">{subtitle}</p>
- <div className="mt-10 space-y-5">{children}</div>
+ <div className="mt-10 flex flex-col gap-5">{children}</div>
  </div>
- </Card>
+ </UiCard>
  </section>
  </main>
  );
