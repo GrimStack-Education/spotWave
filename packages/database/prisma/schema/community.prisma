@@ -20,6 +20,7 @@ enum MemberStatus {
 
 model Community {
 	id           String                 @id @default(uuid())
+	seedKey      String?                @unique
 	name         String
 	description  String
 	avatarUrl    String

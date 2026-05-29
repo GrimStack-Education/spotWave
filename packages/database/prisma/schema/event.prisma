@@ -24,6 +24,7 @@ enum ParticipantStatus {
 
 model Event {
 	id           String             @id @default(uuid())
+	seedKey      String?            @unique
 	creatorId    String
 	communityId  String?
 	title        String
@@ -33,6 +34,7 @@ model Event {
 	status       EventStatus        @default(ACTIVE)
 	visibility   EventVisibility    @default(NEIGHBORHOOD)
 	capacity     Int?
+	imageUrl     String?
 	lat          Decimal            @db.Decimal(9, 6)
 	lng          Decimal            @db.Decimal(9, 6)
 	addressText  String?

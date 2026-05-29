@@ -22,6 +22,38 @@ const adapter = new PrismaPg({
 });
 const prisma = new PrismaClient({ adapter });
 
+type SeededEventMap = Map<string, string>;
+
+const seededEventKey = {
+  rooftopSunsetTalk: 'event:rooftop-sunset-talk',
+  morningRunCircle: 'event:morning-run-circle',
+  indieBoardGamesNight: 'event:indie-board-games-night',
+  coffeeSketchWalk: 'event:coffee-sketch-walk',
+  foundersMicroDinner: 'event:founders-micro-dinner',
+  sundayVinylBreakfast: 'event:sunday-vinyl-breakfast',
+} as const;
+
+function requireSeededEventId(seededEventIds: SeededEventMap, seedKey: string) {
+  const eventId = seededEventIds.get(seedKey);
+  if (!eventId) {
+    throw new Error(`Missing seeded event ${seedKey}`);
+  }
+  return eventId;
+}
+
+async function assertEventUpdateCount(
+  action: string,
+  eventIds: string[],
+  update: Promise<{ count: number }>,
+) {
+  const result = await update;
+  if (result.count !== eventIds.length) {
+    throw new Error(
+      `${action} expected to update ${eventIds.length} seeded events, updated ${result.count}`,
+    );
+  }
+}
+
 const tagSeeds = [
   { slug: 'music', name: 'Music' },
   { slug: 'sports', name: 'Sports' },
@@ -192,7 +224,7 @@ async function seedUsers() {
   }
 }
 
-async function seedEvents() {
+async function seedEvents(): Promise<SeededEventMap> {
   const users = await prisma.user.findMany({
     where: { email: { in: userSeeds.map((user) => user.email) } },
   });
@@ -202,6 +234,7 @@ async function seedEvents() {
 
   const eventData = [
     {
+      seedKey: seededEventKey.rooftopSunsetTalk,
       title: 'Rooftop Sunset Talk',
       description:
         'Камерная встреча на крыше: музыка на фоне, знакомство по интересам и короткий круг introductions.',
@@ -217,6 +250,7 @@ async function seedEvents() {
       participantEmails: ['host@spotwave.local', 'guest@spotwave.local', 'designer@spotwave.local'],
     },
     {
+      seedKey: seededEventKey.morningRunCircle,
       title: 'Morning Run Circle',
       description: 'Легкий темп 5 км вокруг парка, check-in на старте и кофе после финиша.',
       startsAt: new Date('2026-06-03T01:00:00.000Z'),
@@ -231,6 +265,7 @@ async function seedEvents() {
       participantEmails: ['runner@spotwave.local', 'guest@spotwave.local', 'host@spotwave.local'],
     },
     {
+      seedKey: seededEventKey.indieBoardGamesNight,
       title: 'Indie Board Games Night',
       description:
         'Настолки на 6-8 человек: быстрые правила, спокойный темп, без турнирного давления.',
@@ -246,6 +281,7 @@ async function seedEvents() {
       participantEmails: ['guest@spotwave.local', 'host@spotwave.local', 'designer@spotwave.local'],
     },
     {
+      seedKey: seededEventKey.coffeeSketchWalk,
       title: 'Coffee Sketch Walk',
       description:
         'Маршрут по трем кофейням, быстрые городские зарисовки и обмен материалами после прогулки.',
@@ -265,6 +301,7 @@ async function seedEvents() {
       ],
     },
     {
+      seedKey: seededEventKey.foundersMicroDinner,
       title: 'Founders Micro-Dinner',
       description:
         'Небольшой ужин для founders и product people: запросы, интро и честный фидбек по идеям.',
@@ -280,6 +317,7 @@ async function seedEvents() {
       participantEmails: ['admin@spotwave.local', 'host@spotwave.local', 'designer@spotwave.local'],
     },
     {
+      seedKey: seededEventKey.sundayVinylBreakfast,
       title: 'Sunday Vinyl Breakfast',
       description: 'Завтрак, пластинки и обмен любимыми треками. Формат для спокойных знакомств.',
       startsAt: new Date('2026-06-07T05:00:00.000Z'),
@@ -300,56 +338,75 @@ async function seedEvents() {
     },
   ];
 
+  const seededEventIds = new Map<string, string>();
+
   for (const item of eventData) {
     const creator = userByEmail.get(item.creatorEmail);
     if (!creator) throw new Error(`Missing seed user ${item.creatorEmail}`);
 
-    const existing = await prisma.event.findFirst({
-      where: { creatorId: creator.id, title: item.title },
+    const existing = await prisma.event.findUnique({
+      where: { seedKey: item.seedKey },
       select: { id: true },
     });
 
-    if (existing) {
-      await prisma.event.delete({ where: { id: existing.id } });
-    }
+    const baseEventData = {
+      title: item.title,
+      description: item.description,
+      startsAt: item.startsAt,
+      endsAt: item.endsAt,
+      seedKey: item.seedKey,
+      status: EventStatus.ACTIVE,
+      visibility: item.visibility,
+      capacity: item.capacity,
+      lat: item.lat,
+      lng: item.lng,
+      addressText: item.addressText,
+      creatorId: creator.id,
+    };
 
-    await prisma.event.create({
-      data: {
-        title: item.title,
-        description: item.description,
-        startsAt: item.startsAt,
-        endsAt: item.endsAt,
-        status: EventStatus.ACTIVE,
-        visibility: item.visibility,
-        capacity: item.capacity,
-        lat: item.lat,
-        lng: item.lng,
-        addressText: item.addressText,
-        creatorId: creator.id,
-        eventTags: {
-          create: item.tagSlugs.map((slug) => {
-            const tag = tagBySlug.get(slug);
-            if (!tag) throw new Error(`Missing seed tag ${slug}`);
-            return { tagId: tag.id };
-          }),
-        },
-        participants: {
-          create: item.participantEmails.map((email) => {
-            const user = userByEmail.get(email);
-            if (!user) throw new Error(`Missing participant ${email}`);
-            return {
-              userId: user.id,
-              role: email === item.creatorEmail ? ParticipantRole.HOST : ParticipantRole.MEMBER,
-              status: ParticipantStatus.JOINED,
-            };
-          }),
-        },
-      },
+    const event =
+      existing
+        ? await prisma.event.update({
+            where: { id: existing.id },
+            data: baseEventData,
+            select: { id: true },
+          })
+        : await prisma.event.create({
+            data: baseEventData,
+            select: { id: true },
+          });
+
+    await prisma.eventTag.deleteMany({ where: { eventId: event.id } });
+    await prisma.eventParticipant.deleteMany({ where: { eventId: event.id } });
+
+    await prisma.eventTag.createMany({
+      data: item.tagSlugs.map((slug) => {
+        const tag = tagBySlug.get(slug);
+        if (!tag) throw new Error(`Missing seed tag ${slug}`);
+        return { eventId: event.id, tagId: tag.id };
+      }),
     });
+
+    await prisma.eventParticipant.createMany({
+      data: item.participantEmails.map((email) => {
+        const user = userByEmail.get(email);
+        if (!user) throw new Error(`Missing participant ${email}`);
+        return {
+          eventId: event.id,
+          userId: user.id,
+          role: email === item.creatorEmail ? ParticipantRole.HOST : ParticipantRole.MEMBER,
+          status: ParticipantStatus.JOINED,
+        };
+      }),
+    });
+
+    seededEventIds.set(item.seedKey, event.id);
   }
+
+  return seededEventIds;
 }
 
-async function seedTrustActivity() {
+async function seedTrustActivity(seededEventIds: SeededEventMap) {
   const [host, guest, runner, designer] = await Promise.all([
     prisma.user.findUniqueOrThrow({ where: { email: 'host@spotwave.local' } }),
     prisma.user.findUniqueOrThrow({ where: { email: 'guest@spotwave.local' } }),
@@ -357,41 +414,47 @@ async function seedTrustActivity() {
     prisma.user.findUniqueOrThrow({ where: { email: 'designer@spotwave.local' } }),
   ]);
 
+  const trustEventIds = [
+    requireSeededEventId(seededEventIds, seededEventKey.rooftopSunsetTalk),
+    requireSeededEventId(seededEventIds, seededEventKey.morningRunCircle),
+    requireSeededEventId(seededEventIds, seededEventKey.coffeeSketchWalk),
+  ];
+
   const events = await prisma.event.findMany({
-    where: { title: { in: ['Rooftop Sunset Talk', 'Morning Run Circle', 'Coffee Sketch Walk'] } },
+    where: { id: { in: trustEventIds } },
   });
-  const eventByTitle = new Map(events.map((event) => [event.title, event]));
+  const eventBySeedKey = new Map(events.map((event) => [event.seedKey, event]));
   await prisma.eventChatMessage.deleteMany({
     where: { eventId: { in: events.map((event) => event.id) } },
   });
 
   const checkIns = [
     {
-      eventTitle: 'Rooftop Sunset Talk',
+      eventSeedKey: seededEventKey.rooftopSunsetTalk,
       userId: host.id,
       method: EventCheckInMethod.QR,
       code: 'ROOF-HOST',
     },
     {
-      eventTitle: 'Rooftop Sunset Talk',
+      eventSeedKey: seededEventKey.rooftopSunsetTalk,
       userId: guest.id,
       method: EventCheckInMethod.GEO,
       code: null,
     },
     {
-      eventTitle: 'Rooftop Sunset Talk',
+      eventSeedKey: seededEventKey.rooftopSunsetTalk,
       userId: designer.id,
       method: EventCheckInMethod.QR,
       code: 'ROOF-MIRA',
     },
     {
-      eventTitle: 'Morning Run Circle',
+      eventSeedKey: seededEventKey.morningRunCircle,
       userId: runner.id,
       method: EventCheckInMethod.GEO,
       code: null,
     },
     {
-      eventTitle: 'Morning Run Circle',
+      eventSeedKey: seededEventKey.morningRunCircle,
       userId: guest.id,
       method: EventCheckInMethod.GEO,
       code: null,
@@ -399,8 +462,8 @@ async function seedTrustActivity() {
   ];
 
   for (const item of checkIns) {
-    const event = eventByTitle.get(item.eventTitle);
-    if (!event) continue;
+    const event = eventBySeedKey.get(item.eventSeedKey);
+    if (!event) throw new Error(`Missing trust activity event ${item.eventSeedKey}`);
     await prisma.eventCheckIn.upsert({
       where: { eventId_userId: { eventId: event.id, userId: item.userId } },
       update: { method: item.method, code: item.code },
@@ -410,25 +473,25 @@ async function seedTrustActivity() {
 
   const reviews = [
     {
-      eventTitle: 'Rooftop Sunset Talk',
+      eventSeedKey: seededEventKey.rooftopSunsetTalk,
       authorUserId: guest.id,
       rating: 5,
       text: 'Очень спокойный формат, host держал тайминг и помог всем познакомиться.',
     },
     {
-      eventTitle: 'Rooftop Sunset Talk',
+      eventSeedKey: seededEventKey.rooftopSunsetTalk,
       authorUserId: designer.id,
       rating: 5,
       text: 'Понравились небольшая группа и понятная коммуникация до встречи.',
     },
     {
-      eventTitle: 'Morning Run Circle',
+      eventSeedKey: seededEventKey.morningRunCircle,
       authorUserId: guest.id,
       rating: 4,
       text: 'Маршрут был понятный, темп комфортный. Хороший check-in на старте.',
     },
     {
-      eventTitle: 'Coffee Sketch Walk',
+      eventSeedKey: seededEventKey.coffeeSketchWalk,
       authorUserId: host.id,
       rating: 5,
       text: 'Mira заранее описала маршрут, поэтому встреча ощущалась безопасно и собранно.',
@@ -436,8 +499,8 @@ async function seedTrustActivity() {
   ];
 
   for (const item of reviews) {
-    const event = eventByTitle.get(item.eventTitle);
-    if (!event) continue;
+    const event = eventBySeedKey.get(item.eventSeedKey);
+    if (!event) throw new Error(`Missing trust review event ${item.eventSeedKey}`);
     await prisma.eventReview.upsert({
       where: { eventId_authorUserId: { eventId: event.id, authorUserId: item.authorUserId } },
       update: { rating: item.rating, text: item.text },
@@ -507,7 +570,7 @@ async function seedTrustActivity() {
   });
 }
 
-async function seedCommunities() {
+async function seedCommunities(seededEventIds: SeededEventMap) {
   const users = await prisma.user.findMany({
     where: { email: { in: userSeeds.map((user) => user.email) } },
   });
@@ -515,6 +578,7 @@ async function seedCommunities() {
 
   const communityData = [
     {
+      seedKey: 'community:almaty-rooftop-circle',
       name: 'Almaty Rooftop Circle',
       description:
         'Локальное сообщество для камерных rooftop-встреч, музыки на закате и спокойных знакомств без шумных толп.',
@@ -522,7 +586,7 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Almaty%20Rooftop%20Circle',
       ownerEmail: 'host@spotwave.local',
       memberEmails: ['host@spotwave.local', 'guest@spotwave.local', 'designer@spotwave.local'],
-      eventTitles: ['Rooftop Sunset Talk', 'Sunday Vinyl Breakfast'],
+      eventSeedKeys: [seededEventKey.rooftopSunsetTalk, seededEventKey.sundayVinylBreakfast],
       messages: [
         {
           email: 'host@spotwave.local',
@@ -535,6 +599,7 @@ async function seedCommunities() {
       ],
     },
     {
+      seedKey: 'community:morning-run-crew',
       name: 'Morning Run Crew',
       description:
         'Утренние пробежки, outdoor-маршруты и кофе после финиша для тех, кто хочет держать темп рядом с домом.',
@@ -542,7 +607,7 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Morning%20Run%20Crew',
       ownerEmail: 'runner@spotwave.local',
       memberEmails: ['runner@spotwave.local', 'guest@spotwave.local', 'host@spotwave.local'],
-      eventTitles: ['Morning Run Circle'],
+      eventSeedKeys: [seededEventKey.morningRunCircle],
       messages: [
         {
           email: 'runner@spotwave.local',
@@ -552,6 +617,7 @@ async function seedCommunities() {
       ],
     },
     {
+      seedKey: 'community:sketch-walks-kz',
       name: 'Sketch Walks KZ',
       description:
         'Городские sketch walks, арт-завтраки и маршруты по кофейням для тех, кто любит наблюдать город руками.',
@@ -559,7 +625,7 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Sketch%20Walks%20KZ',
       ownerEmail: 'designer@spotwave.local',
       memberEmails: ['designer@spotwave.local', 'host@spotwave.local', 'runner@spotwave.local'],
-      eventTitles: ['Coffee Sketch Walk'],
+      eventSeedKeys: [seededEventKey.coffeeSketchWalk],
       messages: [
         {
           email: 'designer@spotwave.local',
@@ -572,6 +638,7 @@ async function seedCommunities() {
       ],
     },
     {
+      seedKey: 'community:founders-micro-dinners',
       name: 'Founders Micro-Dinners',
       description:
         'Небольшие ужины для founders и product people: честный фидбек, интро по запросу и разговоры без сцены.',
@@ -579,7 +646,7 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Founders%20Micro%20Dinners',
       ownerEmail: 'admin@spotwave.local',
       memberEmails: ['admin@spotwave.local', 'host@spotwave.local', 'designer@spotwave.local'],
-      eventTitles: ['Founders Micro-Dinner'],
+      eventSeedKeys: [seededEventKey.foundersMicroDinner],
       messages: [
         {
           email: 'admin@spotwave.local',
@@ -593,39 +660,63 @@ async function seedCommunities() {
     },
   ];
 
+  const eventIdsToReset = [...new Set([...seededEventIds.values()])];
+  if (eventIdsToReset.length) {
+    await assertEventUpdateCount(
+      'Reset seeded event community links',
+      eventIdsToReset,
+      prisma.event.updateMany({
+        where: { id: { in: eventIdsToReset } },
+        data: { communityId: null },
+      }),
+    );
+  }
+
   for (const item of communityData) {
     const owner = userByEmail.get(item.ownerEmail);
     if (!owner) throw new Error(`Missing community owner ${item.ownerEmail}`);
 
-    const existing = await prisma.community.findFirst({
-      where: { ownerId: owner.id, name: item.name },
+    const existing = await prisma.community.findUnique({
+      where: { seedKey: item.seedKey },
       select: { id: true },
     });
 
-    if (existing) {
-      await prisma.community.delete({ where: { id: existing.id } });
-    }
+    const baseCommunityData = {
+      name: item.name,
+      description: item.description,
+      avatarUrl: item.avatarUrl,
+      city: item.city,
+      seedKey: item.seedKey,
+      visibility: CommunityVisibility.PUBLIC,
+      ownerId: owner.id,
+    };
 
-    const community = await prisma.community.create({
-      data: {
-        name: item.name,
-        description: item.description,
-        avatarUrl: item.avatarUrl,
-        city: item.city,
-        visibility: CommunityVisibility.PUBLIC,
-        ownerId: owner.id,
-        members: {
-          create: item.memberEmails.map((email) => {
-            const user = userByEmail.get(email);
-            if (!user) throw new Error(`Missing community member ${email}`);
-            return {
-              userId: user.id,
-              role: email === item.ownerEmail ? MemberRole.OWNER : MemberRole.MEMBER,
-              status: MemberStatus.ACTIVE,
-            };
-          }),
-        },
-      },
+    const community =
+      existing
+        ? await prisma.community.update({
+            where: { id: existing.id },
+            data: baseCommunityData,
+            select: { id: true },
+          })
+        : await prisma.community.create({
+            data: baseCommunityData,
+            select: { id: true },
+          });
+
+    await prisma.communityMember.deleteMany({ where: { communityId: community.id } });
+    await prisma.communityChatMessage.deleteMany({ where: { communityId: community.id } });
+
+    await prisma.communityMember.createMany({
+      data: item.memberEmails.map((email) => {
+        const user = userByEmail.get(email);
+        if (!user) throw new Error(`Missing community member ${email}`);
+        return {
+          communityId: community.id,
+          userId: user.id,
+          role: email === item.ownerEmail ? MemberRole.OWNER : MemberRole.MEMBER,
+          status: MemberStatus.ACTIVE,
+        };
+      }),
     });
 
     await prisma.communityChatMessage.createMany({
@@ -640,20 +731,27 @@ async function seedCommunities() {
       }),
     });
 
-    await prisma.event.updateMany({
-      where: { title: { in: item.eventTitles } },
-      data: { communityId: community.id },
-    });
+    const communityEventIds = item.eventSeedKeys.map((seedKey) =>
+      requireSeededEventId(seededEventIds, seedKey),
+    );
+
+    await assertEventUpdateCount(
+      `Assign seeded events to community ${item.seedKey}`,
+      communityEventIds,
+      prisma.event.updateMany({
+        where: { id: { in: communityEventIds } },
+        data: { communityId: community.id },
+      }),
+    );
   }
 }
 
-async function seedReports() {
+async function seedReports(seededEventIds: SeededEventMap) {
+  const targetEventId = requireSeededEventId(seededEventIds, seededEventKey.rooftopSunsetTalk);
+
   const [reporter, targetEvent] = await Promise.all([
     prisma.user.findUniqueOrThrow({ where: { email: 'guest@spotwave.local' } }),
-    prisma.event.findFirstOrThrow({
-      where: { title: 'Rooftop Sunset Talk' },
-      select: { id: true },
-    }),
+    prisma.event.findUniqueOrThrow({ where: { id: targetEventId }, select: { id: true } }),
   ]);
 
   const existing = await prisma.report.findFirst({
@@ -691,10 +789,10 @@ async function main() {
   await seedTags();
   await seedInterests();
   await seedUsers();
-  await seedEvents();
-  await seedTrustActivity();
-  await seedCommunities();
-  await seedReports();
+  const seededEventIds = await seedEvents();
+  await seedTrustActivity(seededEventIds);
+  await seedCommunities(seededEventIds);
+  await seedReports(seededEventIds);
 }
 
 main()
