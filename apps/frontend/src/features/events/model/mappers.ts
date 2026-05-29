@@ -15,9 +15,15 @@ export function mapBackendEventToDomain(item: BackendEvent): Event {
   return {
     id: item.id,
     title: item.title,
+    description: item.description,
+    imageUrl: item.imageUrl ?? null,
     category,
     datetime: new Date(item.startsAt).toLocaleString(),
-    location: item.addressText ?? 'Локация уточняется',
+    location:
+      item.locationName ??
+      item.address ??
+      item.addressText ??
+      'Локация уточняется',
     radius,
     privacy: item.visibility === 'PUBLIC' ? 'public' : item.visibility === 'PRIVATE' ? 'closed' : 'hidden',
     capacity,

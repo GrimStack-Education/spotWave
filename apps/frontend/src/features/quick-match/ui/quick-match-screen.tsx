@@ -47,7 +47,7 @@ export function QuickMatchScreen() {
         <div className="absolute inset-x-8 top-6 h-full rotate-[-3deg] rounded-[34px] border border-white/8 bg-white/[0.035]" />
         <div className="absolute inset-x-12 top-12 h-full rotate-[3deg] rounded-[34px] border border-white/8 bg-white/[0.025]" />
         <UiCard className="relative overflow-hidden p-0 shadow-[0_28px_80px_rgba(0,0,0,0.32)]">
-          <CoverImage className="h-[300px] rounded-none border-0" seed={event.id} priority alt={event.title} />
+          <CoverImage className="h-[300px] rounded-none border-0" seed={event.id} src={event.imageUrl} priority alt={event.title} />
           <div className="p-6 md:p-7">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className="text-sm text-[var(--sw-accent-3)]">{event.category}</span>

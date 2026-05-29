@@ -46,6 +46,10 @@ export class CreateEventDto {
   @Max(10000)
   capacity?: number;
 
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
   @Type(() => Number)
   @IsLatitude()
   lat!: number;

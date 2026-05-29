@@ -1,7 +1,9 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import maplibregl, { type Map, type Marker } from 'maplibre-gl';
 import {
   Calendar,
   CheckCircle2,
@@ -12,12 +14,14 @@ import {
   Users,
 } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { me } from '@/features/auth/api/auth.api';
 import { EventChatScreen } from '@/features/event-chat/ui/event-chat-screen';
 import { fetchEventById, joinEvent, leaveEvent } from '@/features/events/api/events.api';
 import { mapBackendEventToDomain } from '@/features/events/model/mappers';
 import { queryClient } from '@/shared/lib/query/query-client';
 import { queryKeys } from '@/shared/lib/query/keys';
 import { toErrorMessage } from '@/shared/lib/api/error';
+import { OSM_STYLE } from '@/shared/lib/map/osm';
 import { ErrorState, LoadingState } from '@/shared/ui/states/states';
 import { UiButton } from '@/shared/ui/button/button';
 import { UiCard } from '@/shared/ui/card/card';
@@ -26,24 +30,23 @@ import { UiAvatar } from '@/shared/ui/avatar/avatar';
 
 export function EventDetailScreen({ id }: { id: string }) {
   const eventQuery = useQuery({ queryKey: queryKeys.event(id), queryFn: () => fetchEventById(id) });
+  const meQuery = useQuery({ queryKey: queryKeys.me, queryFn: me });
   const joinMutation = useMutation({
     mutationFn: () => joinEvent(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.event(id) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.events('home') });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.events('map') });
+      await queryClient.invalidateQueries({ queryKey: ['events'] });
     },
   });
   const leaveMutation = useMutation({
     mutationFn: () => leaveEvent(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.event(id) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.events('home') });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.events('map') });
+      await queryClient.invalidateQueries({ queryKey: ['events'] });
     },
   });
 
-  if (eventQuery.isLoading) return <LoadingState />;
+  if (eventQuery.isLoading || meQuery.isLoading) return <LoadingState />;
   if (eventQuery.isError || !eventQuery.data)
     return <ErrorState message="Не удалось загрузить событие" />;
 
@@ -54,6 +57,20 @@ export function EventDetailScreen({ id }: { id: string }) {
   const creator = eventQuery.data.creator;
   const participants = eventQuery.data.participants?.items ?? [];
   const joinedParticipants = participants.filter((item) => item.status === 'JOINED');
+  const currentParticipant = participants.find((item) => item.userId === meQuery.data?.id) ?? null;
+  const isHost = currentParticipant?.role === 'HOST';
+  const isJoined = currentParticipant?.status === 'JOINED';
+  const isWaitlisted = currentParticipant?.status === 'WAITLIST';
+  const canJoin = !isHost && !isJoined && !isWaitlisted;
+  const canLeave = Boolean(currentParticipant && !isHost && currentParticipant.status !== 'LEFT');
+  const chatUnlocked = Boolean(isHost || isJoined);
+  const actionLabel = isHost
+    ? 'Вы организатор этого события'
+    : isJoined
+      ? 'Вы уже в списке участников'
+      : isWaitlisted
+        ? 'Вы в листе ожидания'
+        : 'Подтвердите участие, чтобы получить доступ к чату и деталям встречи.';
 
   return (
     <div className="space-y-5">
@@ -64,6 +81,7 @@ export function EventDetailScreen({ id }: { id: string }) {
             <CoverImage
               className="h-[22rem] rounded-none border-0"
               seed={event.id}
+              src={event.imageUrl}
               priority
               alt={event.title}
             />
@@ -93,16 +111,17 @@ export function EventDetailScreen({ id }: { id: string }) {
                 <Users size={16} /> Событие сообщества {eventQuery.data.community.name}
               </Link>
             ) : null}
+            <div className="mt-6">
+              <p className="text-sm uppercase tracking-[0.12em] text-white/42">Место встречи</p>
+              <EventLocationMap lat={event.lat} lng={event.lng} title={event.title} />
+            </div>
           </div>
         </UiCard>
 
         <div className="space-y-5">
           <UiCard className="h-fit p-6">
             <h2 className="text-3xl tracking-[-0.05em]">Забронировать место</h2>
-            <p className="mt-3 text-white/56">
-              CTA теперь всегда читается поверх темной поверхности и явно блокируется на время
-              запроса.
-            </p>
+            <p className="mt-3 text-white/56">{actionLabel}</p>
             <div className="mt-6 h-2 overflow-hidden rounded-full bg-white/8">
               <div
                 className="h-full rounded-full bg-[var(--sw-accent-3)]"
@@ -110,17 +129,21 @@ export function EventDetailScreen({ id }: { id: string }) {
               />
             </div>
             <div className="mt-6 grid gap-3">
-              <UiButton isDisabled={busy} onPress={() => joinMutation.mutate()} className="h-12">
-                {joinMutation.isPending ? 'Присоединяем...' : 'Присоединиться'}
-              </UiButton>
-              <UiButton
-                isDisabled={busy}
-                onPress={() => leaveMutation.mutate()}
-                variant="outline"
-                className="h-12"
-              >
-                {leaveMutation.isPending ? 'Отменяем...' : 'Покинуть событие'}
-              </UiButton>
+              {canJoin ? (
+                <UiButton isDisabled={busy} onPress={() => joinMutation.mutate()} className="h-12">
+                  {joinMutation.isPending ? 'Присоединяем...' : 'Присоединиться'}
+                </UiButton>
+              ) : null}
+              {canLeave ? (
+                <UiButton
+                  isDisabled={busy}
+                  onPress={() => leaveMutation.mutate()}
+                  variant="outline"
+                  className="h-12"
+                >
+                  {leaveMutation.isPending ? 'Отменяем...' : 'Покинуть событие'}
+                </UiButton>
+              ) : null}
             </div>
           </UiCard>
 
@@ -191,7 +214,11 @@ export function EventDetailScreen({ id }: { id: string }) {
         <div className="mb-3 flex items-center gap-2 text-sm uppercase tracking-[0.12em] text-white/42">
           <MessageCircle size={15} /> Чат события
         </div>
-        <EventChatScreen eventId={id} compact />
+        {chatUnlocked ? (
+          <EventChatScreen eventId={id} compact />
+        ) : (
+          <ErrorState message="Чат откроется после вступления в событие. Сейчас доступна только карточка встречи." />
+        )}
       </div>
     </div>
   );
@@ -203,6 +230,62 @@ function Info({ icon, text }: { icon: ReactNode; text: string }) {
       {icon}
       {text}
     </p>
+  );
+}
+
+function EventLocationMap({ lat, lng, title }: { lat: number; lng: number; title: string }) {
+  const mapNodeRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<Map | null>(null);
+  const markerRef = useRef<Marker | null>(null);
+
+  useEffect(() => {
+    if (!mapNodeRef.current || mapRef.current) return;
+
+    const container = mapNodeRef.current;
+    const map = new maplibregl.Map({
+      attributionControl: false,
+      center: [lng, lat],
+      container,
+      dragRotate: false,
+      scrollZoom: false,
+      style: OSM_STYLE,
+      zoom: 14,
+    });
+
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.on('load', () => map.resize());
+
+    const markerNode = document.createElement('div');
+    markerNode.className = 'grid h-10 w-10 place-items-center rounded-full border border-white/40 bg-[var(--sw-accent-3)] text-white shadow-[0_12px_36px_rgba(255,123,0,0.35)]';
+    markerNode.setAttribute('aria-label', `Точка события ${title}`);
+    markerNode.innerHTML = '<span class="h-2.5 w-2.5 rounded-full bg-white"></span>';
+
+    const marker = new maplibregl.Marker({ element: markerNode }).setLngLat([lng, lat]).addTo(map);
+
+    mapRef.current = map;
+    markerRef.current = marker;
+
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+    });
+    resizeObserver.observe(container);
+    requestAnimationFrame(() => map.resize());
+
+    return () => {
+      resizeObserver.disconnect();
+      marker.remove();
+      map.remove();
+      markerRef.current = null;
+      mapRef.current = null;
+    };
+  }, [lat, lng, title]);
+
+  return (
+    <div className="relative mt-3 h-[280px] overflow-hidden rounded-[26px] border border-white/10 bg-black">
+      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.24))]" />
+    </div>
   );
 }
 

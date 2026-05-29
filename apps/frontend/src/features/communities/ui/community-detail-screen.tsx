@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import maplibregl, { type Map, type Marker } from 'maplibre-gl';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { io, type Socket } from 'socket.io-client';
 import { CalendarClock, LogOut, MapPin, MessageCircle, Plus, Send, Users } from 'lucide-react';
@@ -18,6 +19,7 @@ import {
 import { createEvent, type BackendEvent } from '@/features/events/api/events.api';
 import { toErrorMessage } from '@/shared/lib/api/error';
 import { getAccessToken } from '@/shared/lib/auth/session';
+import { OSM_STYLE } from '@/shared/lib/map/osm';
 import { queryKeys } from '@/shared/lib/query/keys';
 import { queryClient } from '@/shared/lib/query/query-client';
 import { UiButton } from '@/shared/ui/button/button';
@@ -26,6 +28,7 @@ import { UiInput } from '@/shared/ui/input/input';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/states/states';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333';
+const ALMATY_CENTER = { lat: 43.238949, lng: 76.889709 };
 
 export function CommunityDetailScreen({ id }: { id: string }) {
   const [message, setMessage] = useState('');
@@ -44,9 +47,10 @@ export function CommunityDetailScreen({ id }: { id: string }) {
     queryFn: () => fetchCommunity(id),
   });
   const meQuery = useQuery({ queryKey: queryKeys.me, queryFn: me });
-  const activeMembership = communityQuery.data?.members.items.find(
-    (member) => member.userId === meQuery.data?.id && member.status === 'ACTIVE',
+  const currentMembership = communityQuery.data?.members.items.find(
+    (member) => member.userId === meQuery.data?.id,
   );
+  const activeMembership = currentMembership?.status === 'ACTIVE' ? currentMembership : undefined;
   const hasChatAccess = Boolean(activeMembership);
   const messagesQuery = useQuery({
     queryKey: queryKeys.communityMessages(id),
@@ -137,6 +141,26 @@ export function CommunityDetailScreen({ id }: { id: string }) {
   const community = communityQuery.data;
   const busy = joinMutation.isPending || leaveMutation.isPending || sendMutation.isPending;
   const communityEvents = community.events?.items ?? [];
+  const hasJoinableMembershipState =
+    currentMembership == null ||
+    currentMembership.status === 'LEFT' ||
+    currentMembership.status === 'PENDING';
+  const canJoinCommunity = hasJoinableMembershipState && community.visibility === 'PUBLIC';
+  const canLeaveCommunity = Boolean(activeMembership && activeMembership.role !== 'OWNER');
+  const chatAccessHint = hasChatAccess
+    ? 'Чат открыт для участников'
+    : canJoinCommunity
+      ? 'Вступите, чтобы открыть чат'
+      : 'Вступление недоступно';
+  const chatBlockedDescription = canJoinCommunity
+    ? 'Вступите в сообщество, чтобы читать и отправлять сообщения.'
+    : 'Доступ к чату сейчас недоступен для этого аккаунта.';
+  const eventBlockedTitle = canJoinCommunity
+    ? 'Сначала вступите в сообщество'
+    : 'Доступ к созданию событий недоступен';
+  const eventBlockedDescription = canJoinCommunity
+    ? 'После вступления откроются чат и форма для создания события.'
+    : 'Создание событий доступно только активным участникам сообщества.';
   const canCreateEvent =
     hasChatAccess &&
     eventTitle.trim().length >= 3 &&
@@ -164,15 +188,48 @@ export function CommunityDetailScreen({ id }: { id: string }) {
                 <p className="mt-5 max-w-2xl text-lg leading-7 text-white/62">
                   {community.description}
                 </p>
+                <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-white/62">
+                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2">
+                    {community.members.activeCount} участников
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2">
+                    {communityEvents.length} событий
+                  </span>
+                </div>
               </div>
-              <Image
-                alt=""
-                className="h-28 w-28 rounded-[30px] border border-white/12 bg-black/35 md:h-36 md:w-36"
-                height={144}
-                src={community.avatarUrl}
-                unoptimized
-                width={144}
-              />
+              <div className="flex flex-col items-stretch gap-3 md:w-[280px]">
+                <Image
+                  alt=""
+                  className="h-28 w-28 self-start rounded-[30px] border border-white/12 bg-black/35 md:h-36 md:w-36 md:self-end"
+                  height={144}
+                  src={community.avatarUrl}
+                  unoptimized
+                  width={144}
+                />
+                <div className="rounded-[26px] border border-white/10 bg-black/28 p-4 backdrop-blur">
+                  <p className="text-xs uppercase tracking-[0.12em] text-white/46">Участие</p>
+                  <div className="mt-3 grid gap-3">
+                    {canJoinCommunity ? (
+                      <UiButton onPress={() => joinMutation.mutate()} isDisabled={busy} className="h-12">
+                        {joinMutation.isPending ? 'Вступаем...' : 'Вступить в сообщество'}
+                      </UiButton>
+                    ) : null}
+                    {canLeaveCommunity ? (
+                      <UiButton variant="outline" onPress={() => leaveMutation.mutate()} isDisabled={busy} className="h-12">
+                        <LogOut size={16} /> {leaveMutation.isPending ? 'Выходим...' : 'Покинуть сообщество'}
+                      </UiButton>
+                    ) : null}
+                    {activeMembership?.role === 'OWNER' ? (
+                      <p className="text-sm text-white/52">
+                        Вы владелец сообщества. Для владельца выход отключён.
+                      </p>
+                    ) : null}
+                    {!canJoinCommunity && !canLeaveCommunity && activeMembership?.role !== 'OWNER' ? (
+                      <p className="text-sm text-white/52">Управление участием сейчас недоступно.</p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -212,18 +269,16 @@ export function CommunityDetailScreen({ id }: { id: string }) {
                   Сообщения доступны только активным участникам.
                 </p>
               </div>
-              {!hasChatAccess ? (
-                <UiButton onPress={() => joinMutation.mutate()} isDisabled={busy}>
-                  {joinMutation.isPending ? 'Вступаем...' : 'Вступить'}
-                </UiButton>
-              ) : null}
+              <p className="text-sm text-white/42">
+                {chatAccessHint}
+              </p>
             </div>
 
             {!hasChatAccess ? (
               <div className="mt-6">
                 <EmptyState
                   title="Чат закрыт"
-                  description="Вступите в сообщество, чтобы читать и отправлять сообщения."
+                  description={chatBlockedDescription}
                 />
               </div>
             ) : (
@@ -293,85 +348,75 @@ export function CommunityDetailScreen({ id }: { id: string }) {
               <Plus size={22} className="text-[var(--sw-accent-3)]" /> Добавить событие
             </h3>
             <p className="mt-2 text-sm text-white/50">Доступно активным участникам сообщества.</p>
-            <div className="mt-5 space-y-3">
-              <UiInput
-                aria-label="Название события"
-                placeholder="Название события"
-                value={eventTitle}
-                onChange={(event) => setEventTitle(event.target.value)}
-              />
-              <label className="block">
-                <span className="mb-2 flex items-center justify-between gap-3 text-sm text-white/58">
-                  <span>Описание события</span>
-                  <span className="text-white/38">Минимум 8 символов</span>
-                </span>
-                <textarea
-                  className="min-h-28 w-full resize-none rounded-2xl border border-white/12 bg-white/[0.04] px-4 py-3 text-white outline-none placeholder:text-white/32 focus:border-[var(--sw-accent-3)]"
-                  onChange={(event) => setEventDescription(event.target.value)}
-                  placeholder="Формат, кто приходит и что будет происходить..."
-                  value={eventDescription}
-                />
-              </label>
-              <UiInput
-                aria-label="Дата и время"
-                type="datetime-local"
-                value={eventStartsAt}
-                onChange={(event) => setEventStartsAt(event.target.value)}
-              />
-              <UiInput
-                aria-label="Адрес"
-                placeholder="Место встречи"
-                value={eventAddress}
-                onChange={(event) => setEventAddress(event.target.value)}
-              />
-              <div className="grid gap-3 sm:grid-cols-3">
+            {hasChatAccess ? (
+              <div className="mt-5 space-y-3">
                 <UiInput
-                  aria-label="Мест"
-                  inputMode="numeric"
-                  placeholder="Мест"
-                  value={eventCapacity}
-                  onChange={(event) => setEventCapacity(event.target.value)}
+                  aria-label="Название события"
+                  placeholder="Название события"
+                  value={eventTitle}
+                  onChange={(event) => setEventTitle(event.target.value)}
+                />
+                <label className="block">
+                  <span className="mb-2 flex items-center justify-between gap-3 text-sm text-white/58">
+                    <span>Описание события</span>
+                    <span className="text-white/38">Минимум 8 символов</span>
+                  </span>
+                  <textarea
+                    className="min-h-28 w-full resize-none rounded-2xl border border-white/12 bg-white/[0.04] px-4 py-3 text-white outline-none placeholder:text-white/32 focus:border-[var(--sw-accent-3)]"
+                    onChange={(event) => setEventDescription(event.target.value)}
+                    placeholder="Формат, кто приходит и что будет происходить..."
+                    value={eventDescription}
+                  />
+                </label>
+                <UiInput
+                  aria-label="Дата и время"
+                  type="datetime-local"
+                  value={eventStartsAt}
+                  onChange={(event) => setEventStartsAt(event.target.value)}
                 />
                 <UiInput
-                  aria-label="Широта"
-                  inputMode="decimal"
-                  placeholder="Lat"
-                  value={eventLat}
-                  onChange={(event) => setEventLat(event.target.value)}
+                  aria-label="Адрес"
+                  placeholder="Место встречи"
+                  value={eventAddress}
+                  onChange={(event) => setEventAddress(event.target.value)}
                 />
-                <UiInput
-                  aria-label="Долгота"
-                  inputMode="decimal"
-                  placeholder="Lng"
-                  value={eventLng}
-                  onChange={(event) => setEventLng(event.target.value)}
+                <div>
+                  <p className="text-sm text-white/58">Точка на карте</p>
+                  <p className="mt-1 text-sm text-white/42">Нажмите на карту или перетащите маркер.</p>
+                  <CommunityEventLocationPicker
+                    lat={eventLat}
+                    lng={eventLng}
+                    onChange={(nextLat, nextLng) => {
+                      setEventLat(nextLat.toFixed(6));
+                      setEventLng(nextLng.toFixed(6));
+                    }}
+                  />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-1">
+                  <UiInput
+                    aria-label="Мест"
+                    inputMode="numeric"
+                    placeholder="Мест"
+                    value={eventCapacity}
+                    onChange={(event) => setEventCapacity(event.target.value)}
+                  />
+                </div>
+                <UiButton
+                  fullWidth
+                  isDisabled={!canCreateEvent}
+                  onPress={() => createEventMutation.mutate()}
+                >
+                  {createEventMutation.isPending ? 'Создаем...' : 'Создать событие'}
+                </UiButton>
+              </div>
+            ) : (
+              <div className="mt-5">
+                <EmptyState
+                  title={eventBlockedTitle}
+                  description={eventBlockedDescription}
                 />
               </div>
-              <UiButton
-                fullWidth
-                isDisabled={!canCreateEvent}
-                onPress={() => createEventMutation.mutate()}
-              >
-                {createEventMutation.isPending ? 'Создаем...' : 'Создать событие'}
-              </UiButton>
-              {!hasChatAccess ? (
-                <p className="text-xs text-white/42">
-                  Вступите в сообщество, чтобы добавлять события.
-                </p>
-              ) : null}
-            </div>
-          </UiCard>
-
-          <UiCard className="p-5 md:p-6">
-            <h3 className="text-2xl tracking-[-0.04em]">Действия</h3>
-            <div className="mt-5 grid gap-3">
-              <UiButton onPress={() => joinMutation.mutate()} isDisabled={busy}>
-                {joinMutation.isPending ? 'Вступаем...' : 'Вступить'}
-              </UiButton>
-              <UiButton variant="outline" onPress={() => leaveMutation.mutate()} isDisabled={busy}>
-                <LogOut size={16} /> {leaveMutation.isPending ? 'Выходим...' : 'Покинуть'}
-              </UiButton>
-            </div>
+            )}
           </UiCard>
         </aside>
       </section>
@@ -426,4 +471,103 @@ function appendMessage(communityId: string, incoming: CommunityMessage) {
 function toDateTimeLocal(date: Date) {
   const offsetMs = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
+function CommunityEventLocationPicker({
+  lat,
+  lng,
+  onChange,
+}: {
+  lat: string;
+  lng: string;
+  onChange: (lat: number, lng: number) => void;
+}) {
+  const mapNodeRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<Map | null>(null);
+  const markerRef = useRef<Marker | null>(null);
+  const initialPointRef = useRef({ lat, lng });
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (!mapNodeRef.current || mapRef.current) return;
+
+    const container = mapNodeRef.current;
+    const parsedLat = Number(initialPointRef.current.lat);
+    const parsedLng = Number(initialPointRef.current.lng);
+    const initial = {
+      lat: Number.isFinite(parsedLat) ? parsedLat : ALMATY_CENTER.lat,
+      lng: Number.isFinite(parsedLng) ? parsedLng : ALMATY_CENTER.lng,
+    };
+
+    const map = new maplibregl.Map({
+      attributionControl: false,
+      center: [initial.lng, initial.lat],
+      container,
+      style: OSM_STYLE,
+      zoom: 13,
+    });
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.on('load', () => map.resize());
+
+    const markerNode = document.createElement('button');
+    markerNode.type = 'button';
+    markerNode.className = 'grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-[var(--sw-accent-3)] text-white shadow-[0_12px_36px_rgba(255,123,0,0.35)]';
+    markerNode.setAttribute('aria-label', 'Выбранная точка события сообщества');
+    markerNode.innerHTML = '<span class="h-2.5 w-2.5 rounded-full bg-white"></span>';
+
+    const marker = new maplibregl.Marker({ draggable: true, element: markerNode })
+      .setLngLat([initial.lng, initial.lat])
+      .addTo(map);
+
+    marker.on('dragend', () => {
+      const next = marker.getLngLat();
+      onChangeRef.current(next.lat, next.lng);
+    });
+
+    map.on('click', (event) => {
+      marker.setLngLat(event.lngLat);
+      onChangeRef.current(event.lngLat.lat, event.lngLat.lng);
+    });
+
+    mapRef.current = map;
+    markerRef.current = marker;
+
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+    });
+    resizeObserver.observe(container);
+    requestAnimationFrame(() => map.resize());
+
+    return () => {
+      resizeObserver.disconnect();
+      marker.remove();
+      map.remove();
+      markerRef.current = null;
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const marker = markerRef.current;
+    const parsedLat = Number(lat);
+    const parsedLng = Number(lng);
+    if (!map || !marker || !Number.isFinite(parsedLat) || !Number.isFinite(parsedLng)) return;
+
+    const next: [number, number] = [parsedLng, parsedLat];
+    marker.setLngLat(next);
+    map.easeTo({ center: next, duration: 420, zoom: Math.max(map.getZoom(), 13) });
+  }, [lat, lng]);
+
+  return (
+    <div className="relative mt-4 h-[260px] overflow-hidden rounded-[22px] border border-white/10 bg-black">
+      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.24))]" />
+    </div>
+  );
 }

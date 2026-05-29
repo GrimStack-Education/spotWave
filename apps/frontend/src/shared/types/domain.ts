@@ -4,6 +4,8 @@ export type QuorumStatus = 'forming' | 'quorum_reached' | 'full';
 export type Event = {
   id: string;
   title: string;
+  description?: string | null;
+  imageUrl?: string | null;
   category: string;
   datetime: string;
   location: string;

@@ -43,7 +43,7 @@ export function HomeFeedScreen() {
           href={`/events/${featured.id}`}
           className="group overflow-hidden rounded-[34px] border border-white/10 bg-[var(--sw-neutral-800)] transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.38)]"
         >
-          <CoverImage className="h-56 rounded-none border-0" seed={featured.id} priority alt={featured.title} />
+          <CoverImage className="h-56 rounded-none border-0" seed={featured.id} src={featured.imageUrl} priority alt={featured.title} />
           <div className="p-6 md:p-7">
             <p className="text-xs uppercase tracking-[0.16em] text-[var(--sw-accent-3)]">Главное событие</p>
             <h2 className="mt-3 text-[40px] leading-[0.95] tracking-[-0.06em] text-white">{featured.title}</h2>
@@ -66,7 +66,7 @@ export function HomeFeedScreen() {
             href={`/events/${event.id}`}
             className="group rounded-[28px] border border-white/10 bg-[var(--sw-neutral-800)] p-4 transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.36)] hover:bg-[#1d1d1d]"
           >
-            <CoverImage className="h-36" seed={event.id} alt={event.title} />
+            <CoverImage className="h-36" seed={event.id} src={event.imageUrl} alt={event.title} />
             <div className="mt-4 flex items-center justify-between gap-3">
               <span className="text-sm text-white/64">{event.category}</span>
               <span className="text-xs text-white/45">{event.rsvpCount}/{event.capacity}</span>

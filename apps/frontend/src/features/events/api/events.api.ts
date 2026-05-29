@@ -7,8 +7,11 @@ export type BackendEvent = {
   startsAt: string;
   visibility: 'PUBLIC' | 'PRIVATE' | 'NEIGHBORHOOD';
   capacity: number | null;
+  imageUrl?: string | null;
   lat: number;
   lng: number;
+  locationName?: string | null;
+  address?: string | null;
   addressText?: string | null;
   distanceKm?: number | null;
   tags?: Array<{ id: string; slug: string; name: string }>;
@@ -41,6 +44,15 @@ export type BackendEvent = {
   };
 };
 
+export type EventsListResponse = {
+  items?: BackendEvent[];
+  events?: BackendEvent[];
+  total?: number;
+  count?: number;
+  limit?: number;
+  offset?: number;
+};
+
 export async function fetchEvents(params?: {
   lat?: number;
   lng?: number;
@@ -53,9 +65,20 @@ export async function fetchEvents(params?: {
   if (params?.radiusKm != null) qs.set('radiusKm', String(params.radiusKm));
   if (params?.limit != null) qs.set('limit', String(params.limit));
   const q = qs.toString();
-  return apiRequest<{ items: BackendEvent[]; total: number; limit: number; offset: number }>(
+  const response = await apiRequest<EventsListResponse>(
     `/events${q ? `?${q}` : ''}`,
   );
+
+  const items = response.items ?? response.events ?? [];
+
+  return {
+    items,
+    events: response.events ?? items,
+    total: response.total ?? response.count ?? items.length,
+    count: response.count ?? items.length,
+    limit: response.limit ?? items.length,
+    offset: response.offset ?? 0,
+  };
 }
 
 export async function fetchEventById(id: string) {
@@ -77,6 +100,7 @@ export async function createEvent(payload: {
   startsAt: string;
   endsAt?: string;
   capacity?: number;
+  imageUrl?: string;
   lat: number;
   lng: number;
   addressText?: string;

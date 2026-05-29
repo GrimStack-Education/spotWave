@@ -40,6 +40,16 @@ async function doFetch(path: string, init: RequestInit): Promise<Response> {
   });
 }
 
+function tryParseJson(value: string): unknown {
+  if (!value.trim()) return null;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? 'GET').toUpperCase();
   const retries = method === 'GET' ? 1 : 0;
@@ -52,12 +62,20 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
 
   if (!response) throw new ApiError('No response', 0);
 
-  const rawBody = (await response.json()) as ApiEnvelope<T> | ApiErrorEnvelope;
+  const rawText = await response.text();
+  const parsed = tryParseJson(rawText);
+  const rawBody = (parsed ?? { error: rawText || 'Request failed' }) as
+    | ApiEnvelope<T>
+    | ApiErrorEnvelope;
 
   if (!response.ok) {
     const message = parseMessage((rawBody as ApiErrorEnvelope).error);
     if (response.status === 401) clearAccessToken();
     throw new ApiError(message, response.status, `HTTP_${response.status}`, rawBody);
+  }
+
+  if (!('data' in (rawBody as Record<string, unknown>))) {
+    throw new ApiError('Malformed API response', response.status, 'MALFORMED_RESPONSE', rawBody);
   }
 
   return (rawBody as ApiEnvelope<T>).data;

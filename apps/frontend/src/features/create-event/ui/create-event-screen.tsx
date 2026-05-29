@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import maplibregl, { Map, Marker } from 'maplibre-gl';
-import { Calendar, CheckCircle2, LocateFixed, MapPin, Search, Tags, Users } from 'lucide-react';
+import { Calendar, CheckCircle2, ImagePlus, LocateFixed, MapPin, Search, Tags, Users } from 'lucide-react';
 import { createEvent } from '@/features/events/api/events.api';
 import { fetchTags } from '@/features/tags/api/tags.api';
 import { toRussianInterestLabel } from '@/shared/lib/i18n/interests';
@@ -27,6 +27,7 @@ export function CreateEventScreen() {
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [capacity, setCapacity] = useState('8');
+  const [imageUrl, setImageUrl] = useState('');
   const [lat, setLat] = useState(ALMATY_CENTER.lat.toFixed(6));
   const [lng, setLng] = useState(ALMATY_CENTER.lng.toFixed(6));
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
@@ -95,6 +96,7 @@ export function CreateEventScreen() {
       startsAt: new Date(datetime).toISOString(),
       description,
       capacity: Number(capacity) || 8,
+      imageUrl: imageUrl.trim() || undefined,
       lat: parsedLat,
       lng: parsedLng,
       addressText: location,
@@ -156,13 +158,39 @@ export function CreateEventScreen() {
         </div>
 
         <div className="mt-5 rounded-[26px] border border-white/10 bg-[#101010] p-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-sm uppercase tracking-[0.08em] text-white/58">
+              <ImagePlus size={16} />
+              Фото события
+            </h2>
+            <p className="mt-1 text-sm text-white/44">Обложка появится в превью, ленте и карточке события.</p>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-[220px_minmax(0,1fr)] md:items-start">
+            <CoverImage
+              className="h-40"
+              seed={title || location || 'create-event'}
+              src={imageUrl.trim() || null}
+              alt={title || 'Предпросмотр события'}
+            />
+            <Field icon={<ImagePlus size={16} />} label="Фото">
+              <UiInput
+                aria-label="event-image"
+                placeholder="Вставьте ссылку на изображение"
+                value={imageUrl}
+                onChange={(event) => setImageUrl(event.target.value)}
+              />
+            </Field>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-[26px] border border-white/10 bg-[#101010] p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="flex items-center gap-2 text-sm uppercase tracking-[0.08em] text-white/58">
                 <MapPin size={16} />
                 Место на карте
               </h2>
-              <p className="mt-1 text-sm text-white/44">Кликните по карте или перетащите маркер.</p>
+              <p className="mt-1 text-sm text-white/44">Кликните по карте или перетащите маркер, чтобы уточнить место встречи.</p>
             </div>
             <UiButton
               className="h-11"
@@ -182,7 +210,6 @@ export function CreateEventScreen() {
               setLng(nextLng.toFixed(6));
             }}
           />
-          <p className="mt-3 text-xs text-white/40">Точка события: {lat}, {lng}</p>
         </div>
 
         <div className="mt-6">
@@ -240,7 +267,7 @@ export function CreateEventScreen() {
             <p className="mt-2 text-xs text-white/36">Показано {shownTags.length} из {visibleTags.length}</p>
           ) : null}
           {tagsQuery.isError ? (
-            <p className="mt-3 text-sm text-white/46">Темы не загрузились, событие можно опубликовать без них.</p>
+            <p className="mt-3 text-sm text-white/46">Темы временно не загрузились.</p>
           ) : null}
         </div>
 
@@ -259,17 +286,21 @@ export function CreateEventScreen() {
           <UiButton className="h-14 w-full md:w-auto" onPress={submit} isDisabled={mutation.isPending}>
             {mutation.isPending ? 'Публикуем...' : 'Опубликовать'}
           </UiButton>
-          <span className="text-sm text-white/46">Публикация обновит ленту и карту.</span>
         </div>
       </div>
 
       <div className="min-w-0 space-y-5">
         <div className="rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 md:rounded-[30px] md:p-6">
-          <CoverImage className="h-48" seed={title || location || 'create-event'} priority alt="Event preview" />
+          <CoverImage
+            className="h-48"
+            seed={title || location || 'create-event'}
+            src={imageUrl.trim() || null}
+            priority
+            alt="Event preview"
+          />
           <p className="mt-5 text-xs uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">Превью</p>
           <p className="mt-2 text-3xl leading-tight tracking-[-0.045em] text-white">{title || 'Ваше следующее событие'}</p>
           <p className="mt-3 text-white/58">{location || 'Алматы'} · {capacity || 8} мест</p>
-          <p className="mt-2 text-sm text-white/42">{lat}, {lng}</p>
           <p className="mt-2 text-white/58">{description || 'Короткое описание события появится здесь.'}</p>
         </div>
 
@@ -312,6 +343,7 @@ function EventLocationPicker({
   useEffect(() => {
     if (!mapNodeRef.current || mapRef.current) return;
 
+    const container = mapNodeRef.current;
     const parsedLat = Number(initialPointRef.current.lat);
     const parsedLng = Number(initialPointRef.current.lng);
     const initial = {
@@ -322,12 +354,15 @@ function EventLocationPicker({
     const map = new maplibregl.Map({
       attributionControl: false,
       center: [initial.lng, initial.lat],
-      container: mapNodeRef.current,
+      container,
       style: OSM_STYLE,
       zoom: 13,
     });
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.on('load', () => {
+      map.resize();
+    });
 
     const markerNode = document.createElement('button');
     markerNode.type = 'button';
@@ -352,7 +387,14 @@ function EventLocationPicker({
     mapRef.current = map;
     markerRef.current = marker;
 
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+    });
+    resizeObserver.observe(container);
+    requestAnimationFrame(() => map.resize());
+
     return () => {
+      resizeObserver.disconnect();
       marker.remove();
       map.remove();
       markerRef.current = null;
@@ -374,7 +416,7 @@ function EventLocationPicker({
 
   return (
     <div className="relative mt-4 h-[320px] overflow-hidden rounded-[22px] border border-white/10 bg-black md:h-[380px]">
-      <div ref={mapNodeRef} className="absolute inset-0" />
+      <div ref={mapNodeRef} className="absolute inset-0 h-full w-full" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.24))]" />
     </div>
   );

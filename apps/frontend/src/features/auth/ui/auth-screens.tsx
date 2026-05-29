@@ -195,6 +195,22 @@ export function SignUpScreen() {
 }
 
 export function ForgotPasswordScreen() {
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+
+  const onSubmit = () => {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      setError('Введите корректный email');
+      setSent(false);
+      return;
+    }
+
+    setError(null);
+    setSent(true);
+  };
+
   return (
     <AuthPage topBadge="ПОМОЩЬ">
       <div className={authCardClassName}>
@@ -206,10 +222,26 @@ export function ForgotPasswordScreen() {
         </p>
         <div className="mt-6 flex flex-col gap-5 md:mt-8">
           <AuthField icon={<Mail className="text-white/46" size={20} />} label="Email">
-            <UiInput className={authInputClassName} placeholder="name@mail.com" type="email" />
+            <UiInput
+              className={authInputClassName}
+              placeholder="name@mail.com"
+              type="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                if (error) setError(null);
+                if (sent) setSent(false);
+              }}
+            />
           </AuthField>
-          <UiButton fullWidth className={orangeButtonClassName}>
-            Отправить ссылку
+          {error ? <ErrorState message={error} /> : null}
+          {sent ? (
+            <p className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+              Если аккаунт существует, ссылка на восстановление отправлена.
+            </p>
+          ) : null}
+          <UiButton fullWidth className={orangeButtonClassName} onClick={onSubmit}>
+            {sent ? 'Отправлено' : 'Отправить ссылку'}
           </UiButton>
           <p className="text-base text-white/48">
             <Link href="/sign-in" className="text-[var(--sw-accent-3)]">

@@ -15,6 +15,22 @@ import { CoverImage } from '@/shared/ui/media/cover-image';
 import type { Event } from '@/shared/types/domain';
 
 type MapCenter = typeof ALMATY_CENTER;
+type RadiusPolygonFeatureCollection = {
+  type: 'FeatureCollection';
+  features: Array<{
+    type: 'Feature';
+    geometry: {
+      type: 'Polygon';
+      coordinates: Array<Array<[number, number]>>;
+    };
+    properties: Record<string, never>;
+  }>;
+};
+
+const RADIUS_SOURCE_ID = 'search-radius-source';
+const RADIUS_FILL_LAYER_ID = 'search-radius-fill';
+const RADIUS_OUTLINE_LAYER_ID = 'search-radius-outline';
+const DEFAULT_RADIUS_KM = 8;
 
 export function MapScreen() {
   const mapNodeRef = useRef<HTMLDivElement | null>(null);
@@ -22,13 +38,30 @@ export function MapScreen() {
   const markersRef = useRef<Marker[]>([]);
   const [center, setCenter] = useState<MapCenter>(ALMATY_CENTER);
   const [isLocating, setIsLocating] = useState(false);
-  const [radiusKm, setRadiusKm] = useState(8);
+  const [radiusKm, setRadiusKm] = useState(DEFAULT_RADIUS_KM);
+  const [debouncedRadiusKm, setDebouncedRadiusKm] = useState(DEFAULT_RADIUS_KM);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const queryKey = `map:${center.lat.toFixed(4)}:${center.lng.toFixed(4)}:${radiusKm}`;
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedRadiusKm(radiusKm);
+    }, 400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [radiusKm]);
+
+  const queryKey = `map:${center.lat.toFixed(4)}:${center.lng.toFixed(4)}:${debouncedRadiusKm}`;
   const eventsQuery = useQuery({
     queryKey: queryKeys.events(queryKey),
-    queryFn: () => fetchEvents({ lat: center.lat, lng: center.lng, radiusKm, limit: 80 }),
+    queryFn: () =>
+      fetchEvents({
+        lat: center.lat,
+        lng: center.lng,
+        radiusKm: debouncedRadiusKm,
+        limit: 80,
+      }),
     placeholderData: keepPreviousData,
   });
 
@@ -39,35 +72,56 @@ export function MapScreen() {
   const selectedEvent = events.find((event) => event.id === selectedId) ?? events[0] ?? null;
 
   useEffect(() => {
-    if (eventsQuery.isLoading || eventsQuery.isError || !mapNodeRef.current || mapRef.current) return;
+    if (eventsQuery.isPending) return;
+    if (!mapNodeRef.current || mapRef.current) return;
 
-    mapRef.current = new maplibregl.Map({
-      container: mapNodeRef.current,
+    const container = mapNodeRef.current;
+    const map = new maplibregl.Map({
+      container,
       style: OSM_STYLE,
       center: [ALMATY_CENTER.lng, ALMATY_CENTER.lat],
       zoom: 12,
       attributionControl: false,
     });
+    mapRef.current = map;
 
-    mapRef.current.addControl(
-      new maplibregl.AttributionControl({ compact: true }),
-      'bottom-right',
-    );
-    mapRef.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.on('load', () => {
+      map.resize();
+      setMapError(null);
+      upsertRadiusOverlay(map, ALMATY_CENTER, DEFAULT_RADIUS_KM);
+    });
+    map.on('error', () => {
+      setMapError('Базовая карта не загрузилась. Список событий и ссылки остаются рабочими.');
+    });
+
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+    });
+    resizeObserver.observe(container);
+    requestAnimationFrame(() => map.resize());
 
     return () => {
+      resizeObserver.disconnect();
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
-      mapRef.current?.remove();
+      map.remove();
       mapRef.current = null;
     };
-  }, [eventsQuery.isError, eventsQuery.isLoading]);
+  }, [eventsQuery.isPending]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     map.easeTo({ center: [center.lng, center.lat], zoom: radiusKm > 20 ? 10.5 : 12, duration: 650 });
   }, [center, radiusKm]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    upsertRadiusOverlay(map, center, debouncedRadiusKm);
+  }, [center, debouncedRadiusKm]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -93,18 +147,34 @@ export function MapScreen() {
       ].join(' ');
       markerNode.textContent = event.rsvpCount ? `${event.rsvpCount}` : '•';
       markerNode.setAttribute('aria-label', event.title);
-      markerNode.addEventListener('click', () => setSelectedId(event.id));
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnMove: true,
+        offset: 18,
+        maxWidth: '280px',
+      }).setDOMContent(buildEventPopupContent(event));
 
-      markersRef.current.push(
-        new maplibregl.Marker({ element: markerNode, anchor: 'bottom' })
-          .setLngLat([event.lng, event.lat])
-          .addTo(map),
-      );
+      const marker = new maplibregl.Marker({ element: markerNode, anchor: 'bottom' })
+        .setLngLat([event.lng, event.lat])
+        .setPopup(popup)
+        .addTo(map);
+
+      markerNode.addEventListener('click', () => {
+        setSelectedId(event.id);
+        marker.togglePopup();
+      });
+
+      markersRef.current.push(marker);
     }
   }, [center, events, selectedEvent?.id]);
 
   const locate = () => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setLocationError('Ваш браузер не поддерживает геолокацию.');
+      return;
+    }
+
+    setLocationError(null);
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -112,10 +182,15 @@ export function MapScreen() {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         });
+        setLocationError(null);
         setIsLocating(false);
       },
-      () => {
-        setCenter(ALMATY_CENTER);
+      (error) => {
+        setLocationError(
+          error.code === error.PERMISSION_DENIED
+            ? 'Доступ к геопозиции запрещён. Разрешите доступ в браузере.'
+            : 'Не удалось определить геопозицию. Попробуйте ещё раз.',
+        );
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 6000 },
@@ -123,7 +198,6 @@ export function MapScreen() {
   };
 
   if (eventsQuery.isPending) return <LoadingState />;
-  if (eventsQuery.isError) return <ErrorState message="Не удалось загрузить карту событий" />;
 
   return (
     <div className="min-w-0 space-y-5">
@@ -148,11 +222,26 @@ export function MapScreen() {
                 {isLocating ? 'Ищем...' : 'Моя геопозиция'}
               </UiButton>
             </div>
+            {locationError ? (
+              <p className="w-full rounded-xl border border-[rgba(var(--sw-accent-2-rgb),0.28)] bg-[rgba(var(--sw-accent-4-rgb),0.22)] px-3 py-2 text-sm text-white/78">
+                {locationError}
+              </p>
+            ) : null}
+            {eventsQuery.isError ? (
+              <div className="w-full">
+                <ErrorState message="Список событий временно не загрузился. Базовая карта и переходы по уже найденным событиям остаются доступны после повтора." />
+              </div>
+            ) : null}
+            {mapError ? (
+              <div className="w-full">
+                <ErrorState message={mapError} />
+              </div>
+            ) : null}
           </div>
 
           <div className="min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#101010] md:rounded-[30px]">
             <div className="relative h-[68vh] min-h-[500px] w-full max-h-[760px]">
-              <div ref={mapNodeRef} className="absolute inset-0 min-w-0" />
+              <div ref={mapNodeRef} className="absolute inset-0 h-full w-full min-w-0" />
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0.04),rgba(10,10,10,0.32))]" />
               <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/68 p-3 backdrop-blur md:bottom-5 md:left-5 md:right-5 md:p-4">
                 <div className="min-w-0">
@@ -172,7 +261,7 @@ export function MapScreen() {
                   />
                 </label>
                 <div className="shrink-0 rounded-full border border-white/10 px-3 py-2 text-sm text-white/64 md:px-4 md:text-base">
-                  {eventsQuery.isFetching ? 'Обновляем...' : `${events.length} событий`}
+                  {eventsQuery.isFetching || radiusKm !== debouncedRadiusKm ? 'Обновляем...' : `${events.length} событий`}
                 </div>
               </div>
             </div>
@@ -183,7 +272,7 @@ export function MapScreen() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-[34px] leading-[0.96] tracking-[-0.06em] text-white md:text-[40px]">События рядом</h2>
-              <p className="mt-2 text-sm text-white/48">Выберите пин или карточку для перехода.</p>
+              <p className="mt-2 text-sm text-white/48">Выберите карточку для подсветки и откройте событие стрелкой.</p>
             </div>
             <MapPin className="text-[var(--sw-accent-3)]" size={22} />
           </div>
@@ -209,6 +298,125 @@ export function MapScreen() {
   );
 }
 
+function buildEventPopupContent(event: Event) {
+  const root = document.createElement('div');
+  root.className = 'max-w-[240px] space-y-1.5 text-[13px] leading-5 text-[#161616]';
+
+  const title = document.createElement('p');
+  title.className = 'font-semibold text-[#0f0f0f]';
+  title.textContent = event.title;
+  root.appendChild(title);
+
+  const location = document.createElement('p');
+  location.className = 'text-[#2a2a2a]';
+  location.textContent = event.location;
+  root.appendChild(location);
+
+  const startsAt = document.createElement('p');
+  startsAt.className = 'text-[#3a3a3a]';
+  startsAt.textContent = event.datetime;
+  root.appendChild(startsAt);
+
+  if (event.description) {
+    const description = document.createElement('p');
+    description.className = 'line-clamp-3 text-[#464646]';
+    description.textContent = event.description;
+    root.appendChild(description);
+  }
+
+  return root;
+}
+
+function upsertRadiusOverlay(map: Map, center: MapCenter, radiusKm: number) {
+  if (!map.isStyleLoaded()) {
+    return;
+  }
+
+  const radiusPolygon = createRadiusPolygon(center, radiusKm);
+  const existingSource = map.getSource(RADIUS_SOURCE_ID);
+
+  if (!existingSource) {
+    map.addSource(RADIUS_SOURCE_ID, {
+      type: 'geojson',
+      data: radiusPolygon,
+    });
+
+    map.addLayer({
+      id: RADIUS_FILL_LAYER_ID,
+      type: 'fill',
+      source: RADIUS_SOURCE_ID,
+      paint: {
+        'fill-color': 'rgba(255,123,0,0.18)',
+        'fill-opacity': 0.35,
+      },
+    });
+
+    map.addLayer({
+      id: RADIUS_OUTLINE_LAYER_ID,
+      type: 'line',
+      source: RADIUS_SOURCE_ID,
+      paint: {
+        'line-color': 'rgba(255,123,0,0.95)',
+        'line-width': 2,
+      },
+    });
+
+    return;
+  }
+
+  (existingSource as unknown as { setData: (value: RadiusPolygonFeatureCollection) => void }).setData(
+    radiusPolygon,
+  );
+}
+
+function createRadiusPolygon(center: MapCenter, radiusKm: number): RadiusPolygonFeatureCollection {
+  const steps = 72;
+  const earthRadiusKm = 6371;
+  const latitudeRad = toRadians(center.lat);
+  const longitudeRad = toRadians(center.lng);
+  const angularDistance = radiusKm / earthRadiusKm;
+  const coordinates: Array<[number, number]> = [];
+
+  for (let step = 0; step <= steps; step += 1) {
+    const bearing = (step / steps) * Math.PI * 2;
+    const destinationLat = Math.asin(
+      Math.sin(latitudeRad) * Math.cos(angularDistance) +
+        Math.cos(latitudeRad) * Math.sin(angularDistance) * Math.cos(bearing),
+    );
+    const destinationLng =
+      longitudeRad +
+      Math.atan2(
+        Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latitudeRad),
+        Math.cos(angularDistance) -
+          Math.sin(latitudeRad) * Math.sin(destinationLat),
+      );
+
+    coordinates.push([toDegrees(destinationLng), toDegrees(destinationLat)]);
+  }
+
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coordinates],
+        },
+        properties: {},
+      },
+    ],
+  };
+}
+
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
+function toDegrees(value: number) {
+  return (value * 180) / Math.PI;
+}
+
 function EventRow({
   event,
   isSelected,
@@ -219,23 +427,25 @@ function EventRow({
   onSelect: () => void;
 }) {
   return (
-    <button
+    <div
       className={[
-        'group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-white/84 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sw-neutral-800)]',
+        'group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-white/84 transition',
         isSelected
           ? 'border-[rgba(var(--sw-accent-2-rgb),0.52)] bg-[rgba(var(--sw-accent-4-rgb),0.22)]'
           : 'border-white/10 bg-[#101010] hover:border-[rgba(var(--sw-accent-2-rgb),0.35)]',
       ].join(' ')}
-      onClick={onSelect}
-      type="button"
     >
-      <CoverImage className="h-12 w-12 rounded-xl" seed={event.id} alt={event.title} />
-      <div className="min-w-0 flex-1">
+      <CoverImage className="h-12 w-12 rounded-xl" seed={event.id} src={event.imageUrl} alt={event.title} />
+      <button
+        className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sw-neutral-800)]"
+        onClick={onSelect}
+        type="button"
+      >
         <p className="truncate">{event.title}</p>
         <p className="truncate text-sm text-white/52">
           {event.distanceKm != null ? `${event.distanceKm.toFixed(1)} км` : event.radius + ' км'} · {event.rsvpCount}/{event.capacity}
         </p>
-      </div>
+      </button>
       <Link
         aria-label={`Открыть ${event.title}`}
         className="rounded-full border border-white/10 p-2 text-white/45 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.38)] hover:text-[var(--sw-accent-3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]"
@@ -243,6 +453,6 @@ function EventRow({
       >
         <ArrowRight size={16} />
       </Link>
-    </button>
+    </div>
   );
 }

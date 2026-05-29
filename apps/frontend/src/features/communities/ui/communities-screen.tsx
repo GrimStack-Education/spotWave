@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import { ArrowRight, MessageCircle, Plus, Search, Users } from 'lucide-react';
+import { ArrowRight, ImagePlus, MessageCircle, Plus, Search, Users } from 'lucide-react';
 import {
   createCommunity,
   fetchCommunities,
@@ -18,6 +18,7 @@ import { UiButton } from '@/shared/ui/button/button';
 import { UiCard } from '@/shared/ui/card/card';
 import { UiInput } from '@/shared/ui/input/input';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/states/states';
+import { CoverImage } from '@/shared/ui/media/cover-image';
 
 export function CommunitiesScreen() {
   const [searchCity, setSearchCity] = useState('');
@@ -25,6 +26,7 @@ export function CommunitiesScreen() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [communityCity, setCommunityCity] = useState('Алматы');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [createError, setCreateError] = useState<string | null>(null);
   const appliedCity = cityFilter.trim();
   const queryKey = appliedCity ? `city:${appliedCity}` : 'all';
@@ -39,11 +41,13 @@ export function CommunitiesScreen() {
         name: name.trim(),
         description: description.trim(),
         city: communityCity.trim() || 'Алматы',
+        avatarUrl: avatarUrl.trim() || undefined,
       }),
     onSuccess: async (community) => {
       setName('');
       setDescription('');
       setCommunityCity(community.city);
+      setAvatarUrl('');
       setSearchCity(community.city);
       setCityFilter(community.city);
       setCreateError(null);
@@ -169,6 +173,28 @@ export function CommunitiesScreen() {
               value={communityCity}
               onChange={(event) => setCommunityCity(event.target.value)}
             />
+            <div className="rounded-[24px] border border-white/10 bg-white/[0.025] p-4">
+              <div className="grid gap-4 md:grid-cols-[160px_minmax(0,1fr)] md:items-start">
+                <CoverImage
+                  className="h-32"
+                  seed={name || communityCity || 'community'}
+                  src={avatarUrl.trim() || null}
+                  alt={name || 'Предпросмотр сообщества'}
+                />
+                <label className="block">
+                  <span className="mb-2 flex items-center gap-2 text-sm uppercase tracking-[0.08em] text-white/58">
+                    <ImagePlus size={16} />
+                    Фото сообщества
+                  </span>
+                  <UiInput
+                    aria-label="Ссылка на картинку сообщества"
+                    placeholder="Вставьте ссылку на изображение"
+                    value={avatarUrl}
+                    onChange={(event) => setAvatarUrl(event.target.value)}
+                  />
+                </label>
+              </div>
+            </div>
             <UiButton
               fullWidth
               isDisabled={!canCreate}

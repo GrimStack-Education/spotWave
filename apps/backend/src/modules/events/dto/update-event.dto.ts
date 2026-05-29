@@ -49,6 +49,10 @@ export class UpdateEventDto {
   capacity?: number;
 
   @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsLatitude()
   lat?: number;

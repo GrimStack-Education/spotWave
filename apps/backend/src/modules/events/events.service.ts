@@ -156,6 +156,8 @@ export class EventsService {
       .map((item) => this.mapEvent(item.record, item.distanceKm));
 
     return {
+      count: items.length,
+      events: items,
       items,
       total: withDistance.length,
       limit,
@@ -194,6 +196,7 @@ export class EventsService {
         endsAt: dto.endsAt ? new Date(dto.endsAt) : null,
         visibility: dto.visibility,
         capacity: dto.capacity,
+        imageUrl: dto.imageUrl?.trim(),
         lat: new Prisma.Decimal(dto.lat),
         lng: new Prisma.Decimal(dto.lng),
         addressText: dto.addressText?.trim(),
@@ -267,6 +270,8 @@ export class EventsService {
               : undefined,
           visibility: dto.visibility,
           capacity: dto.capacity,
+          imageUrl:
+            dto.imageUrl !== undefined ? dto.imageUrl.trim() : undefined,
           lat: dto.lat !== undefined ? new Prisma.Decimal(dto.lat) : undefined,
           lng: dto.lng !== undefined ? new Prisma.Decimal(dto.lng) : undefined,
           addressText:
@@ -669,8 +674,11 @@ export class EventsService {
       status: event.status,
       visibility: event.visibility,
       capacity: event.capacity,
+      imageUrl: event.imageUrl,
       lat: this.toNumber(event.lat),
       lng: this.toNumber(event.lng),
+      locationName: event.community?.name ?? event.addressText ?? null,
+      address: event.addressText ?? null,
       addressText: event.addressText,
       createdAt: event.createdAt,
       updatedAt: event.updatedAt,
