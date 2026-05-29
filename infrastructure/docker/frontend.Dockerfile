@@ -14,13 +14,17 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 FROM deps AS build
 COPY apps/frontend ./apps/frontend
 COPY packages/types ./packages/types
+ARG NEXT_PUBLIC_API_URL=http://localhost:3333
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN pnpm --filter @spotwave/frontend build
 
 FROM base AS runner
 WORKDIR /app
+ARG NEXT_PUBLIC_API_URL=http://localhost:3333
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 COPY --from=build /app/node_modules ./node_modules
