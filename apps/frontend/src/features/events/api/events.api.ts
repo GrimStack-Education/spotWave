@@ -13,7 +13,13 @@ export type BackendEvent = {
   distanceKm?: number | null;
   tags?: Array<{ id: string; slug: string; name: string }>;
   creator?: { id: string; email: string; role: string; displayName?: string | null; avatarUrl?: string | null };
-  participants?: { joinedCount: number; waitlistCount: number };
+  participants?: {
+    joinedCount: number;
+    memberJoinedCount?: number;
+    hostCount?: number;
+    waitlistCount: number;
+    seatsLeft?: number | null;
+  };
 };
 
 export async function fetchEvents(params?: { lat?: number; lng?: number; radiusKm?: number; limit?: number }) {
@@ -46,6 +52,7 @@ export async function createEvent(payload: {
   lat: number;
   lng: number;
   addressText?: string;
+  tagIds?: string[];
 }) {
   return apiRequest('/events', {
     method: 'POST',

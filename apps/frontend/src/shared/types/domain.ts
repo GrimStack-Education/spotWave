@@ -11,6 +11,8 @@ export type Event = {
   privacy: Privacy;
   capacity: number;
   rsvpCount: number;
+  waitlistCount: number;
+  seatsLeft: number | null;
   quorumStatus: QuorumStatus;
   organizerId: string;
   lat: number;
