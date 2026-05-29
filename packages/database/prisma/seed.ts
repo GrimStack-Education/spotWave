@@ -193,7 +193,9 @@ async function seedUsers() {
 }
 
 async function seedEvents() {
-  const users = await prisma.user.findMany({ where: { email: { in: userSeeds.map((user) => user.email) } } });
+  const users = await prisma.user.findMany({
+    where: { email: { in: userSeeds.map((user) => user.email) } },
+  });
   const userByEmail = new Map(users.map((user) => [user.email, user]));
   const tags = await prisma.tag.findMany();
   const tagBySlug = new Map(tags.map((tag) => [tag.slug, tag]));
@@ -201,7 +203,8 @@ async function seedEvents() {
   const eventData = [
     {
       title: 'Rooftop Sunset Talk',
-      description: 'Камерная встреча на крыше: музыка на фоне, знакомство по интересам и короткий круг introductions.',
+      description:
+        'Камерная встреча на крыше: музыка на фоне, знакомство по интересам и короткий круг introductions.',
       startsAt: new Date('2026-06-02T14:00:00.000Z'),
       endsAt: new Date('2026-06-02T16:00:00.000Z'),
       visibility: EventVisibility.PUBLIC,
@@ -229,7 +232,8 @@ async function seedEvents() {
     },
     {
       title: 'Indie Board Games Night',
-      description: 'Настолки на 6-8 человек: быстрые правила, спокойный темп, без турнирного давления.',
+      description:
+        'Настолки на 6-8 человек: быстрые правила, спокойный темп, без турнирного давления.',
       startsAt: new Date('2026-06-04T13:30:00.000Z'),
       endsAt: new Date('2026-06-04T16:30:00.000Z'),
       visibility: EventVisibility.PRIVATE,
@@ -243,7 +247,8 @@ async function seedEvents() {
     },
     {
       title: 'Coffee Sketch Walk',
-      description: 'Маршрут по трем кофейням, быстрые городские зарисовки и обмен материалами после прогулки.',
+      description:
+        'Маршрут по трем кофейням, быстрые городские зарисовки и обмен материалами после прогулки.',
       startsAt: new Date('2026-06-05T08:00:00.000Z'),
       endsAt: new Date('2026-06-05T10:00:00.000Z'),
       visibility: EventVisibility.PUBLIC,
@@ -253,11 +258,16 @@ async function seedEvents() {
       addressText: 'Abay Ave, first stop at Bowler Coffee',
       creatorEmail: 'designer@spotwave.local',
       tagSlugs: ['art', 'coffee', 'outdoors'],
-      participantEmails: ['designer@spotwave.local', 'host@spotwave.local', 'runner@spotwave.local'],
+      participantEmails: [
+        'designer@spotwave.local',
+        'host@spotwave.local',
+        'runner@spotwave.local',
+      ],
     },
     {
       title: 'Founders Micro-Dinner',
-      description: 'Небольшой ужин для founders и product people: запросы, интро и честный фидбек по идеям.',
+      description:
+        'Небольшой ужин для founders и product people: запросы, интро и честный фидбек по идеям.',
       startsAt: new Date('2026-06-06T14:30:00.000Z'),
       endsAt: new Date('2026-06-06T17:00:00.000Z'),
       visibility: EventVisibility.NEIGHBORHOOD,
@@ -281,7 +291,12 @@ async function seedEvents() {
       addressText: 'Mono Cafe, vinyl room',
       creatorEmail: 'host@spotwave.local',
       tagSlugs: ['music', 'food', 'coffee'],
-      participantEmails: ['host@spotwave.local', 'guest@spotwave.local', 'runner@spotwave.local', 'designer@spotwave.local'],
+      participantEmails: [
+        'host@spotwave.local',
+        'guest@spotwave.local',
+        'runner@spotwave.local',
+        'designer@spotwave.local',
+      ],
     },
   ];
 
@@ -342,16 +357,45 @@ async function seedTrustActivity() {
     prisma.user.findUniqueOrThrow({ where: { email: 'designer@spotwave.local' } }),
   ]);
 
-  const events = await prisma.event.findMany({ where: { title: { in: ['Rooftop Sunset Talk', 'Morning Run Circle', 'Coffee Sketch Walk'] } } });
+  const events = await prisma.event.findMany({
+    where: { title: { in: ['Rooftop Sunset Talk', 'Morning Run Circle', 'Coffee Sketch Walk'] } },
+  });
   const eventByTitle = new Map(events.map((event) => [event.title, event]));
-  await prisma.eventChatMessage.deleteMany({ where: { eventId: { in: events.map((event) => event.id) } } });
+  await prisma.eventChatMessage.deleteMany({
+    where: { eventId: { in: events.map((event) => event.id) } },
+  });
 
   const checkIns = [
-    { eventTitle: 'Rooftop Sunset Talk', userId: host.id, method: EventCheckInMethod.QR, code: 'ROOF-HOST' },
-    { eventTitle: 'Rooftop Sunset Talk', userId: guest.id, method: EventCheckInMethod.GEO, code: null },
-    { eventTitle: 'Rooftop Sunset Talk', userId: designer.id, method: EventCheckInMethod.QR, code: 'ROOF-MIRA' },
-    { eventTitle: 'Morning Run Circle', userId: runner.id, method: EventCheckInMethod.GEO, code: null },
-    { eventTitle: 'Morning Run Circle', userId: guest.id, method: EventCheckInMethod.GEO, code: null },
+    {
+      eventTitle: 'Rooftop Sunset Talk',
+      userId: host.id,
+      method: EventCheckInMethod.QR,
+      code: 'ROOF-HOST',
+    },
+    {
+      eventTitle: 'Rooftop Sunset Talk',
+      userId: guest.id,
+      method: EventCheckInMethod.GEO,
+      code: null,
+    },
+    {
+      eventTitle: 'Rooftop Sunset Talk',
+      userId: designer.id,
+      method: EventCheckInMethod.QR,
+      code: 'ROOF-MIRA',
+    },
+    {
+      eventTitle: 'Morning Run Circle',
+      userId: runner.id,
+      method: EventCheckInMethod.GEO,
+      code: null,
+    },
+    {
+      eventTitle: 'Morning Run Circle',
+      userId: guest.id,
+      method: EventCheckInMethod.GEO,
+      code: null,
+    },
   ];
 
   for (const item of checkIns) {
@@ -365,10 +409,30 @@ async function seedTrustActivity() {
   }
 
   const reviews = [
-    { eventTitle: 'Rooftop Sunset Talk', authorUserId: guest.id, rating: 5, text: 'Очень спокойный формат, host держал тайминг и помог всем познакомиться.' },
-    { eventTitle: 'Rooftop Sunset Talk', authorUserId: designer.id, rating: 5, text: 'Понравились небольшая группа и понятная коммуникация до встречи.' },
-    { eventTitle: 'Morning Run Circle', authorUserId: guest.id, rating: 4, text: 'Маршрут был понятный, темп комфортный. Хороший check-in на старте.' },
-    { eventTitle: 'Coffee Sketch Walk', authorUserId: host.id, rating: 5, text: 'Mira заранее описала маршрут, поэтому встреча ощущалась безопасно и собранно.' },
+    {
+      eventTitle: 'Rooftop Sunset Talk',
+      authorUserId: guest.id,
+      rating: 5,
+      text: 'Очень спокойный формат, host держал тайминг и помог всем познакомиться.',
+    },
+    {
+      eventTitle: 'Rooftop Sunset Talk',
+      authorUserId: designer.id,
+      rating: 5,
+      text: 'Понравились небольшая группа и понятная коммуникация до встречи.',
+    },
+    {
+      eventTitle: 'Morning Run Circle',
+      authorUserId: guest.id,
+      rating: 4,
+      text: 'Маршрут был понятный, темп комфортный. Хороший check-in на старте.',
+    },
+    {
+      eventTitle: 'Coffee Sketch Walk',
+      authorUserId: host.id,
+      rating: 5,
+      text: 'Mira заранее описала маршрут, поэтому встреча ощущалась безопасно и собранно.',
+    },
   ];
 
   for (const item of reviews) {
@@ -377,27 +441,68 @@ async function seedTrustActivity() {
     await prisma.eventReview.upsert({
       where: { eventId_authorUserId: { eventId: event.id, authorUserId: item.authorUserId } },
       update: { rating: item.rating, text: item.text },
-      create: { eventId: event.id, authorUserId: item.authorUserId, rating: item.rating, text: item.text },
+      create: {
+        eventId: event.id,
+        authorUserId: item.authorUserId,
+        rating: item.rating,
+        text: item.text,
+      },
     });
   }
 
   for (const event of events) {
     await prisma.eventChatMessage.createMany({
       data: [
-        { eventId: event.id, userId: event.creatorId, message: 'Встречаемся у входа за 10 минут до старта.' },
+        {
+          eventId: event.id,
+          userId: event.creatorId,
+          message: 'Встречаемся у входа за 10 минут до старта.',
+        },
         { eventId: event.id, userId: guest.id, message: 'Я на месте, check-in прошел.' },
       ],
     });
   }
 
-  await prisma.notification.deleteMany({ where: { userId: { in: [host.id, guest.id, runner.id, designer.id] } } });
+  await prisma.notification.deleteMany({
+    where: { userId: { in: [host.id, guest.id, runner.id, designer.id] } },
+  });
   await prisma.notification.createMany({
     data: [
-      { userId: host.id, type: NotificationType.EVENT_JOIN_APPROVED, title: 'Новый участник', body: 'Mira Sketch присоединилась к Rooftop Sunset Talk.', meta: { eventTitle: 'Rooftop Sunset Talk' } },
-      { userId: host.id, type: NotificationType.EVENT_CHECKIN, title: 'Check-in подтвержден', body: 'Nearby Guest отметился на событии через геолокацию.', meta: { eventTitle: 'Rooftop Sunset Talk' } },
-      { userId: guest.id, type: NotificationType.SYSTEM, title: 'Профиль выглядит надежнее', body: 'Добавлены интересы, радиус и первые отзывы по событиям.', meta: { section: 'trust' } },
-      { userId: runner.id, type: NotificationType.EVENT_JOIN_APPROVED, title: 'Вы в списке', body: 'Ваше участие в Sunday Vinyl Breakfast подтверждено.', meta: { eventTitle: 'Sunday Vinyl Breakfast' } },
-      { userId: designer.id, type: NotificationType.EVENT_CHECKIN, title: 'QR check-in готов', body: 'Для Coffee Sketch Walk можно использовать код на входе.', meta: { eventTitle: 'Coffee Sketch Walk' } },
+      {
+        userId: host.id,
+        type: NotificationType.EVENT_JOIN_APPROVED,
+        title: 'Новый участник',
+        body: 'Mira Sketch присоединилась к Rooftop Sunset Talk.',
+        meta: { eventTitle: 'Rooftop Sunset Talk' },
+      },
+      {
+        userId: host.id,
+        type: NotificationType.EVENT_CHECKIN,
+        title: 'Check-in подтвержден',
+        body: 'Nearby Guest отметился на событии через геолокацию.',
+        meta: { eventTitle: 'Rooftop Sunset Talk' },
+      },
+      {
+        userId: guest.id,
+        type: NotificationType.SYSTEM,
+        title: 'Профиль выглядит надежнее',
+        body: 'Добавлены интересы, радиус и первые отзывы по событиям.',
+        meta: { section: 'trust' },
+      },
+      {
+        userId: runner.id,
+        type: NotificationType.EVENT_JOIN_APPROVED,
+        title: 'Вы в списке',
+        body: 'Ваше участие в Sunday Vinyl Breakfast подтверждено.',
+        meta: { eventTitle: 'Sunday Vinyl Breakfast' },
+      },
+      {
+        userId: designer.id,
+        type: NotificationType.EVENT_CHECKIN,
+        title: 'QR check-in готов',
+        body: 'Для Coffee Sketch Walk можно использовать код на входе.',
+        meta: { eventTitle: 'Coffee Sketch Walk' },
+      },
     ],
   });
 }
@@ -417,9 +522,16 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Almaty%20Rooftop%20Circle',
       ownerEmail: 'host@spotwave.local',
       memberEmails: ['host@spotwave.local', 'guest@spotwave.local', 'designer@spotwave.local'],
+      eventTitles: ['Rooftop Sunset Talk', 'Sunday Vinyl Breakfast'],
       messages: [
-        { email: 'host@spotwave.local', message: 'На этой неделе держим формат до 12 человек и встречаемся ближе к закату.' },
-        { email: 'designer@spotwave.local', message: 'Могу принести мини-подборку мест с хорошим видом для следующей встречи.' },
+        {
+          email: 'host@spotwave.local',
+          message: 'На этой неделе держим формат до 12 человек и встречаемся ближе к закату.',
+        },
+        {
+          email: 'designer@spotwave.local',
+          message: 'Могу принести мини-подборку мест с хорошим видом для следующей встречи.',
+        },
       ],
     },
     {
@@ -430,8 +542,12 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Morning%20Run%20Crew',
       ownerEmail: 'runner@spotwave.local',
       memberEmails: ['runner@spotwave.local', 'guest@spotwave.local', 'host@spotwave.local'],
+      eventTitles: ['Morning Run Circle'],
       messages: [
-        { email: 'runner@spotwave.local', message: 'Завтра стартуем у северных ворот, легкий темп 5 км.' },
+        {
+          email: 'runner@spotwave.local',
+          message: 'Завтра стартуем у северных ворот, легкий темп 5 км.',
+        },
         { email: 'guest@spotwave.local', message: 'Я присоединюсь, хочу проверить новый маршрут.' },
       ],
     },
@@ -443,9 +559,16 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Sketch%20Walks%20KZ',
       ownerEmail: 'designer@spotwave.local',
       memberEmails: ['designer@spotwave.local', 'host@spotwave.local', 'runner@spotwave.local'],
+      eventTitles: ['Coffee Sketch Walk'],
       messages: [
-        { email: 'designer@spotwave.local', message: 'Следующий walk хочу сделать по тихим дворикам вокруг Абая.' },
-        { email: 'host@spotwave.local', message: 'Могу помочь с финальной точкой и небольшим интро-кругом.' },
+        {
+          email: 'designer@spotwave.local',
+          message: 'Следующий walk хочу сделать по тихим дворикам вокруг Абая.',
+        },
+        {
+          email: 'host@spotwave.local',
+          message: 'Могу помочь с финальной точкой и небольшим интро-кругом.',
+        },
       ],
     },
     {
@@ -456,9 +579,16 @@ async function seedCommunities() {
       avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Founders%20Micro%20Dinners',
       ownerEmail: 'admin@spotwave.local',
       memberEmails: ['admin@spotwave.local', 'host@spotwave.local', 'designer@spotwave.local'],
+      eventTitles: ['Founders Micro-Dinner'],
       messages: [
-        { email: 'admin@spotwave.local', message: 'Держим ужины маленькими: максимум 6-8 человек и конкретные запросы заранее.' },
-        { email: 'host@spotwave.local', message: 'Поддерживаю, так интро остаются полезными и без лишнего шума.' },
+        {
+          email: 'admin@spotwave.local',
+          message: 'Держим ужины маленькими: максимум 6-8 человек и конкретные запросы заранее.',
+        },
+        {
+          email: 'host@spotwave.local',
+          message: 'Поддерживаю, так интро остаются полезными и без лишнего шума.',
+        },
       ],
     },
   ];
@@ -508,6 +638,11 @@ async function seedCommunities() {
           message: message.message,
         };
       }),
+    });
+
+    await prisma.event.updateMany({
+      where: { title: { in: item.eventTitles } },
+      data: { communityId: community.id },
     });
   }
 }
