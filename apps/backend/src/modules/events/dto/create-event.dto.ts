@@ -17,6 +17,10 @@ import {
 import { EventVisibility } from '@spotwave/database';
 
 export class CreateEventDto {
+  @IsOptional()
+  @IsUUID('4')
+  communityId?: string;
+
   @IsString()
   @MinLength(3)
   title!: string;

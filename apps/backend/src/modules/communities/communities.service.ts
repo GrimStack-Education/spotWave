@@ -6,8 +6,11 @@ import {
 } from '@nestjs/common';
 import {
   CommunityVisibility,
+  EventStatus,
   MemberRole,
   MemberStatus,
+  ParticipantRole,
+  ParticipantStatus,
   Prisma,
 } from '@spotwave/database';
 import { DatabaseService } from '../../core/database/database.service';
@@ -51,6 +54,38 @@ const COMMUNITY_INCLUDE = {
       joinedAt: 'asc',
     },
   },
+  events: {
+    where: {
+      status: EventStatus.ACTIVE,
+    },
+    orderBy: {
+      startsAt: 'asc',
+    },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      startsAt: true,
+      endsAt: true,
+      status: true,
+      visibility: true,
+      capacity: true,
+      lat: true,
+      lng: true,
+      addressText: true,
+      participants: {
+        select: {
+          role: true,
+          status: true,
+        },
+      },
+      eventTags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
+  },
 } satisfies Prisma.CommunityInclude;
 
 type CommunityWithRelations = Prisma.CommunityGetPayload<{
@@ -69,7 +104,9 @@ export class CommunitiesService {
     const offset = query.offset ?? 0;
     const where: Prisma.CommunityWhereInput = {
       visibility: CommunityVisibility.PUBLIC,
-      ...(query.city ? { city: { contains: query.city, mode: 'insensitive' } } : {}),
+      ...(query.city
+        ? { city: { contains: query.city, mode: 'insensitive' } }
+        : {}),
     };
 
     const [items, total] = await Promise.all([
@@ -98,7 +135,9 @@ export class CommunitiesService {
     });
 
     if (!community) {
-      throw new NotFoundException(`Community with id "${communityId}" was not found`);
+      throw new NotFoundException(
+        `Community with id "${communityId}" was not found`,
+      );
     }
 
     return this.mapCommunity(community);
@@ -138,11 +177,15 @@ export class CommunitiesService {
     });
 
     if (!community) {
-      throw new NotFoundException(`Community with id "${communityId}" was not found`);
+      throw new NotFoundException(
+        `Community with id "${communityId}" was not found`,
+      );
     }
 
     if (community.visibility !== CommunityVisibility.PUBLIC) {
-      throw new ConflictException('Only public communities can be joined directly');
+      throw new ConflictException(
+        'Only public communities can be joined directly',
+      );
     }
 
     const existing = await this.db.client.communityMember.findUnique({
@@ -161,7 +204,10 @@ export class CommunitiesService {
       ? await this.db.client.communityMember.update({
           where: { id: existing.id },
           data: {
-            role: existing.role === MemberRole.OWNER ? MemberRole.OWNER : MemberRole.MEMBER,
+            role:
+              existing.role === MemberRole.OWNER
+                ? MemberRole.OWNER
+                : MemberRole.MEMBER,
             status: MemberStatus.ACTIVE,
             joinedAt: new Date(),
           },
@@ -185,7 +231,9 @@ export class CommunitiesService {
     });
 
     if (!community) {
-      throw new NotFoundException(`Community with id "${communityId}" was not found`);
+      throw new NotFoundException(
+        `Community with id "${communityId}" was not found`,
+      );
     }
 
     if (community.ownerId === userId) {
@@ -225,7 +273,11 @@ export class CommunitiesService {
     return { items: items.map((message) => this.mapMessage(message)) };
   }
 
-  async sendMessage(communityId: string, userId: string, dto: CreateCommunityMessageDto) {
+  async sendMessage(
+    communityId: string,
+    userId: string,
+    dto: CreateCommunityMessageDto,
+  ) {
     await this.assertActiveMember(communityId, userId);
 
     const message = await this.db.client.communityChatMessage.create({
@@ -252,7 +304,9 @@ export class CommunitiesService {
     });
 
     if (!community) {
-      throw new NotFoundException(`Community with id "${communityId}" was not found`);
+      throw new NotFoundException(
+        `Community with id "${communityId}" was not found`,
+      );
     }
 
     const member = await this.db.client.communityMember.findUnique({
@@ -261,7 +315,9 @@ export class CommunitiesService {
     });
 
     if (!member || member.status !== MemberStatus.ACTIVE) {
-      throw new ForbiddenException('Only active members can access community chat');
+      throw new ForbiddenException(
+        'Only active members can access community chat',
+      );
     }
   }
 
@@ -291,8 +347,12 @@ export class CommunitiesService {
       owner: {
         id: community.owner.id,
         email: community.owner.email,
-        displayName: community.owner.profile?.displayName ?? community.owner.displayName,
-        avatarUrl: community.owner.profile?.avatarUrl ?? community.owner.avatarUrl ?? null,
+        displayName:
+          community.owner.profile?.displayName ?? community.owner.displayName,
+        avatarUrl:
+          community.owner.profile?.avatarUrl ??
+          community.owner.avatarUrl ??
+          null,
       },
       members: {
         activeCount: activeMembers.length,
@@ -304,6 +364,45 @@ export class CommunitiesService {
           joinedAt: member.joinedAt,
           user: member.user,
         })),
+      },
+      events: {
+        items: community.events.map((event) => {
+          const joinedMembers = event.participants.filter(
+            (participant) =>
+              participant.role === ParticipantRole.MEMBER &&
+              participant.status === ParticipantStatus.JOINED,
+          );
+          const waitlistParticipants = event.participants.filter(
+            (participant) => participant.status === ParticipantStatus.WAITLIST,
+          );
+
+          return {
+            id: event.id,
+            title: event.title,
+            description: event.description,
+            startsAt: event.startsAt,
+            endsAt: event.endsAt,
+            status: event.status,
+            visibility: event.visibility,
+            capacity: event.capacity,
+            lat: Number(event.lat),
+            lng: Number(event.lng),
+            addressText: event.addressText,
+            tags: event.eventTags.map((eventTag) => ({
+              id: eventTag.tag.id,
+              slug: eventTag.tag.slug,
+              name: eventTag.tag.name,
+            })),
+            participants: {
+              memberJoinedCount: joinedMembers.length,
+              waitlistCount: waitlistParticipants.length,
+              seatsLeft:
+                event.capacity !== null
+                  ? Math.max(event.capacity - joinedMembers.length, 0)
+                  : null,
+            },
+          };
+        }),
       },
       createdAt: community.createdAt,
       updatedAt: community.updatedAt,

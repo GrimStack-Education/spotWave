@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   EventStatus,
+  MemberStatus,
   NotificationType,
   ParticipantRole,
   ParticipantStatus,
@@ -48,6 +49,28 @@ const EVENT_INCLUDE = {
       role: true,
       status: true,
       joinedAt: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+          profile: {
+            select: {
+              displayName: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  community: {
+    select: {
+      id: true,
+      name: true,
+      avatarUrl: true,
+      city: true,
     },
   },
 } satisfies Prisma.EventInclude;
@@ -157,10 +180,14 @@ export class EventsService {
     await this.ensureUserExists(userId);
     this.validateEventDates(dto.startsAt, dto.endsAt);
     const tagIds = await this.ensureTagsExist(dto.tagIds);
+    const communityId = dto.communityId
+      ? await this.ensureCanAttachCommunity(dto.communityId, userId)
+      : null;
 
     const event = await this.db.client.event.create({
       data: {
         creatorId: userId,
+        communityId,
         title: dto.title.trim(),
         description: dto.description?.trim(),
         startsAt: new Date(dto.startsAt),
@@ -218,11 +245,16 @@ export class EventsService {
 
     const tagIds =
       dto.tagIds !== undefined ? await this.ensureTagsExist(dto.tagIds) : null;
+    const communityId =
+      dto.communityId !== undefined
+        ? await this.ensureCanAttachCommunity(dto.communityId, userId)
+        : undefined;
 
     await this.db.client.$transaction(async (tx) => {
       await tx.event.update({
         where: { id: eventId },
         data: {
+          communityId,
           title: dto.title?.trim(),
           description:
             dto.description !== undefined ? dto.description.trim() : undefined,
@@ -655,6 +687,7 @@ export class EventsService {
         avatarUrl:
           event.creator.profile?.avatarUrl ?? event.creator.avatarUrl ?? null,
       },
+      community: event.community,
       tags: event.eventTags.map((eventTag) => ({
         id: eventTag.tag.id,
         slug: eventTag.tag.slug,
@@ -666,7 +699,23 @@ export class EventsService {
         hostCount: hosts.length,
         waitlistCount: waitlistParticipants.length,
         seatsLeft,
-        items: event.participants,
+        items: event.participants.map((participant) => ({
+          userId: participant.userId,
+          role: participant.role,
+          status: participant.status,
+          joinedAt: participant.joinedAt,
+          user: {
+            id: participant.user.id,
+            email: participant.user.email,
+            displayName:
+              participant.user.profile?.displayName ??
+              participant.user.displayName,
+            avatarUrl:
+              participant.user.profile?.avatarUrl ??
+              participant.user.avatarUrl ??
+              null,
+          },
+        })),
       },
     };
   }
@@ -707,9 +756,39 @@ export class EventsService {
     }
   }
 
+  private async ensureCanAttachCommunity(communityId: string, userId: string) {
+    const community = await this.db.client.community.findUnique({
+      where: { id: communityId },
+      select: {
+        id: true,
+        members: {
+          where: { userId, status: MemberStatus.ACTIVE },
+          select: { id: true },
+          take: 1,
+        },
+      },
+    });
+
+    if (!community) {
+      throw new NotFoundException(
+        `Community with id "${communityId}" was not found`,
+      );
+    }
+
+    if (community.members.length === 0) {
+      throw new ForbiddenException(
+        'Only active community members can attach events to this community',
+      );
+    }
+
+    return community.id;
+  }
+
   private assertCanModify(creatorId: string, userId: string, userRole: string) {
     if (creatorId !== userId && userRole !== 'ADMIN') {
-      throw new ForbiddenException('Only creator or admin can modify this event');
+      throw new ForbiddenException(
+        'Only creator or admin can modify this event',
+      );
     }
   }
 
