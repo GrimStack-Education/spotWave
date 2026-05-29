@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   EventStatus,
+  MemberStatus,
   NotificationType,
   ParticipantRole,
   ParticipantStatus,
@@ -48,6 +49,28 @@ const EVENT_INCLUDE = {
       role: true,
       status: true,
       joinedAt: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          displayName: true,
+          avatarUrl: true,
+          profile: {
+            select: {
+              displayName: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      },
+    },
+  },
+  community: {
+    select: {
+      id: true,
+      name: true,
+      avatarUrl: true,
+      city: true,
     },
   },
 } satisfies Prisma.EventInclude;
@@ -157,10 +180,14 @@ export class EventsService {
     await this.ensureUserExists(userId);
     this.validateEventDates(dto.startsAt, dto.endsAt);
     const tagIds = await this.ensureTagsExist(dto.tagIds);
+    const communityId = dto.communityId
+      ? await this.ensureCanAttachCommunity(dto.communityId, userId)
+      : null;
 
     const event = await this.db.client.event.create({
       data: {
         creatorId: userId,
+        communityId,
         title: dto.title.trim(),
         description: dto.description?.trim(),
         startsAt: new Date(dto.startsAt),
@@ -218,11 +245,16 @@ export class EventsService {
 
     const tagIds =
       dto.tagIds !== undefined ? await this.ensureTagsExist(dto.tagIds) : null;
+    const communityId =
+      dto.communityId !== undefined
+        ? await this.ensureCanAttachCommunity(dto.communityId, userId)
+        : undefined;
 
     await this.db.client.$transaction(async (tx) => {
       await tx.event.update({
         where: { id: eventId },
         data: {
+          communityId,
           title: dto.title?.trim(),
           description:
             dto.description !== undefined ? dto.description.trim() : undefined,
@@ -485,6 +517,34 @@ export class EventsService {
       throw new NotFoundException('Join request not found');
     }
 
+    const event = await this.db.client.event.findUnique({
+      where: { id: eventId },
+      include: {
+        participants: {
+          select: {
+            role: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with id "${eventId}" was not found`);
+    }
+
+    if (event.capacity !== null && event.capacity !== undefined) {
+      const joinedMembers = event.participants.filter(
+        (item) =>
+          item.role === ParticipantRole.MEMBER &&
+          item.status === ParticipantStatus.JOINED,
+      ).length;
+
+      if (joinedMembers >= event.capacity) {
+        throw new ConflictException('Event capacity is already full');
+      }
+    }
+
     const updated = await this.db.client.eventParticipant.update({
       where: { eventId_userId: { eventId, userId: targetUserId } },
       data: { status: ParticipantStatus.JOINED },
@@ -586,9 +646,19 @@ export class EventsService {
     const joinedParticipants = event.participants.filter(
       (participant) => participant.status === ParticipantStatus.JOINED,
     );
+    const joinedMembers = joinedParticipants.filter(
+      (participant) => participant.role === ParticipantRole.MEMBER,
+    );
+    const hosts = joinedParticipants.filter(
+      (participant) => participant.role === ParticipantRole.HOST,
+    );
     const waitlistParticipants = event.participants.filter(
       (participant) => participant.status === ParticipantStatus.WAITLIST,
     );
+    const seatsLeft =
+      event.capacity !== null
+        ? Math.max(event.capacity - joinedMembers.length, 0)
+        : null;
 
     return {
       id: event.id,
@@ -617,6 +687,7 @@ export class EventsService {
         avatarUrl:
           event.creator.profile?.avatarUrl ?? event.creator.avatarUrl ?? null,
       },
+      community: event.community,
       tags: event.eventTags.map((eventTag) => ({
         id: eventTag.tag.id,
         slug: eventTag.tag.slug,
@@ -624,8 +695,27 @@ export class EventsService {
       })),
       participants: {
         joinedCount: joinedParticipants.length,
+        memberJoinedCount: joinedMembers.length,
+        hostCount: hosts.length,
         waitlistCount: waitlistParticipants.length,
-        items: event.participants,
+        seatsLeft,
+        items: event.participants.map((participant) => ({
+          userId: participant.userId,
+          role: participant.role,
+          status: participant.status,
+          joinedAt: participant.joinedAt,
+          user: {
+            id: participant.user.id,
+            email: participant.user.email,
+            displayName:
+              participant.user.profile?.displayName ??
+              participant.user.displayName,
+            avatarUrl:
+              participant.user.profile?.avatarUrl ??
+              participant.user.avatarUrl ??
+              null,
+          },
+        })),
       },
     };
   }
@@ -666,9 +756,39 @@ export class EventsService {
     }
   }
 
+  private async ensureCanAttachCommunity(communityId: string, userId: string) {
+    const community = await this.db.client.community.findUnique({
+      where: { id: communityId },
+      select: {
+        id: true,
+        members: {
+          where: { userId, status: MemberStatus.ACTIVE },
+          select: { id: true },
+          take: 1,
+        },
+      },
+    });
+
+    if (!community) {
+      throw new NotFoundException(
+        `Community with id "${communityId}" was not found`,
+      );
+    }
+
+    if (community.members.length === 0) {
+      throw new ForbiddenException(
+        'Only active community members can attach events to this community',
+      );
+    }
+
+    return community.id;
+  }
+
   private assertCanModify(creatorId: string, userId: string, userRole: string) {
     if (creatorId !== userId && userRole !== 'ADMIN') {
-      throw new ForbiddenException('Only creator or admin can modify this event');
+      throw new ForbiddenException(
+        'Only creator or admin can modify this event',
+      );
     }
   }
 

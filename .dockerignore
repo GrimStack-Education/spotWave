@@ -6,6 +6,8 @@ coverage
 .next
 .turbo
 **/node_modules
+**/.next
+**/.turbo
 .DS_Store
 logs
 *.log

@@ -1,4 +1,4 @@
-import { AlertTriangle, Loader2, SearchX } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Loader2, SearchX } from 'lucide-react';
 
 export function EmptyState({ title, description }: { title: string; description: string }) {
   return (
@@ -23,6 +23,15 @@ export function ErrorState({ message }: { message: string }) {
   return (
     <div className="rounded-2xl border border-[rgba(var(--sw-accent-2-rgb),0.30)] bg-[rgba(var(--sw-accent-4-rgb),0.10)] p-5 text-sm text-white/80">
       <AlertTriangle className="mb-2 text-[var(--sw-accent-3)]" />{message}
+    </div>
+  );
+}
+
+export function SuccessState({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl border border-emerald-300/30 bg-emerald-500/10 p-5 text-sm text-emerald-50">
+      <CheckCircle2 className="mb-2 text-emerald-300" />
+      {message}
     </div>
   );
 }

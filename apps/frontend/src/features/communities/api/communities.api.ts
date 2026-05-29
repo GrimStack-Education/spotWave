@@ -1,4 +1,5 @@
 import { apiRequest } from '@/shared/lib/api/client';
+import type { BackendEvent } from '@/features/events/api/events.api';
 
 export type CommunityVisibility = 'PUBLIC' | 'PRIVATE' | 'INVITE_ONLY';
 export type CommunityMemberStatus = 'ACTIVE' | 'PENDING' | 'BANNED' | 'LEFT';
@@ -33,6 +34,9 @@ export type Community = {
       };
     }>;
   };
+  events?: {
+    items: BackendEvent[];
+  };
   createdAt: string;
   updatedAt: string;
 };
@@ -65,7 +69,9 @@ export function fetchCommunities(params?: { city?: string; limit?: number; offse
   if (params?.limit != null) qs.set('limit', String(params.limit));
   if (params?.offset != null) qs.set('offset', String(params.offset));
   const q = qs.toString();
-  return apiRequest<{ items: Community[]; total: number; limit: number; offset: number }>(`/communities${q ? `?${q}` : ''}`);
+  return apiRequest<{ items: Community[]; total: number; limit: number; offset: number }>(
+    `/communities${q ? `?${q}` : ''}`,
+  );
 }
 
 export function fetchCommunity(id: string) {

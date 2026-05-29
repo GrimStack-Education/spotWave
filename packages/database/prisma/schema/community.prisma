@@ -31,6 +31,7 @@ model Community {
 	owner        User                   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 	members      CommunityMember[]
 	chatMessages CommunityChatMessage[]
+	events       Event[]
 
 	@@index([city, visibility])
 	@@index([ownerId])

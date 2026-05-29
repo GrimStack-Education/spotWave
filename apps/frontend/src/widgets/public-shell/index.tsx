@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { UiCard } from '@/shared/ui/card/card';
 
 export function PublicShell({
@@ -44,9 +43,7 @@ export function PublicShell({
  Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
  </span>
  </div>
- <UiBadge className="border border-white/12 bg-transparent px-4 tracking-[0.08em] text-white/72">
- {topBadge}
- </UiBadge>
+ <span className="text-sm uppercase tracking-[0.12em] text-white/54">{topBadge}</span>
  </div>
 
  <div className="mt-10">

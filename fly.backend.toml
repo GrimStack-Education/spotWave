@@ -1,0 +1,33 @@
+app = "spotwave-backend"
+primary_region = "fra"
+
+[build]
+  dockerfile = "infrastructure/docker/backend.Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3333"
+  CORS_ORIGIN = "https://spotwave.fly.dev,https://spotwave-b2b-admin.fly.dev"
+
+[deploy]
+  release_command = "sh -lc 'cd packages/database && PATH=/app/packages/database/node_modules/.bin:/app/node_modules/.pnpm/node_modules/.bin:$PATH prisma db push --schema prisma/schema --accept-data-loss && PATH=/app/packages/database/node_modules/.bin:/app/node_modules/.pnpm/node_modules/.bin:$PATH prisma db seed'"
+
+[http_service]
+  internal_port = 3333
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "GET"
+    path = "/health/ready"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "1gb"

@@ -1,0 +1,26 @@
+app = "spotwave"
+primary_region = "fra"
+
+[build]
+  dockerfile = "infrastructure/docker/frontend.Dockerfile"
+
+  [build.args]
+    NEXT_PUBLIC_API_URL = "https://spotwave-backend.fly.dev"
+
+[env]
+  NODE_ENV = "production"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_PUBLIC_API_URL = "https://spotwave-backend.fly.dev"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "1gb"
