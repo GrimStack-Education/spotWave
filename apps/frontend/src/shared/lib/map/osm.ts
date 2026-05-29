@@ -10,7 +10,7 @@ export const OSM_STYLE: StyleSpecification = {
   sources: {
     osm: {
       type: 'raster',
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tiles: ['/api/map-tiles/{z}/{x}/{y}'],
       tileSize: 256,
       attribution: '&copy; OpenStreetMap contributors',
     },

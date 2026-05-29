@@ -27,7 +27,7 @@ services:
       NODE_ENV: development
       DATABASE_URL: postgresql://spotwave:spotwave@postgres:5432/spotwave
       JWT_SECRET: spotwave-dev-secret
-      CORS_ORIGIN: http://localhost:3000,http://localhost:3001
+      CORS_ORIGIN: http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001
     ports:
       - '3333:3333'
     depends_on:
@@ -77,6 +77,8 @@ services:
         condition: service_healthy
       migrator:
         condition: service_completed_successfully
+    profiles:
+      - tests
     command:
       - sh
       - -lc
@@ -89,8 +91,8 @@ services:
     restart: unless-stopped
     environment:
       NEXT_TELEMETRY_DISABLED: '1'
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3333
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3333
     ports:
       - '3000:3000'
     depends_on:
@@ -103,8 +105,8 @@ services:
     restart: unless-stopped
     environment:
       NEXT_TELEMETRY_DISABLED: '1'
-      NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3333
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:3333
     ports:
       - '3001:3001'
     depends_on:

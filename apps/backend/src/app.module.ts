@@ -20,6 +20,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { CheckInsModule } from './modules/checkins/checkins.module';
 import { CommunitiesModule } from './modules/communities/communities.module';
+import { MapTilesModule } from './modules/map-tiles/map-tiles.module';
   
 
 @Module({
@@ -49,6 +50,7 @@ import { CommunitiesModule } from './modules/communities/communities.module';
     ChatModule,
     CheckInsModule,
     CommunitiesModule,
+    MapTilesModule,
   ],
   controllers: [AppController],
   providers: [
