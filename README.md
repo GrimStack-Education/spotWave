@@ -19,6 +19,7 @@
 - [Архитектура](#архитектура)
 - [Быстрый старт](#быстрый-старт)
 - [Команды](#команды)
+- [Демо-сценарий](#демо-сценарий)
 
 ---
 
@@ -182,4 +183,38 @@ docker compose -f infrastructure/docker/docker-compose.yml run --rm migrator
 
 # Запустить backend e2e-тесты через Docker
 docker compose -f infrastructure/docker/docker-compose.yml run --rm backend-test
+```
+
+---
+
+## Демо-сценарий
+
+После запуска Docker-стека приложение доступно на:
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3333
+- B2B admin: http://localhost:3001
+
+Seed создает несколько пользователей для демонстрации:
+
+| Роль | Email | Пароль |
+| ---- | ----- | ------ |
+| Host | `host@spotwave.local` | `password123` |
+| Guest | `guest@spotwave.local` | `password123` |
+| Runner | `runner@spotwave.local` | `password123` |
+| Admin | `admin@spotwave.local` | `password123` |
+
+Рекомендуемый demo flow:
+
+1. Откройте `/sign-in` и войдите как `guest@spotwave.local`.
+2. Перейдите в `/home`, чтобы показать ленту локальных событий.
+3. Откройте `/map`, измените радиус и покажите события на карте.
+4. Откройте карточку события и нажмите `Присоединиться`.
+5. Перейдите в `/communities`, откройте сообщество и покажите чат участников.
+6. Откройте `/profile` и `/verification`, чтобы показать trust-сигналы, check-ins и отзывы.
+
+Важно: команда `docker compose -f infrastructure/docker/docker-compose.yml run --rm backend-test` запускает e2e-тесты на локальной Postgres-базе и может очищать demo-данные. Чтобы восстановить seed после тестов:
+
+```bash
+docker compose -f infrastructure/docker/docker-compose.yml run --rm migrator
 ```
