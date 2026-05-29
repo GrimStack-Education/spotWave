@@ -7,4 +7,7 @@ export const queryKeys = {
   eventReviews: (eventId: string) => ['event-reviews', eventId] as const,
   eventChat: (eventId: string) => ['event-chat', eventId] as const,
   joinRequests: (eventId: string) => ['join-requests', eventId] as const,
+  communities: (params?: string) => ['communities', params ?? 'default'] as const,
+  community: (id: string) => ['community', id] as const,
+  communityMessages: (id: string) => ['community-messages', id] as const,
 };

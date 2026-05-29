@@ -4,12 +4,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { Bell, Compass, Home, LogOut, PlusSquare, ShieldCheck, User } from 'lucide-react';
+import { Bell, Compass, Home, LogOut, PlusSquare, ShieldCheck, User, Users } from 'lucide-react';
 import { clearAccessToken } from '@/shared/lib/auth/session';
 
 const nav = [
   { href: '/home', label: 'Лента', icon: Home },
   { href: '/map', label: 'Карта', icon: Compass },
+  { href: '/communities', label: 'Сообщества', icon: Users },
   { href: '/create-event', label: 'Создать', icon: PlusSquare },
   { href: '/verification', label: 'Доверие', icon: ShieldCheck },
   { href: '/profile', label: 'Профиль', icon: User },
