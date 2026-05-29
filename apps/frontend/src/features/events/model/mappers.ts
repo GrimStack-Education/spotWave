@@ -19,5 +19,8 @@ export function mapBackendEventToDomain(item: BackendEvent): Event {
     rsvpCount: joinedCount,
     quorumStatus: joinedCount >= capacity ? 'full' : joinedCount >= 5 ? 'quorum_reached' : 'forming',
     organizerId: item.creator?.id ?? 'unknown',
+    lat: item.lat,
+    lng: item.lng,
+    distanceKm: item.distanceKm ?? null,
   };
 }

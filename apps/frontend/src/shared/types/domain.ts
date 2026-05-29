@@ -13,6 +13,9 @@ export type Event = {
   rsvpCount: number;
   quorumStatus: QuorumStatus;
   organizerId: string;
+  lat: number;
+  lng: number;
+  distanceKm: number | null;
 };
 
 export type RSVP = {
