@@ -37,6 +37,12 @@ describe('Backend e2e', () => {
     const password = 'password123';
 
     await prisma.report.deleteMany();
+    await prisma.communityChatMessage.deleteMany();
+    await prisma.communityMember.deleteMany();
+    await prisma.community.deleteMany();
+    await prisma.eventChatMessage.deleteMany();
+    await prisma.eventCheckIn.deleteMany();
+    await prisma.eventReview.deleteMany();
     await prisma.eventParticipant.deleteMany();
     await prisma.eventTag.deleteMany();
     await prisma.event.deleteMany();
@@ -93,6 +99,57 @@ describe('Backend e2e', () => {
       .send({ email: hostEmail, password })
       .expect(201);
     expect(loginHost.body.data.accessToken).toBeDefined();
+
+    const createCommunity = await request(app.getHttpServer())
+      .post('/communities')
+      .set('Authorization', `Bearer ${hostToken}`)
+      .send({
+        name: 'Local makers circle',
+        description: 'A small community for nearby makers, operators and hosts to coordinate useful meetups.',
+        city: 'Almaty',
+      })
+      .expect(201);
+
+    const communityId: string = createCommunity.body.data.id;
+    expect(createCommunity.body.data.members.activeCount).toBe(1);
+
+    await request(app.getHttpServer()).get('/communities').expect(200);
+    await request(app.getHttpServer()).get(`/communities/${communityId}`).expect(200);
+
+    await request(app.getHttpServer())
+      .get(`/communities/${communityId}/messages`)
+      .set('Authorization', `Bearer ${guestToken}`)
+      .expect(403);
+
+    const joinCommunity = await request(app.getHttpServer())
+      .post(`/communities/${communityId}/join`)
+      .set('Authorization', `Bearer ${guestToken}`)
+      .expect(201);
+    expect(joinCommunity.body.data.status).toBe('ACTIVE');
+
+    const sendCommunityMessage = await request(app.getHttpServer())
+      .post(`/communities/${communityId}/messages`)
+      .set('Authorization', `Bearer ${guestToken}`)
+      .send({ message: 'I can help host the next small meetup.' })
+      .expect(201);
+    expect(sendCommunityMessage.body.data.message).toBe('I can help host the next small meetup.');
+
+    const communityMessages = await request(app.getHttpServer())
+      .get(`/communities/${communityId}/messages`)
+      .set('Authorization', `Bearer ${guestToken}`)
+      .expect(200);
+    expect(communityMessages.body.data.items).toHaveLength(1);
+
+    await request(app.getHttpServer())
+      .post(`/communities/${communityId}/leave`)
+      .set('Authorization', `Bearer ${hostToken}`)
+      .expect(409);
+
+    const leaveCommunity = await request(app.getHttpServer())
+      .post(`/communities/${communityId}/leave`)
+      .set('Authorization', `Bearer ${guestToken}`)
+      .expect(201);
+    expect(leaveCommunity.body.data.status).toBe('LEFT');
 
     await request(app.getHttpServer())
       .post('/events')

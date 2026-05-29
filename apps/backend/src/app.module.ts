@@ -19,6 +19,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { CheckInsModule } from './modules/checkins/checkins.module';
+import { CommunitiesModule } from './modules/communities/communities.module';
   
 
 @Module({
@@ -47,6 +48,7 @@ import { CheckInsModule } from './modules/checkins/checkins.module';
     ReviewsModule,
     ChatModule,
     CheckInsModule,
+    CommunitiesModule,
   ],
   controllers: [AppController],
   providers: [

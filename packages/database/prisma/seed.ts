@@ -1,8 +1,11 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import {
+  CommunityVisibility,
   EventCheckInMethod,
   EventStatus,
   EventVisibility,
+  MemberRole,
+  MemberStatus,
   NotificationType,
   ParticipantRole,
   ParticipantStatus,
@@ -399,6 +402,116 @@ async function seedTrustActivity() {
   });
 }
 
+async function seedCommunities() {
+  const users = await prisma.user.findMany({
+    where: { email: { in: userSeeds.map((user) => user.email) } },
+  });
+  const userByEmail = new Map(users.map((user) => [user.email, user]));
+
+  const communityData = [
+    {
+      name: 'Almaty Rooftop Circle',
+      description:
+        'Локальное сообщество для камерных rooftop-встреч, музыки на закате и спокойных знакомств без шумных толп.',
+      city: 'Алматы',
+      avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Almaty%20Rooftop%20Circle',
+      ownerEmail: 'host@spotwave.local',
+      memberEmails: ['host@spotwave.local', 'guest@spotwave.local', 'designer@spotwave.local'],
+      messages: [
+        { email: 'host@spotwave.local', message: 'На этой неделе держим формат до 12 человек и встречаемся ближе к закату.' },
+        { email: 'designer@spotwave.local', message: 'Могу принести мини-подборку мест с хорошим видом для следующей встречи.' },
+      ],
+    },
+    {
+      name: 'Morning Run Crew',
+      description:
+        'Утренние пробежки, outdoor-маршруты и кофе после финиша для тех, кто хочет держать темп рядом с домом.',
+      city: 'Алматы',
+      avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Morning%20Run%20Crew',
+      ownerEmail: 'runner@spotwave.local',
+      memberEmails: ['runner@spotwave.local', 'guest@spotwave.local', 'host@spotwave.local'],
+      messages: [
+        { email: 'runner@spotwave.local', message: 'Завтра стартуем у северных ворот, легкий темп 5 км.' },
+        { email: 'guest@spotwave.local', message: 'Я присоединюсь, хочу проверить новый маршрут.' },
+      ],
+    },
+    {
+      name: 'Sketch Walks KZ',
+      description:
+        'Городские sketch walks, арт-завтраки и маршруты по кофейням для тех, кто любит наблюдать город руками.',
+      city: 'Алматы',
+      avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Sketch%20Walks%20KZ',
+      ownerEmail: 'designer@spotwave.local',
+      memberEmails: ['designer@spotwave.local', 'host@spotwave.local', 'runner@spotwave.local'],
+      messages: [
+        { email: 'designer@spotwave.local', message: 'Следующий walk хочу сделать по тихим дворикам вокруг Абая.' },
+        { email: 'host@spotwave.local', message: 'Могу помочь с финальной точкой и небольшим интро-кругом.' },
+      ],
+    },
+    {
+      name: 'Founders Micro-Dinners',
+      description:
+        'Небольшие ужины для founders и product people: честный фидбек, интро по запросу и разговоры без сцены.',
+      city: 'Алматы',
+      avatarUrl: 'https://api.dicebear.com/9.x/shapes/svg?seed=Founders%20Micro%20Dinners',
+      ownerEmail: 'admin@spotwave.local',
+      memberEmails: ['admin@spotwave.local', 'host@spotwave.local', 'designer@spotwave.local'],
+      messages: [
+        { email: 'admin@spotwave.local', message: 'Держим ужины маленькими: максимум 6-8 человек и конкретные запросы заранее.' },
+        { email: 'host@spotwave.local', message: 'Поддерживаю, так интро остаются полезными и без лишнего шума.' },
+      ],
+    },
+  ];
+
+  for (const item of communityData) {
+    const owner = userByEmail.get(item.ownerEmail);
+    if (!owner) throw new Error(`Missing community owner ${item.ownerEmail}`);
+
+    const existing = await prisma.community.findFirst({
+      where: { ownerId: owner.id, name: item.name },
+      select: { id: true },
+    });
+
+    if (existing) {
+      await prisma.community.delete({ where: { id: existing.id } });
+    }
+
+    const community = await prisma.community.create({
+      data: {
+        name: item.name,
+        description: item.description,
+        avatarUrl: item.avatarUrl,
+        city: item.city,
+        visibility: CommunityVisibility.PUBLIC,
+        ownerId: owner.id,
+        members: {
+          create: item.memberEmails.map((email) => {
+            const user = userByEmail.get(email);
+            if (!user) throw new Error(`Missing community member ${email}`);
+            return {
+              userId: user.id,
+              role: email === item.ownerEmail ? MemberRole.OWNER : MemberRole.MEMBER,
+              status: MemberStatus.ACTIVE,
+            };
+          }),
+        },
+      },
+    });
+
+    await prisma.communityChatMessage.createMany({
+      data: item.messages.map((message) => {
+        const user = userByEmail.get(message.email);
+        if (!user) throw new Error(`Missing community message author ${message.email}`);
+        return {
+          communityId: community.id,
+          userId: user.id,
+          message: message.message,
+        };
+      }),
+    });
+  }
+}
+
 async function seedReports() {
   const [reporter, targetEvent] = await Promise.all([
     prisma.user.findUniqueOrThrow({ where: { email: 'guest@spotwave.local' } }),
@@ -445,6 +558,7 @@ async function main() {
   await seedUsers();
   await seedEvents();
   await seedTrustActivity();
+  await seedCommunities();
   await seedReports();
 }
 
