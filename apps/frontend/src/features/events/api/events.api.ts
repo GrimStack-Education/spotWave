@@ -7,6 +7,8 @@ export type BackendEvent = {
   startsAt: string;
   visibility: 'PUBLIC' | 'PRIVATE' | 'NEIGHBORHOOD';
   capacity: number | null;
+  lat: number;
+  lng: number;
   addressText?: string | null;
   distanceKm?: number | null;
   tags?: Array<{ id: string; slug: string; name: string }>;
