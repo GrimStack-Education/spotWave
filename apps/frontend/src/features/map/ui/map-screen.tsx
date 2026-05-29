@@ -2,43 +2,17 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import maplibregl, { Map, Marker } from 'maplibre-gl';
-import { ArrowRight, LocateFixed, MapPin, Navigation, SlidersHorizontal } from 'lucide-react';
+import { ArrowRight, MapPin, Navigation, SlidersHorizontal } from 'lucide-react';
 import { fetchEvents } from '@/features/events/api/events.api';
 import { mapBackendEventToDomain } from '@/features/events/model/mappers';
+import { ALMATY_CENTER, OSM_STYLE } from '@/shared/lib/map/osm';
 import { queryKeys } from '@/shared/lib/query/keys';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { UiButton } from '@/shared/ui/button/button';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/states/states';
 import { CoverImage } from '@/shared/ui/media/cover-image';
 import type { Event } from '@/shared/types/domain';
-
-const ALMATY_CENTER = { lat: 43.238949, lng: 76.889709 };
-const OSM_STYLE: maplibregl.StyleSpecification = {
-  version: 8,
-  sources: {
-    osm: {
-      type: 'raster',
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      attribution: '&copy; OpenStreetMap contributors',
-    },
-  },
-  layers: [
-    {
-      id: 'osm',
-      type: 'raster',
-      source: 'osm',
-      paint: {
-        'raster-saturation': -0.65,
-        'raster-brightness-min': 0.05,
-        'raster-brightness-max': 0.72,
-        'raster-contrast': 0.28,
-      },
-    },
-  ],
-};
 
 type MapCenter = typeof ALMATY_CENTER;
 
@@ -55,6 +29,7 @@ export function MapScreen() {
   const eventsQuery = useQuery({
     queryKey: queryKeys.events(queryKey),
     queryFn: () => fetchEvents({ lat: center.lat, lng: center.lng, radiusKm, limit: 80 }),
+    placeholderData: keepPreviousData,
   });
 
   const events = useMemo(
@@ -103,7 +78,7 @@ export function MapScreen() {
 
     const centerMarker = document.createElement('button');
     centerMarker.type = 'button';
-    centerMarker.className = 'grid h-4 w-4 place-items-center rounded-full bg-white shadow-[0_0_0_6px_rgba(255,123,0,0.24),0_0_36px_rgba(255,123,0,0.65)]';
+    centerMarker.className = 'grid h-4 w-4 place-items-center rounded-full bg-white shadow-[0_0_0_6px_rgba(255,123,0,0.24),0_0_36px_rgba(255,123,0,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.65)] focus-visible:ring-offset-2 focus-visible:ring-offset-black';
     centerMarker.setAttribute('aria-label', 'Текущая позиция поиска');
     markersRef.current.push(new maplibregl.Marker({ element: centerMarker }).setLngLat([center.lng, center.lat]).addTo(map));
 
@@ -111,7 +86,7 @@ export function MapScreen() {
       const markerNode = document.createElement('button');
       markerNode.type = 'button';
       markerNode.className = [
-        'group min-w-9 rounded-full border px-3 py-2 text-xs font-semibold text-white shadow-2xl backdrop-blur transition',
+        'group min-w-9 rounded-full border px-3 py-2 text-xs font-semibold text-white shadow-2xl backdrop-blur transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.65)] focus-visible:ring-offset-2 focus-visible:ring-offset-black',
         selectedEvent?.id === event.id
           ? 'border-[rgba(var(--sw-accent-2-rgb),0.72)] bg-[var(--sw-accent-3)]'
           : 'border-white/16 bg-black/70 hover:border-[rgba(var(--sw-accent-2-rgb),0.5)] hover:bg-[#1b1510]',
@@ -147,47 +122,48 @@ export function MapScreen() {
     );
   };
 
-  if (eventsQuery.isLoading) return <LoadingState />;
+  if (eventsQuery.isPending) return <LoadingState />;
   if (eventsQuery.isError) return <ErrorState message="Не удалось загрузить карту событий" />;
 
   return (
-    <div className="space-y-6">
-      <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-5">
-          <div className="rounded-[34px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
-            <UiBadge className="border-[rgba(var(--sw-accent-2-rgb),0.28)] bg-[rgba(var(--sw-accent-4-rgb),0.14)] text-[var(--sw-accent-3)]">
-              <LocateFixed size={13} /> Live geo
-            </UiBadge>
-            <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <h1 className="text-[52px] leading-[0.96] tracking-[-0.06em] text-white md:text-[76px] xl:text-[92px]">
-                  Карта событий <span className="text-[var(--sw-accent-3)]">рядом</span>
-                </h1>
-                <p className="mt-5 max-w-2xl text-white/58">
-                  Настоящая карта активных встреч: геоточки, радиус поиска и быстрый переход в событие.
-                </p>
+    <div className="min-w-0 space-y-5">
+      <section className="grid min-w-0 items-start gap-5 2xl:grid-cols-[minmax(0,1fr)_390px]">
+        <div className="min-w-0 space-y-4">
+          <div className="flex min-w-0 flex-col gap-4 rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-4 md:flex-row md:items-center md:justify-between md:rounded-[30px] md:p-5">
+            <div className="min-w-0">
+              <h1 className="text-[38px] leading-[0.96] tracking-[-0.055em] text-white md:text-[58px]">
+                Карта событий
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/56 md:text-base">
+                Геоточки из OpenStreetMap, радиус поиска и список встреч в одной рабочей зоне.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.12em] text-white/42">Найдено</p>
+                <p className="mt-1 text-2xl tracking-[-0.05em] text-white">{events.length}</p>
               </div>
-              <UiButton variant="secondary" className="h-12 w-full sm:w-auto" onPress={locate} isDisabled={isLocating}>
+              <UiButton variant="secondary" className="h-12" onPress={locate} isDisabled={isLocating}>
                 <Navigation size={16} />
                 {isLocating ? 'Ищем...' : 'Моя геопозиция'}
               </UiButton>
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[34px] border border-white/10 bg-[#101010]">
-            <div className="relative h-[520px] min-h-[420px]">
-              <div ref={mapNodeRef} className="absolute inset-0" />
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(var(--sw-accent-2-rgb),0.12),transparent_28%),linear-gradient(180deg,rgba(8,10,15,0.08),rgba(8,10,15,0.42))]" />
-              <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-white/10 bg-black/60 p-4 backdrop-blur">
-                <div>
+          <div className="min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#101010] md:rounded-[30px]">
+            <div className="relative h-[68vh] min-h-[500px] w-full max-h-[760px]">
+              <div ref={mapNodeRef} className="absolute inset-0 min-w-0" />
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0.04),rgba(10,10,10,0.32))]" />
+              <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/68 p-3 backdrop-blur md:bottom-5 md:left-5 md:right-5 md:p-4">
+                <div className="min-w-0">
                   <p className="text-sm uppercase tracking-[0.12em] text-white/45">Радиус поиска</p>
                   <p className="mt-1 text-2xl tracking-[-0.04em] text-white">{radiusKm} км</p>
                 </div>
-                <label className="flex min-w-[220px] flex-1 items-center gap-3 text-white/70 sm:max-w-[360px]">
+                <label className="flex min-w-0 flex-[1_1_180px] items-center gap-3 text-white/70 sm:max-w-[360px]">
                   <SlidersHorizontal size={16} className="text-[var(--sw-accent-3)]" />
                   <input
                     aria-label="Радиус поиска"
-                    className="h-2 w-full accent-[var(--sw-accent-3)]"
+                    className="h-2 w-full accent-[var(--sw-accent-3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]"
                     max={30}
                     min={1}
                     onChange={(event) => setRadiusKm(Number(event.target.value))}
@@ -195,19 +171,24 @@ export function MapScreen() {
                     value={radiusKm}
                   />
                 </label>
-                <div className="rounded-full border border-white/10 px-4 py-2 text-white/64">{events.length} событий</div>
+                <div className="shrink-0 rounded-full border border-white/10 px-3 py-2 text-sm text-white/64 md:px-4 md:text-base">
+                  {eventsQuery.isFetching ? 'Обновляем...' : `${events.length} событий`}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <aside className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-6 md:p-8">
+        <aside className="min-w-0 rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 md:rounded-[30px] md:p-6">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-[36px] leading-[0.96] tracking-[-0.06em] text-white md:text-[42px]">События</h2>
+            <div>
+              <h2 className="text-[34px] leading-[0.96] tracking-[-0.06em] text-white md:text-[40px]">События рядом</h2>
+              <p className="mt-2 text-sm text-white/48">Выберите пин или карточку для перехода.</p>
+            </div>
             <MapPin className="text-[var(--sw-accent-3)]" size={22} />
           </div>
           {events.length ? (
-            <div className="mt-6 space-y-3">
+            <div className="mt-5 max-h-[680px] space-y-3 overflow-y-auto pr-1">
               {events.map((event) => (
                 <EventRow
                   event={event}
@@ -240,7 +221,7 @@ function EventRow({
   return (
     <button
       className={[
-        'group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-white/84 transition',
+        'group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-white/84 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sw-neutral-800)]',
         isSelected
           ? 'border-[rgba(var(--sw-accent-2-rgb),0.52)] bg-[rgba(var(--sw-accent-4-rgb),0.22)]'
           : 'border-white/10 bg-[#101010] hover:border-[rgba(var(--sw-accent-2-rgb),0.35)]',
@@ -257,7 +238,7 @@ function EventRow({
       </div>
       <Link
         aria-label={`Открыть ${event.title}`}
-        className="rounded-full border border-white/10 p-2 text-white/45 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.38)] hover:text-[var(--sw-accent-3)]"
+        className="rounded-full border border-white/10 p-2 text-white/45 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.38)] hover:text-[var(--sw-accent-3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]"
         href={`/events/${event.id}`}
       >
         <ArrowRight size={16} />

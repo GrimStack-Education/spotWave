@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { io, type Socket } from 'socket.io-client';
 import { LogOut, MessageCircle, Send, ShieldCheck, Users } from 'lucide-react';
+import { me } from '@/features/auth/api/auth.api';
 import {
   fetchCommunity,
   fetchCommunityMessages,
@@ -17,7 +18,6 @@ import { toErrorMessage } from '@/shared/lib/api/error';
 import { getAccessToken } from '@/shared/lib/auth/session';
 import { queryKeys } from '@/shared/lib/query/keys';
 import { queryClient } from '@/shared/lib/query/query-client';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { UiButton } from '@/shared/ui/button/button';
 import { UiCard } from '@/shared/ui/card/card';
 import { UiInput } from '@/shared/ui/input/input';
@@ -29,9 +29,15 @@ export function CommunityDetailScreen({ id }: { id: string }) {
   const [message, setMessage] = useState('');
   const [accessError, setAccessError] = useState<string | null>(null);
   const communityQuery = useQuery({ queryKey: queryKeys.community(id), queryFn: () => fetchCommunity(id) });
+  const meQuery = useQuery({ queryKey: queryKeys.me, queryFn: me });
+  const activeMembership = communityQuery.data?.members.items.find(
+    (member) => member.userId === meQuery.data?.id && member.status === 'ACTIVE',
+  );
+  const hasChatAccess = Boolean(activeMembership);
   const messagesQuery = useQuery({
     queryKey: queryKeys.communityMessages(id),
     queryFn: () => fetchCommunityMessages(id),
+    enabled: hasChatAccess,
     retry: false,
   });
   const joinMutation = useMutation({
@@ -61,7 +67,6 @@ export function CommunityDetailScreen({ id }: { id: string }) {
   });
 
   const messages = useMemo(() => messagesQuery.data?.items ?? [], [messagesQuery.data?.items]);
-  const hasChatAccess = !messagesQuery.isError;
 
   useEffect(() => {
     if (!hasChatAccess) return;
@@ -89,23 +94,23 @@ export function CommunityDetailScreen({ id }: { id: string }) {
     };
   }, [hasChatAccess, id]);
 
-  if (communityQuery.isLoading) return <LoadingState />;
+  if (communityQuery.isLoading || meQuery.isLoading) return <LoadingState />;
   if (communityQuery.isError || !communityQuery.data) return <ErrorState message="Не удалось загрузить сообщество" />;
 
   const community = communityQuery.data;
   const busy = joinMutation.isPending || leaveMutation.isPending || sendMutation.isPending;
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {accessError ? <ErrorState message={accessError} /> : null}
-      <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-5">
-          <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,#21130a,#101010_58%,#191919)] p-6 md:p-8">
-            <div className="pointer-events-none absolute -right-24 -top-20 size-72 rounded-full bg-[rgba(var(--sw-accent-2-rgb),0.18)] blur-3xl" />
+      <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="min-w-0 space-y-5">
+          <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[linear-gradient(135deg,#21130a,#101010_58%,#191919)] p-5 md:rounded-[34px] md:p-8">
+            <div className="pointer-events-none absolute -right-24 -top-20 hidden size-72 rounded-full bg-[rgba(var(--sw-accent-2-rgb),0.18)] blur-3xl md:block" />
             <div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div>
-                <UiBadge className="border-white/12 bg-black/35 text-white/70">{community.city}</UiBadge>
-                <h1 className="mt-5 max-w-4xl text-[52px] leading-[0.96] tracking-[-0.06em] text-white md:text-[78px] xl:text-[94px]">
+              <div className="min-w-0">
+                <p className="text-sm uppercase tracking-[0.12em] text-white/54">{community.city}</p>
+                <h1 className="mt-3 max-w-4xl text-[44px] leading-[0.98] tracking-[-0.04em] text-white md:text-[78px] md:tracking-[-0.06em] xl:text-[94px]">
                   {community.name}
                 </h1>
                 <p className="mt-5 max-w-2xl text-lg leading-7 text-white/62">{community.description}</p>
@@ -155,11 +160,11 @@ export function CommunityDetailScreen({ id }: { id: string }) {
                     onChange={(event) => setMessage(event.target.value)}
                   />
                   <UiButton
-                    className="h-12 sm:w-36"
+                    className="h-12 sm:w-40"
                     isDisabled={!message.trim() || busy}
                     onPress={() => sendMutation.mutate(message)}
                   >
-                    <Send size={16} /> {sendMutation.isPending ? '...' : 'Send'}
+                    <Send size={16} /> {sendMutation.isPending ? '...' : 'Отправить'}
                   </UiButton>
                 </div>
               </>
@@ -167,8 +172,8 @@ export function CommunityDetailScreen({ id }: { id: string }) {
           </UiCard>
         </div>
 
-        <aside className="space-y-5">
-          <UiCard className="p-6">
+        <aside className="min-w-0 space-y-5">
+          <UiCard className="p-5 md:p-6">
             <h2 className="flex items-center gap-2 text-2xl tracking-[-0.04em]">
               <Users className="text-[var(--sw-accent-3)]" size={22} /> Участники
             </h2>
@@ -186,7 +191,7 @@ export function CommunityDetailScreen({ id }: { id: string }) {
             </div>
           </UiCard>
 
-          <UiCard className="p-6">
+          <UiCard className="p-5 md:p-6">
             <h3 className="text-2xl tracking-[-0.04em]">Действия</h3>
             <div className="mt-5 grid gap-3">
               <UiButton onPress={() => joinMutation.mutate()} isDisabled={busy}>
