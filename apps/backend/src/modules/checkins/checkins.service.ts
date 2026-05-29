@@ -16,8 +16,8 @@ export class CheckInsService {
       where: { eventId_userId: { eventId, userId } },
       select: { status: true },
     });
-    if (!participant || participant.status === ParticipantStatus.LEFT) {
-      throw new ForbiddenException('Only active participants can check in');
+    if (!participant || participant.status !== ParticipantStatus.JOINED) {
+      throw new ForbiddenException('Only joined participants can check in');
     }
 
     return this.db.client.eventCheckIn.upsert({

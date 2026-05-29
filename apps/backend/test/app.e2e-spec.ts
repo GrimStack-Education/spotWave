@@ -225,6 +225,17 @@ describe('Backend e2e', () => {
     expect(joinWaitlist.body.data.status).toBe('WAITLIST');
 
     await request(app.getHttpServer())
+      .post(`/events/${eventId}/check-in`)
+      .set('Authorization', `Bearer ${waitlistToken}`)
+      .send({ method: 'GEO' })
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .post(`/events/${eventId}/requests/${joinWaitlist.body.data.userId}/approve`)
+      .set('Authorization', `Bearer ${hostToken}`)
+      .expect(409);
+
+    await request(app.getHttpServer())
       .post(`/events/${eventId}/join`)
       .set('Authorization', `Bearer ${guestToken}`)
       .expect(409);

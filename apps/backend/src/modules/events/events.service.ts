@@ -485,6 +485,34 @@ export class EventsService {
       throw new NotFoundException('Join request not found');
     }
 
+    const event = await this.db.client.event.findUnique({
+      where: { id: eventId },
+      include: {
+        participants: {
+          select: {
+            role: true,
+            status: true,
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event with id "${eventId}" was not found`);
+    }
+
+    if (event.capacity !== null && event.capacity !== undefined) {
+      const joinedMembers = event.participants.filter(
+        (item) =>
+          item.role === ParticipantRole.MEMBER &&
+          item.status === ParticipantStatus.JOINED,
+      ).length;
+
+      if (joinedMembers >= event.capacity) {
+        throw new ConflictException('Event capacity is already full');
+      }
+    }
+
     const updated = await this.db.client.eventParticipant.update({
       where: { eventId_userId: { eventId, userId: targetUserId } },
       data: { status: ParticipantStatus.JOINED },
@@ -586,9 +614,19 @@ export class EventsService {
     const joinedParticipants = event.participants.filter(
       (participant) => participant.status === ParticipantStatus.JOINED,
     );
+    const joinedMembers = joinedParticipants.filter(
+      (participant) => participant.role === ParticipantRole.MEMBER,
+    );
+    const hosts = joinedParticipants.filter(
+      (participant) => participant.role === ParticipantRole.HOST,
+    );
     const waitlistParticipants = event.participants.filter(
       (participant) => participant.status === ParticipantStatus.WAITLIST,
     );
+    const seatsLeft =
+      event.capacity !== null
+        ? Math.max(event.capacity - joinedMembers.length, 0)
+        : null;
 
     return {
       id: event.id,
@@ -624,7 +662,10 @@ export class EventsService {
       })),
       participants: {
         joinedCount: joinedParticipants.length,
+        memberJoinedCount: joinedMembers.length,
+        hostCount: hosts.length,
         waitlistCount: waitlistParticipants.length,
+        seatsLeft,
         items: event.participants,
       },
     };
