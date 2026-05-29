@@ -19,24 +19,47 @@ enum MemberStatus {
 }
 
 model Community {
-	id          String              @id @default(uuid())
-	name        String
-	description String
-	avatarUrl   String
-	city        String
-	visibility  CommunityVisibility
-	ownerId     String
-	owner       User                @relation(fields: [ownerId], references: [id])
-	members     CommunityMember[]
+	id           String                 @id @default(uuid())
+	name         String
+	description  String
+	avatarUrl    String
+	city         String
+	visibility   CommunityVisibility    @default(PUBLIC)
+	ownerId      String
+	createdAt    DateTime               @default(now())
+	updatedAt    DateTime               @updatedAt
+	owner        User                   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+	members      CommunityMember[]
+	chatMessages CommunityChatMessage[]
+
+	@@index([city, visibility])
+	@@index([ownerId])
 }
 
 model CommunityMember {
 	id          String       @id @default(uuid())
 	communityId String
 	userId      String
-	role        MemberRole
-	status      MemberStatus
-	joinedAt    DateTime
-	community   Community   @relation(fields: [communityId], references: [id])
-	user        User        @relation(fields: [userId], references: [id])
+	role        MemberRole   @default(MEMBER)
+	status      MemberStatus @default(ACTIVE)
+	joinedAt    DateTime     @default(now())
+	community   Community    @relation(fields: [communityId], references: [id], onDelete: Cascade)
+	user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	@@unique([communityId, userId])
+	@@index([userId, status])
+	@@index([communityId, status])
+}
+
+model CommunityChatMessage {
+	id          String    @id @default(uuid())
+	communityId String
+	userId      String
+	message     String
+	createdAt   DateTime  @default(now())
+	community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+	user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	@@index([communityId, createdAt])
+	@@index([userId, createdAt])
 }

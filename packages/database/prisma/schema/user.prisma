@@ -19,6 +19,7 @@ model User {
 	profile              Profile?
 	ownedCommunities     Community[]
 	communityMemberships CommunityMember[]
+	communityChatMessages CommunityChatMessage[]
 	archivedEvents       EventArchive[]     @relation("LegacyEventCreator")
 	createdEvents        Event[]            @relation("EventCreator")
 	eventParticipants    EventParticipant[]
