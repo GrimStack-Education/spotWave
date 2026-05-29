@@ -9,7 +9,6 @@ import { queryClient } from '@/shared/lib/query/query-client';
 import { queryKeys } from '@/shared/lib/query/keys';
 import { toErrorMessage } from '@/shared/lib/api/error';
 import { ErrorState, LoadingState } from '@/shared/ui/states/states';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { UiButton } from '@/shared/ui/button/button';
 import { UiCard } from '@/shared/ui/card/card';
 import { CoverImage } from '@/shared/ui/media/cover-image';
@@ -43,7 +42,7 @@ export function EventDetailScreen({ id }: { id: string }) {
           <div className="relative">
             <CoverImage className="h-[22rem] rounded-none border-0" seed={event.id} priority alt={event.title} />
             <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-end justify-between gap-3 rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur">
-              <UiBadge className="border-[rgba(var(--sw-accent-2-rgb),0.30)] bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-1)]">{event.category}</UiBadge>
+              <span className="text-sm text-[var(--sw-accent-1)]">{event.category}</span>
               <span className="text-sm text-white/70">{event.rsvpCount}/{event.capacity} мест занято</span>
             </div>
           </div>

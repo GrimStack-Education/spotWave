@@ -4,14 +4,14 @@ import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { MapPin, Radar, Sparkles, Wand2 } from 'lucide-react';
+import { MapPin, Radar, Wand2 } from 'lucide-react';
 import { fetchOnboarding, fetchOnboardingInterests, saveOnboarding } from '@/features/onboarding/api/onboarding.api';
 import { queryClient } from '@/shared/lib/query/query-client';
 import { queryKeys } from '@/shared/lib/query/keys';
 import { toErrorMessage } from '@/shared/lib/api/error';
+import { toRussianInterestLabel } from '@/shared/lib/i18n/interests';
 import { UiButton } from '@/shared/ui/button/button';
 import { UiCard } from '@/shared/ui/card/card';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { ErrorState, LoadingState } from '@/shared/ui/states/states';
 import { CoverImage } from '@/shared/ui/media/cover-image';
 
@@ -46,8 +46,7 @@ export function OnboardingScreen() {
     <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
       <UiCard className="relative overflow-hidden p-6 md:p-8">
         <div className="pointer-events-none absolute -right-24 -top-24 size-72 rounded-full bg-[rgba(var(--sw-accent-2-rgb),0.12)] blur-3xl" />
-        <UiBadge className="w-fit border-[rgba(var(--sw-accent-2-rgb),0.30)] bg-[rgba(var(--sw-accent-4-rgb),0.12)] text-[var(--sw-accent-3)]"><Sparkles size={13} /> Настройка</UiBadge>
-        <div className="relative mt-5">
+        <div className="relative">
           <h1 className="max-w-3xl text-5xl leading-[.95] tracking-[-0.06em] md:text-7xl">Настройте локальный ритм</h1>
           <p className="mt-4 max-w-2xl text-white/60">Выберите интересы и радиус поиска перед входом в основную ленту SpotWave.</p>
         </div>
@@ -74,7 +73,7 @@ export function OnboardingScreen() {
                   ].join(' ')}
                   onClick={() => setSelectedIds((prev) => prev.includes(item.id) ? prev.filter((id) => id !== item.id) : [...prev, item.id])}
                 >
-                  {item.name}
+                  {toRussianInterestLabel(item.name, item.slug)}
                 </button>
               );
             })}

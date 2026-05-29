@@ -2,12 +2,12 @@
 
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { CalendarClock, CheckCircle2, MapPin, Radio, ShieldCheck, Star, Users } from 'lucide-react';
+import { CalendarClock, CheckCircle2, MapPin, Radio, Star, Users } from 'lucide-react';
 import { me } from '@/features/auth/api/auth.api';
 import { fetchOnboarding } from '@/features/onboarding/api/onboarding.api';
+import { toRussianInterestLabel } from '@/shared/lib/i18n/interests';
 import { queryKeys } from '@/shared/lib/query/keys';
 import { UiAvatar } from '@/shared/ui/avatar/avatar';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { UiCard } from '@/shared/ui/card/card';
 import { LoadingState } from '@/shared/ui/states/states';
 
@@ -35,10 +35,8 @@ export function ProfileScreen() {
             <div className="flex min-w-0 flex-wrap items-start gap-5">
               <UiAvatar label={displayName} className="h-24 w-24 rounded-[30px] text-2xl shadow-[0_20px_60px_rgba(0,0,0,0.24)]" />
               <div className="min-w-0">
-                <UiBadge className="border-[rgba(var(--sw-accent-2-rgb),0.28)] bg-[rgba(var(--sw-accent-4-rgb),0.14)] text-[var(--sw-accent-3)]">
-                  <ShieldCheck size={13} /> Trust {trust?.level ?? '18+'}
-                </UiBadge>
-                <h1 className="mt-4 max-w-4xl text-[50px] leading-[0.95] tracking-[-0.065em] text-white md:text-[76px]">{displayName}</h1>
+                <p className="text-sm uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">Trust {trust?.level ?? '18+'}</p>
+                <h1 className="mt-3 max-w-4xl text-[50px] leading-[0.95] tracking-[-0.065em] text-white md:text-[76px]">{displayName}</h1>
                 <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-white/58">
                   <span className="inline-flex items-center gap-2"><MapPin size={16} /> Радиус {radius} км</span>
                   <span className="inline-flex items-center gap-2"><CalendarClock size={16} /> На SpotWave с {formatDate(meData?.createdAt)}</span>
@@ -51,7 +49,7 @@ export function ProfileScreen() {
 
           <div className="relative mt-8 flex flex-wrap gap-2">
             {interests.length ? interests.map((interest) => (
-              <span key={interest.id} className="rounded-full border border-white/10 bg-white/[0.055] px-4 py-2 text-sm text-white/72">{interest.name}</span>
+              <span key={interest.id} className="rounded-full border border-white/10 bg-white/[0.055] px-4 py-2 text-sm text-white/72">{toRussianInterestLabel(interest.name, interest.slug)}</span>
             )) : <span className="text-sm text-white/46">Интересы пока не выбраны.</span>}
           </div>
         </UiCard>

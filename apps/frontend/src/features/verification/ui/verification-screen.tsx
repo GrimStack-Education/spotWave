@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, ClipboardCheck, ShieldCheck, Star, UserCheck, Waves } from 'lucide-react';
 import { me } from '@/features/auth/api/auth.api';
 import { queryKeys } from '@/shared/lib/query/keys';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { UiCard } from '@/shared/ui/card/card';
 import { LoadingState } from '@/shared/ui/states/states';
 
@@ -32,10 +31,8 @@ export function VerificationScreen() {
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_390px]">
         <UiCard className="relative overflow-hidden p-6 md:p-8">
           <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-[rgba(var(--sw-accent-2-rgb),0.14)] blur-3xl" />
-          <UiBadge className="relative border-[rgba(var(--sw-accent-2-rgb),0.28)] bg-[rgba(var(--sw-accent-4-rgb),0.14)] text-[var(--sw-accent-3)]">
-            <ShieldCheck size={13} /> Trust dashboard
-          </UiBadge>
-          <h1 className="relative mt-5 text-[58px] leading-[0.96] tracking-[-0.07em] text-white md:text-[84px] xl:text-[96px]">Уровень доверия</h1>
+          <p className="relative text-sm uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">Trust dashboard</p>
+          <h1 className="relative mt-3 text-[58px] leading-[0.96] tracking-[-0.07em] text-white md:text-[84px] xl:text-[96px]">Уровень доверия</h1>
           <p className="relative mt-5 max-w-2xl text-lg leading-7 text-white/60">Доверие теперь считается из backend-активности: профиль, check-ins, отзывы, hosted/joined события и moderation-сигналы.</p>
 
           <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
@@ -76,9 +73,9 @@ export function VerificationScreen() {
         <UiCard className="p-6 md:p-7">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-3xl tracking-[-0.05em]">Отзывы и сигналы</h2>
-            <UiBadge className={openReports > 0 ? 'border-red-300/30 bg-red-500/10 text-red-200' : 'border-[rgba(var(--sw-accent-2-rgb),0.25)] bg-[rgba(var(--sw-accent-4-rgb),0.12)] text-[var(--sw-accent-3)]'}>
+            <span className={['inline-flex items-center gap-2 text-sm', openReports > 0 ? 'text-red-200' : 'text-[var(--sw-accent-3)]'].join(' ')}>
               {openReports > 0 ? <AlertTriangle size={13} /> : <Waves size={13} />} {openReports > 0 ? `${openReports} открыто` : 'чисто'}
-            </UiBadge>
+            </span>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {(trust?.recentReviews ?? []).length ? trust?.recentReviews.map((review) => (

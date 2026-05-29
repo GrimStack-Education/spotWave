@@ -3,11 +3,10 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, CalendarClock, MapPin, Radar, Users } from 'lucide-react';
+import { ArrowRight, CalendarClock, MapPin, Users } from 'lucide-react';
 import { fetchEvents } from '@/features/events/api/events.api';
 import { mapBackendEventToDomain } from '@/features/events/model/mappers';
 import { queryKeys } from '@/shared/lib/query/keys';
-import { UiBadge } from '@/shared/ui/badge/badge';
 import { EmptyState, LoadingState } from '@/shared/ui/states/states';
 import { CoverImage } from '@/shared/ui/media/cover-image';
 
@@ -20,17 +19,14 @@ export function HomeFeedScreen() {
   if (!data.length) return <EmptyState title="Пока нет событий" description="Создайте первое событие или расширьте радиус." />;
 
   const featured = data[0];
-  const seatsLeft = Math.max(featured.capacity - featured.rsvpCount, 0);
+  const seatsLeft = featured.seatsLeft ?? Math.max(featured.capacity - featured.rsvpCount, 0);
 
   return (
     <div className="space-y-7">
       <section className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_440px]">
         <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,#171717_0%,#101010_46%,rgba(var(--sw-accent-4-rgb),0.42)_100%)] p-6 md:p-8 xl:p-10">
           <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-[rgba(var(--sw-accent-2-rgb),0.16)] blur-3xl" />
-          <UiBadge className="border-[rgba(var(--sw-accent-2-rgb),0.28)] bg-black/20 text-[var(--sw-accent-1)]">
-            <Radar size={13} /> Живой радар
-          </UiBadge>
-          <h1 className="relative mt-5 max-w-4xl text-[54px] leading-[0.94] tracking-[-0.075em] text-white md:text-[82px] xl:text-[104px]">
+          <h1 className="relative max-w-4xl text-[54px] leading-[0.94] tracking-[-0.075em] text-white md:text-[82px] xl:text-[104px]">
             События рядом и <span className="text-[var(--sw-accent-3)]">твои люди</span>
           </h1>
           <p className="relative mt-6 max-w-2xl text-lg leading-7 text-white/62">
@@ -72,7 +68,7 @@ export function HomeFeedScreen() {
           >
             <CoverImage className="h-36" seed={event.id} alt={event.title} />
             <div className="mt-4 flex items-center justify-between gap-3">
-              <UiBadge className="border-white/10 bg-white/[0.06] text-white/64">{event.category}</UiBadge>
+              <span className="text-sm text-white/64">{event.category}</span>
               <span className="text-xs text-white/45">{event.rsvpCount}/{event.capacity}</span>
             </div>
             <p className="mt-3 text-2xl leading-tight tracking-[-0.04em] text-white">{event.title}</p>
