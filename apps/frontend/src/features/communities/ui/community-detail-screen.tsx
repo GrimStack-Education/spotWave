@@ -179,9 +179,8 @@ export function CommunityDetailScreen({ id }: { id: string }) {
           <UiCard className="p-5 md:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="flex items-center gap-2 text-3xl tracking-[-0.05em]">
-                  <CalendarClock className="text-[var(--sw-accent-3)]" size={24} /> События
-                  сообщества
+                <h2 className="flex items-center gap-2 text-3xl tracking-tighter">
+                  <CalendarClock className="text-brand" size={24} /> События сообщества
                 </h2>
                 <p className="mt-2 text-sm text-white/50">
                   Встречи, созданные участниками этого сообщества.
@@ -205,8 +204,8 @@ export function CommunityDetailScreen({ id }: { id: string }) {
           <UiCard className="p-5 md:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="flex items-center gap-2 text-3xl tracking-[-0.05em]">
-                  <MessageCircle className="text-[var(--sw-accent-3)]" size={24} /> Групповой чат
+                <h2 className="flex items-center gap-2 text-3xl tracking-tighter">
+                  <MessageCircle className="text-brand" size={24} /> Групповой чат
                 </h2>
                 <p className="mt-2 text-sm text-white/50">
                   Сообщения доступны только активным участникам.
@@ -261,7 +260,7 @@ export function CommunityDetailScreen({ id }: { id: string }) {
         <aside className="min-w-0 space-y-5">
           <UiCard className="p-5 md:p-6">
             <h2 className="flex items-center gap-2 text-2xl tracking-[-0.04em]">
-              <Users className="text-[var(--sw-accent-3)]" size={22} /> Участники
+              <Users className="text-brand" size={22} /> Участники
             </h2>
             <p className="mt-2 text-sm text-white/50">
               {community.members.activeCount} активных участников
@@ -272,7 +271,7 @@ export function CommunityDetailScreen({ id }: { id: string }) {
                 .slice(0, 8)
                 .map((member) => (
                   <div
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[0.035] px-4 py-3"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/3.5 px-4 py-3"
                     key={member.id}
                   >
                     <div className="min-w-0">
@@ -290,7 +289,7 @@ export function CommunityDetailScreen({ id }: { id: string }) {
 
           <UiCard className="p-5 md:p-6">
             <h3 className="flex items-center gap-2 text-2xl tracking-[-0.04em]">
-              <Plus size={22} className="text-[var(--sw-accent-3)]" /> Добавить событие
+              <Plus size={22} className="text-brand" /> Добавить событие
             </h3>
             <p className="mt-2 text-sm text-white/50">Доступно активным участникам сообщества.</p>
             <div className="mt-5 space-y-3">
@@ -306,7 +305,7 @@ export function CommunityDetailScreen({ id }: { id: string }) {
                   <span className="text-white/38">Минимум 8 символов</span>
                 </span>
                 <textarea
-                  className="min-h-28 w-full resize-none rounded-2xl border border-white/12 bg-white/[0.04] px-4 py-3 text-white outline-none placeholder:text-white/32 focus:border-[var(--sw-accent-3)]"
+                  className="min-h-28 w-full resize-none rounded-2xl border border-white/12 bg-white/4 px-4 py-3 text-white outline-none placeholder:text-white/32 focus:border-brand"
                   onChange={(event) => setEventDescription(event.target.value)}
                   placeholder="Формат, кто приходит и что будет происходить..."
                   value={eventDescription}
@@ -402,7 +401,7 @@ function CommunityEventCard({ event }: { event: BackendEvent }) {
 
 function MessageBubble({ item }: { item: CommunityMessage }) {
   return (
-    <div className="rounded-2xl border border-white/8 bg-white/[0.045] p-4">
+    <div className="rounded-2xl border border-white/8 bg-white/4.5 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-medium text-white/86">{item.user.displayName ?? item.user.email}</p>
         <span className="text-xs text-white/38">{new Date(item.createdAt).toLocaleString()}</span>

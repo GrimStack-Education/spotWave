@@ -68,7 +68,7 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
             <CalendarDays size={16} /> Событие
           </span>
           <select
-            className="mt-2 min-h-12 w-full rounded-2xl border border-white/12 bg-[#151515] px-4 text-white outline-none transition focus:border-[var(--sw-accent-3)]"
+            className="mt-2 min-h-12 w-full rounded-2xl border border-white/12 bg-[#151515] px-4 text-white outline-none transition focus:border-brand"
             value={resolvedEventId}
             onChange={(e) => setEventId(e.target.value)}
           >
@@ -88,7 +88,7 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
 
       {!isOrganizer && resolvedEventId ? (
         <UiCard className="flex items-start gap-4 p-5 md:p-6">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-3)]">
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-brand">
             <ShieldAlert size={20} />
           </span>
           <div>
@@ -112,7 +112,7 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
               <UiCard key={request.userId} className="p-5">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-3)]">
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-brand">
                       <UserPlus size={20} />
                     </span>
                     <div className="min-w-0">

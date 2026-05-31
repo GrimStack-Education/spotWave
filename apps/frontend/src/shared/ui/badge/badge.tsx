@@ -6,7 +6,7 @@ export function UiBadge({ className, ...props }: ComponentProps<typeof Badge>) {
     <Badge
       variant="secondary"
       className={[
-        'border border-white/10 bg-white/[0.075] px-3 uppercase tracking-[0.08em] text-white/78',
+        'border border-white/10 bg-white/7.5 px-3 uppercase tracking-[0.08em] text-white/78',
         className ?? '',
       ].join(' ')}
       {...props}

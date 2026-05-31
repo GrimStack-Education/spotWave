@@ -130,7 +130,7 @@ export function CreateEventScreen() {
 
   return (
     <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-      <div className="relative min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 md:rounded-[34px] md:p-8">
+      <div className="relative min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-(--sw-neutral-800) p-5 md:rounded-[34px] md:p-8">
         <div className="pointer-events-none absolute -right-24 top-10 hidden size-64 rounded-full bg-[rgba(var(--sw-accent-2-rgb),0.12)] blur-3xl md:block" />
         <h1 className="relative text-[44px] leading-[0.98] tracking-[-0.04em] text-white md:text-[74px] md:tracking-[-0.06em]">
           Создать событие
@@ -235,7 +235,7 @@ export function CreateEventScreen() {
               onChange={(event) => setTagSearch(event.target.value)}
             />
           </label>
-          <div className="mt-3 max-h-52 overflow-y-auto rounded-2xl border border-white/10 bg-white/[0.025] p-2">
+          <div className="mt-3 max-h-52 overflow-y-auto rounded-2xl border border-white/10 bg-white/2.5 p-2">
             <div className="flex flex-wrap gap-2">
               {shownTags.map((tag) => {
                 const active = selectedTagIds.includes(tag.id);
@@ -246,8 +246,8 @@ export function CreateEventScreen() {
                     className={[
                       'rounded-full border px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.45)]',
                       active
-                        ? 'border-[rgba(var(--sw-accent-2-rgb),0.48)] bg-[rgba(var(--sw-accent-4-rgb),0.22)] text-[var(--sw-accent-1)]'
-                        : 'border-white/12 bg-white/[0.035] text-white/64 hover:border-white/24 hover:text-white',
+                        ? 'border-[rgba(var(--sw-accent-2-rgb),0.48)] bg-[rgba(var(--sw-accent-4-rgb),0.22)] text-(--sw-accent-1)'
+                        : 'border-white/12 bg-white/3.5 text-white/64 hover:border-white/24 hover:text-white',
                     ].join(' ')}
                     key={tag.id}
                     onClick={() =>
@@ -286,7 +286,7 @@ export function CreateEventScreen() {
           </span>
           <textarea
             aria-label="description"
-            className="mt-2 min-h-28 w-full rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 text-white placeholder:text-white/34 transition focus-visible:border-[rgba(var(--sw-accent-2-rgb),0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.22)]"
+            className="mt-2 min-h-28 w-full rounded-2xl border border-white/10 bg-white/5.5 px-4 py-3 text-white placeholder:text-white/34 transition focus-visible:border-[rgba(var(--sw-accent-2-rgb),0.45)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.22)]"
             placeholder="Коротко о формате, тайминге и кому подойдет встреча"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -306,16 +306,14 @@ export function CreateEventScreen() {
       </div>
 
       <div className="min-w-0 space-y-5">
-        <div className="rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 md:rounded-[30px] md:p-6">
+        <div className="rounded-[26px] border border-white/10 bg-(--sw-neutral-800) p-5 md:rounded-[30px] md:p-6">
           <CoverImage
             className="h-48"
             seed={title || location || 'create-event'}
             priority
             alt="Event preview"
           />
-          <p className="mt-5 text-xs uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">
-            Превью
-          </p>
+          <p className="mt-5 text-xs uppercase tracking-[0.12em] text-brand">Превью</p>
           <p className="mt-2 text-3xl leading-tight tracking-[-0.045em] text-white">
             {title || 'Ваше следующее событие'}
           </p>
@@ -397,7 +395,7 @@ function EventLocationPicker({
     const markerNode = document.createElement('button');
     markerNode.type = 'button';
     markerNode.className =
-      'grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-[var(--sw-accent-3)] text-white shadow-[0_12px_36px_rgba(255,123,0,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.65)] focus-visible:ring-offset-2 focus-visible:ring-offset-black';
+      'grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-brand text-white shadow-[0_12px_36px_rgba(255,123,0,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.65)] focus-visible:ring-offset-2 focus-visible:ring-offset-black';
     markerNode.setAttribute('aria-label', 'Выбранная точка события');
     markerNode.innerHTML = '<span class="h-2.5 w-2.5 rounded-full bg-white"></span>';
 
@@ -439,7 +437,7 @@ function EventLocationPicker({
   }, [lat, lng]);
 
   return (
-    <div className="relative mt-4 h-[320px] overflow-hidden rounded-[22px] border border-white/10 bg-black md:h-[380px]">
+    <div className="relative mt-4 h-80 overflow-hidden rounded-[22px] border border-white/10 bg-black md:h-95">
       <div ref={mapNodeRef} className="absolute inset-0" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.24))]" />
     </div>
@@ -452,8 +450,8 @@ function Tip({ ready, text }: { ready: boolean; text: string }) {
       className={[
         'flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm transition',
         ready
-          ? 'border-[rgba(var(--sw-accent-2-rgb),0.34)] bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-1)]'
-          : 'border-white/10 bg-white/[0.04] text-white/52',
+          ? 'border-[rgba(var(--sw-accent-2-rgb),0.34)] bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-(--sw-accent-1)'
+          : 'border-white/10 bg-white/4 text-white/52',
       ].join(' ')}
     >
       <CheckCircle2 size={16} />

@@ -44,7 +44,7 @@ export function QuickMatchScreen() {
       <div className="grid items-end gap-5 md:grid-cols-[1fr_320px]">
         <div>
           <h1 className="text-[44px] leading-[0.98] tracking-[-0.04em] md:text-7xl md:tracking-[-0.06em]">
-            Быстрый <span className="text-[var(--sw-accent-3)]">match</span>
+            Быстрый <span className="text-brand">match</span>
           </h1>
           <p className="mt-4 max-w-xl text-white/58">
             Карточка события для быстрого решения: пропустить, сохранить или присоединиться без
@@ -58,18 +58,18 @@ export function QuickMatchScreen() {
       </div>
 
       <div className="relative mx-auto max-w-3xl">
-        <div className="absolute inset-x-8 top-6 h-full rotate-[-3deg] rounded-[34px] border border-white/8 bg-white/[0.035]" />
-        <div className="absolute inset-x-12 top-12 h-full rotate-[3deg] rounded-[34px] border border-white/8 bg-white/[0.025]" />
+        <div className="absolute inset-x-8 top-6 h-full -rotate-3 rounded-[34px] border border-white/8 bg-white/3.5" />
+        <div className="absolute inset-x-12 top-12 h-full rotate-3 rounded-[34px] border border-white/8 bg-white/2.5" />
         <UiCard className="relative overflow-hidden p-0 shadow-[0_28px_80px_rgba(0,0,0,0.32)]">
           <CoverImage
-            className="h-[300px] rounded-none border-0"
+            className="h-75 rounded-none border-0"
             seed={event.id}
             priority
             alt={event.title}
           />
           <div className="p-6 md:p-7">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="text-sm text-[var(--sw-accent-3)]">{event.category}</span>
+              <span className="text-sm text-brand">{event.category}</span>
               <span className="flex items-center gap-2 text-sm text-white/52">
                 <Users size={15} /> {event.rsvpCount}/{event.capacity}
               </span>
@@ -85,7 +85,7 @@ export function QuickMatchScreen() {
               <UiButton
                 isDisabled={joinMutation.isPending}
                 onClick={() => joinMutation.mutate(event.id)}
-                className="h-14 border border-[rgba(var(--sw-accent-2-rgb),0.38)] bg-[var(--sw-accent-3)] hover:bg-[#ff8c1a]"
+                className="h-14 border border-[rgba(var(--sw-accent-2-rgb),0.38)] bg-brand hover:bg-[#ff8c1a]"
               >
                 {joinMutation.isPending ? 'Отправляем...' : 'Я иду'}
               </UiButton>
@@ -97,7 +97,7 @@ export function QuickMatchScreen() {
         </UiCard>
       </div>
 
-      <div className="mx-auto flex max-w-3xl items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/50">
+      <div className="mx-auto flex max-w-3xl items-center justify-center gap-2 rounded-full border border-white/10 bg-white/4 px-4 py-3 text-sm text-white/50">
         <RotateCcw size={15} /> Следующая карточка появится после обновления списка событий.
       </div>
     </div>
@@ -106,9 +106,9 @@ export function QuickMatchScreen() {
 
 function MiniStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-4">
+    <div className="rounded-3xl border border-white/10 bg-white/4.5 p-4">
       <p className="text-xs uppercase tracking-[0.12em] text-white/42">{label}</p>
-      <p className="mt-2 text-2xl tracking-[-0.05em] text-white">{value}</p>
+      <p className="mt-2 text-2xl tracking-tighter text-white">{value}</p>
     </div>
   );
 }

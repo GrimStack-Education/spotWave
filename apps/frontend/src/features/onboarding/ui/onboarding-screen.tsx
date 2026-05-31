@@ -69,7 +69,7 @@ export function OnboardingScreen() {
 
         <div className="relative mt-8 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm uppercase tracking-[0.1em] text-white/54">Интересы</h2>
+            <h2 className="text-sm uppercase tracking-widest text-white/54">Интересы</h2>
             <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs text-white/56">
               Выбрано: {currentIds.length}
             </span>
@@ -85,8 +85,8 @@ export function OnboardingScreen() {
                   className={[
                     'rounded-full border px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]',
                     active
-                      ? 'border-[rgba(var(--sw-accent-2-rgb),0.48)] bg-[rgba(var(--sw-accent-4-rgb),0.24)] text-[var(--sw-accent-1)] shadow-[0_0_0_1px_rgba(255,145,0,0.28)]'
-                      : 'border-white/12 text-white/74 hover:border-white/25 hover:bg-white/[0.04]',
+                      ? 'border-[rgba(var(--sw-accent-2-rgb),0.48)] bg-[rgba(var(--sw-accent-4-rgb),0.24)] text-(--sw-accent-1) shadow-[0_0_0_1px_rgba(255,145,0,0.28)]'
+                      : 'border-white/12 text-white/74 hover:border-white/25 hover:bg-white/4',
                   ].join(' ')}
                   onClick={() =>
                     setSelectedIds((prev) =>
@@ -109,7 +109,7 @@ export function OnboardingScreen() {
         </div>
 
         <div className="relative mt-8 space-y-3">
-          <h2 className="text-sm uppercase tracking-[0.1em] text-white/54">Радиус</h2>
+          <h2 className="text-sm uppercase tracking-widest text-white/54">Радиус</h2>
           <div className="grid gap-3 md:grid-cols-3">
             {radii.map((radius) => {
               const active = currentRadius === radius;
@@ -121,12 +121,12 @@ export function OnboardingScreen() {
                   className={[
                     'rounded-[24px] border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]',
                     active
-                      ? 'border-[rgba(var(--sw-accent-2-rgb),0.55)] bg-[rgba(var(--sw-accent-4-rgb),0.26)] text-[var(--sw-accent-1)] shadow-[0_0_0_1px_rgba(255,145,0,0.3)]'
-                      : 'border-white/10 bg-white/[0.04] text-white/72 hover:border-white/24 hover:bg-white/[0.07]',
+                      ? 'border-[rgba(var(--sw-accent-2-rgb),0.55)] bg-[rgba(var(--sw-accent-4-rgb),0.26)] text-(--sw-accent-1) shadow-[0_0_0_1px_rgba(255,145,0,0.3)]'
+                      : 'border-white/10 bg-white/4 text-white/72 hover:border-white/24 hover:bg-white/[0.07]',
                   ].join(' ')}
                   onClick={() => setRadiusKm(radius)}
                 >
-                  <span className="text-3xl tracking-[-0.05em]">{radius} км</span>
+                  <span className="text-3xl tracking-tighter">{radius} км</span>
                   <span className="mt-2 block text-sm text-white/48">
                     {radius === 2
                       ? 'Ближайшие места'
@@ -179,7 +179,7 @@ export function OnboardingScreen() {
 
 function SideNote({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+    <div className="rounded-2xl border border-white/10 bg-white/4 p-4">
       <p className="flex items-center gap-2 text-sm text-white/80">
         {icon}
         {title}

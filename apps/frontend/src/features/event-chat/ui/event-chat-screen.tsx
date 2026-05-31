@@ -61,11 +61,11 @@ export function EventChatScreen({
           items.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-white/8 bg-white/[0.045] p-4 text-white/72"
+              className="rounded-2xl border border-white/8 bg-white/4.5 p-4 text-white/72"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-medium text-white/86">
-                  <MessageCircle className="mr-2 inline text-[var(--sw-accent-3)]" size={15} />
+                  <MessageCircle className="mr-2 inline text-brand" size={15} />
                   {item.user.displayName ?? item.user.email}
                 </p>
                 <span className="text-xs text-white/38">

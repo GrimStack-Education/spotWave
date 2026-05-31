@@ -5,7 +5,7 @@ export default function TermsPage() {
   return (
     <main className="sw-bg min-h-screen px-4 py-10 text-white">
       <UiCard className="mx-auto max-w-3xl p-8 md:p-10">
-        <p className="text-xs uppercase tracking-[0.14em] text-[var(--sw-accent-3)]">SpotWave</p>
+        <p className="text-xs uppercase tracking-[0.14em] text-brand">SpotWave</p>
         <h1 className="mt-4 text-[44px] leading-[0.98] tracking-[-0.04em] md:text-6xl">
           Правила сервиса
         </h1>
@@ -28,16 +28,13 @@ export default function TermsPage() {
               'Спам, вводящие в заблуждение события и небезопасное поведение могут быть отправлены на модерацию.',
             ],
           ].map(([title, text]) => (
-            <section
-              key={title}
-              className="rounded-2xl border border-white/10 bg-white/[0.035] p-5"
-            >
+            <section key={title} className="rounded-2xl border border-white/10 bg-white/3.5 p-5">
               <h2 className="text-xl tracking-[-0.03em]">{title}</h2>
               <p className="mt-2 leading-7 text-white/58">{text}</p>
             </section>
           ))}
         </div>
-        <Link href="/start" className="mt-8 inline-block text-[var(--sw-accent-3)]">
+        <Link href="/start" className="mt-8 inline-block text-brand">
           Вернуться на старт
         </Link>
       </UiCard>

@@ -68,7 +68,7 @@ export function EventDetailScreen({ id }: { id: string }) {
               alt={event.title}
             />
             <div className="absolute bottom-5 left-5 right-5 flex flex-wrap items-end justify-between gap-3 rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur">
-              <span className="text-sm text-[var(--sw-accent-1)]">{event.category}</span>
+              <span className="text-sm text-(--sw-accent-1)">{event.category}</span>
               <span className="text-sm text-white/70">
                 {event.rsvpCount}/{event.capacity} мест занято
               </span>
@@ -87,7 +87,7 @@ export function EventDetailScreen({ id }: { id: string }) {
             </div>
             {eventQuery.data.community ? (
               <Link
-                className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-white/72 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.34)] hover:text-white"
+                className="mt-5 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/4.5 px-4 py-3 text-sm text-white/72 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.34)] hover:text-white"
                 href={`/communities/${eventQuery.data.community.id}`}
               >
                 <Users size={16} /> Событие сообщества {eventQuery.data.community.name}
@@ -98,16 +98,13 @@ export function EventDetailScreen({ id }: { id: string }) {
 
         <div className="space-y-5">
           <UiCard className="h-fit p-6">
-            <h2 className="text-3xl tracking-[-0.05em]">Забронировать место</h2>
+            <h2 className="text-3xl tracking-tighter">Забронировать место</h2>
             <p className="mt-3 text-white/56">
               CTA теперь всегда читается поверх темной поверхности и явно блокируется на время
               запроса.
             </p>
             <div className="mt-6 h-2 overflow-hidden rounded-full bg-white/8">
-              <div
-                className="h-full rounded-full bg-[var(--sw-accent-3)]"
-                style={{ width: `${progress}%` }}
-              />
+              <div className="h-full rounded-full bg-brand" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-6 grid gap-3">
               <UiButton isDisabled={busy} onPress={() => joinMutation.mutate()} className="h-12">
@@ -126,9 +123,9 @@ export function EventDetailScreen({ id }: { id: string }) {
 
           <UiCard className="p-6">
             <h3 className="flex items-center gap-2 text-xl tracking-[-0.04em]">
-              <Crown size={20} className="text-[var(--sw-accent-3)]" /> Организатор
+              <Crown size={20} className="text-brand" /> Организатор
             </h3>
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4">
+            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-white/8 bg-white/4 p-4">
               <UiAvatar
                 label={creator?.displayName ?? creator?.email ?? 'Host'}
                 className="h-12 w-12"
@@ -144,13 +141,13 @@ export function EventDetailScreen({ id }: { id: string }) {
 
           <UiCard className="p-6">
             <h3 className="flex items-center gap-2 text-xl tracking-[-0.04em]">
-              <Users size={20} className="text-[var(--sw-accent-3)]" /> Участники
+              <Users size={20} className="text-brand" /> Участники
             </h3>
             <p className="mt-2 text-sm text-white/50">{joinedParticipants.length} человек</p>
             <div className="mt-4 space-y-2">
               {joinedParticipants.slice(0, 10).map((participant) => (
                 <div
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/[0.035] px-4 py-3"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-white/3.5 px-4 py-3"
                   key={participant.userId}
                 >
                   <div className="flex min-w-0 items-center gap-3">
@@ -174,7 +171,7 @@ export function EventDetailScreen({ id }: { id: string }) {
 
           <UiCard className="p-6">
             <h3 className="flex items-center gap-2 text-xl tracking-[-0.04em]">
-              <ShieldCheck size={20} className="text-[var(--sw-accent-3)]" /> Доверие
+              <ShieldCheck size={20} className="text-brand" /> Доверие
             </h3>
             <div className="mt-4 grid gap-3">
               <TrustItem
@@ -199,7 +196,7 @@ export function EventDetailScreen({ id }: { id: string }) {
 
 function Info({ icon, text }: { icon: ReactNode; text: string }) {
   return (
-    <p className="flex items-center gap-2 rounded-2xl border border-white/8 bg-white/[0.04] p-4">
+    <p className="flex items-center gap-2 rounded-2xl border border-white/8 bg-white/4 p-4">
       {icon}
       {text}
     </p>
@@ -208,7 +205,7 @@ function Info({ icon, text }: { icon: ReactNode; text: string }) {
 
 function TrustItem({ icon, text }: { icon: ReactNode; text: string }) {
   return (
-    <p className="flex items-center gap-2 rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3 text-sm text-white/62">
+    <p className="flex items-center gap-2 rounded-2xl border border-white/8 bg-white/4 px-4 py-3 text-sm text-white/62">
       {icon}
       {text}
     </p>

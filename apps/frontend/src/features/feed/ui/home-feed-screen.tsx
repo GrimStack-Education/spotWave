@@ -36,7 +36,7 @@ export function HomeFeedScreen() {
         <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(135deg,#171717_0%,#101010_46%,rgba(var(--sw-accent-4-rgb),0.42)_100%)] p-6 md:p-8 xl:p-10">
           <div className="pointer-events-none absolute -right-20 -top-24 size-72 rounded-full bg-[rgba(var(--sw-accent-2-rgb),0.16)] blur-3xl" />
           <h1 className="relative max-w-4xl text-[54px] leading-[0.94] tracking-[-0.075em] text-white md:text-[82px] xl:text-[104px]">
-            События рядом и <span className="text-[var(--sw-accent-3)]">твои люди</span>
+            События рядом и <span className="text-brand">твои люди</span>
           </h1>
           <p className="relative mt-6 max-w-2xl text-lg leading-7 text-white/62">
             Лента собирает локальные встречи в понятный ритм: что начинается скоро, где есть места и
@@ -55,7 +55,7 @@ export function HomeFeedScreen() {
 
         <Link
           href={`/events/${featured.id}`}
-          className="group overflow-hidden rounded-[34px] border border-white/10 bg-[var(--sw-neutral-800)] transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.38)]"
+          className="group overflow-hidden rounded-[34px] border border-white/10 bg-(--sw-neutral-800) transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.38)]"
         >
           <CoverImage
             className="h-56 rounded-none border-0"
@@ -64,9 +64,7 @@ export function HomeFeedScreen() {
             alt={featured.title}
           />
           <div className="p-6 md:p-7">
-            <p className="text-xs uppercase tracking-[0.16em] text-[var(--sw-accent-3)]">
-              Главное событие
-            </p>
+            <p className="text-xs uppercase tracking-[0.16em] text-brand">Главное событие</p>
             <h2 className="mt-3 text-[40px] leading-[0.95] tracking-[-0.06em] text-white">
               {featured.title}
             </h2>
@@ -78,13 +76,13 @@ export function HomeFeedScreen() {
             </p>
             <div className="mt-6 h-2 overflow-hidden rounded-full bg-white/8">
               <div
-                className="h-full rounded-full bg-[var(--sw-accent-3)]"
+                className="h-full rounded-full bg-brand"
                 style={{
                   width: `${Math.min((featured.rsvpCount / featured.capacity) * 100, 100)}%`,
                 }}
               />
             </div>
-            <span className="mt-6 inline-flex items-center gap-2 text-[var(--sw-accent-3)] transition group-hover:translate-x-1">
+            <span className="mt-6 inline-flex items-center gap-2 text-brand transition group-hover:translate-x-1">
               Открыть событие <ArrowRight size={16} />
             </span>
           </div>
@@ -96,7 +94,7 @@ export function HomeFeedScreen() {
           <Link
             key={event.id}
             href={`/events/${event.id}`}
-            className="group rounded-[28px] border border-white/10 bg-[var(--sw-neutral-800)] p-4 transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.36)] hover:bg-[#1d1d1d]"
+            className="group rounded-[28px] border border-white/10 bg-(--sw-neutral-800) p-4 transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.36)] hover:bg-[#1d1d1d]"
           >
             <CoverImage className="h-36" seed={event.id} alt={event.title} />
             <div className="mt-4 flex items-center justify-between gap-3">
@@ -115,7 +113,7 @@ export function HomeFeedScreen() {
               <span>{event.datetime}</span>
               <ArrowRight
                 size={15}
-                className="transition group-hover:translate-x-1 group-hover:text-[var(--sw-accent-3)]"
+                className="transition group-hover:translate-x-1 group-hover:text-brand"
               />
             </div>
           </Link>
@@ -132,7 +130,7 @@ function Metric({ icon, label, value }: { icon: ReactNode; label: string; value:
         {icon}
         <span className="text-xs uppercase tracking-[0.12em]">{label}</span>
       </div>
-      <p className="mt-3 text-3xl tracking-[-0.05em] text-white">{value}</p>
+      <p className="mt-3 text-3xl tracking-tighter text-white">{value}</p>
     </div>
   );
 }

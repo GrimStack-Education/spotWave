@@ -7,6 +7,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js)](https://nextjs.org/)
 [![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs)](https://nestjs.com/)
 [![Prisma](https://img.shields.io/badge/prisma-7-5A67D8?logo=prisma)](https://www.prisma.io/)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
 
 </div>
@@ -183,38 +184,4 @@ docker compose -f infrastructure/docker/docker-compose.yml run --rm migrator
 
 # Запустить backend e2e-тесты через Docker
 docker compose -f infrastructure/docker/docker-compose.yml run --rm backend-test
-```
-
----
-
-## Демо-сценарий
-
-После запуска Docker-стека приложение доступно на:
-
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3333
-- B2B admin: http://localhost:3001
-
-Seed создает несколько пользователей для демонстрации:
-
-| Роль   | Email                   | Пароль        |
-| ------ | ----------------------- | ------------- |
-| Host   | `host@spotwave.local`   | `password123` |
-| Guest  | `guest@spotwave.local`  | `password123` |
-| Runner | `runner@spotwave.local` | `password123` |
-| Admin  | `admin@spotwave.local`  | `password123` |
-
-Рекомендуемый demo flow:
-
-1. Откройте `/sign-in` и войдите как `guest@spotwave.local`.
-2. Перейдите в `/home`, чтобы показать ленту локальных событий.
-3. Откройте `/map`, измените радиус и покажите события на карте.
-4. Откройте карточку события и нажмите `Присоединиться`.
-5. Перейдите в `/communities`, откройте сообщество и покажите чат участников.
-6. Откройте `/profile` и `/verification`, чтобы показать trust-сигналы, check-ins и отзывы.
-
-Важно: команда `docker compose -f infrastructure/docker/docker-compose.yml run --rm backend-test` запускает e2e-тесты на локальной Postgres-базе и может очищать demo-данные. Чтобы восстановить seed после тестов:
-
-```bash
-docker compose -f infrastructure/docker/docker-compose.yml run --rm migrator
 ```

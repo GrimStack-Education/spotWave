@@ -50,7 +50,7 @@ export function CheckInScreen({ initialEventId = '' }: { initialEventId?: string
             <CalendarDays size={16} /> Событие
           </span>
           <select
-            className="mt-2 min-h-12 w-full rounded-2xl border border-white/12 bg-[#151515] px-4 text-white outline-none transition focus:border-[var(--sw-accent-3)]"
+            className="mt-2 min-h-12 w-full rounded-2xl border border-white/12 bg-[#151515] px-4 text-white outline-none transition focus:border-brand"
             value={resolvedEventId}
             onChange={(e) => setEventId(e.target.value)}
           >

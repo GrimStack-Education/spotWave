@@ -69,7 +69,7 @@ export function CommunitiesScreen() {
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
         <div className="space-y-5">
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_260px]">
-            <div className="rounded-[30px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 md:p-7">
+            <div className="rounded-[30px] border border-white/10 bg-(--sw-neutral-800) p-5 md:p-7">
               <h1 className="text-[44px] leading-[0.96] tracking-[-0.06em] text-white md:text-[68px]">
                 Сообщества для локальных встреч
               </h1>
@@ -77,7 +77,7 @@ export function CommunitiesScreen() {
                 Найдите группу по городу, зайдите в чат и договоритесь о реальной встрече по
                 интересам.
               </p>
-              <div className="mt-6 flex max-w-xl items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 focus-within:border-[rgba(var(--sw-accent-2-rgb),0.42)] focus-within:ring-2 focus-within:ring-[rgba(var(--sw-accent-2-rgb),0.18)]">
+              <div className="mt-6 flex max-w-xl items-center gap-3 rounded-2xl border border-white/10 bg-white/4 px-4 focus-within:border-[rgba(var(--sw-accent-2-rgb),0.42)] focus-within:ring-2 focus-within:ring-[rgba(var(--sw-accent-2-rgb),0.18)]">
                 <Search size={17} className="text-white/42" />
                 <input
                   aria-label="Город"
@@ -131,7 +131,7 @@ export function CommunitiesScreen() {
 
         <UiCard className="h-fit p-6 md:p-7">
           <div className="flex items-center gap-3">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-3)]">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-brand">
               <Plus size={21} />
             </span>
             <div>
@@ -157,7 +157,7 @@ export function CommunitiesScreen() {
                 <span className="text-white/38">Минимум 12 символов</span>
               </span>
               <textarea
-                className="min-h-32 w-full resize-none rounded-2xl border border-white/12 bg-white/[0.04] px-4 py-3 text-white outline-none placeholder:text-white/32 focus:border-[var(--sw-accent-3)]"
+                className="min-h-32 w-full resize-none rounded-2xl border border-white/12 bg-white/4 px-4 py-3 text-white outline-none placeholder:text-white/32 focus:border-brand"
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Для кого группа, какой формат встреч и чем полезен чат..."
                 value={description}
@@ -189,7 +189,7 @@ export function CommunitiesScreen() {
 function CommunityCard({ community }: { community: Community }) {
   return (
     <Link
-      className="group overflow-hidden rounded-[30px] border border-white/10 bg-[#101010] transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sw-neutral-900)]"
+      className="group overflow-hidden rounded-[30px] border border-white/10 bg-[#101010] transition hover:-translate-y-1 hover:border-[rgba(var(--sw-accent-2-rgb),0.38)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-(--sw-neutral-900)"
       href={`/communities/${community.id}`}
     >
       <div className="relative h-40 bg-[radial-gradient(circle_at_28%_20%,rgba(var(--sw-accent-2-rgb),0.42),transparent_32%),linear-gradient(135deg,#21130a,#101010_58%,#191919)]">
@@ -209,9 +209,9 @@ function CommunityCard({ community }: { community: Community }) {
         </div>
       </div>
       <div className="p-5">
-        <h3 className="text-3xl leading-tight tracking-[-0.05em] text-white">{community.name}</h3>
+        <h3 className="text-3xl leading-tight tracking-tighter text-white">{community.name}</h3>
         <p className="mt-3 line-clamp-3 text-sm leading-6 text-white/56">{community.description}</p>
-        <span className="mt-5 inline-flex items-center gap-2 text-[var(--sw-accent-3)] transition group-hover:translate-x-1">
+        <span className="mt-5 inline-flex items-center gap-2 text-brand transition group-hover:translate-x-1">
           Открыть чат <ArrowRight size={15} />
         </span>
       </div>
@@ -229,8 +229,8 @@ function CommunityMetric({
   value: string;
 }) {
   return (
-    <div className="rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-5">
-      <div className="flex items-center gap-2 text-[var(--sw-accent-3)]">
+    <div className="rounded-[26px] border border-white/10 bg-(--sw-neutral-800) p-5">
+      <div className="flex items-center gap-2 text-brand">
         {icon}
         <span className="text-xs uppercase tracking-[0.12em] text-white/42">{label}</span>
       </div>

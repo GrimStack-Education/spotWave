@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validateEnv } from './core/config/env.validation';
 import { DatabaseModule } from './core/database/database.module';
+import { FirebaseModule } from './core/firebase/firebase.module';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 import { EventsModule } from './modules/events/events.module';
@@ -36,6 +37,7 @@ import { CommunitiesModule } from './modules/communities/communities.module';
       ],
     }),
     DatabaseModule,
+    FirebaseModule,
     AuthModule,
     UsersModule,
     EventsModule,

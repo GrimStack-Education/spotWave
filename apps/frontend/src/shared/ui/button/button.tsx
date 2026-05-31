@@ -38,16 +38,16 @@ export function UiButton({
     <Button
       variant={shadcnVariant}
       className={[
-        'min-h-11 rounded-2xl px-5 tracking-[-0.01em] text-white transition-all focus-visible:border-[rgba(var(--sw-accent-2-rgb),0.58)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sw-neutral-900)]',
+        'min-h-11 rounded-2xl px-5 tracking-[-0.01em] text-white transition-all focus-visible:border-[rgba(var(--sw-accent-2-rgb),0.58)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-(--sw-neutral-900)',
         fullWidth ? 'w-full' : '',
         variant === 'primary'
           ? 'bg-[#0f0f0f] text-white hover:bg-[#1a1a1a] enabled:hover:-translate-y-0.5'
           : '',
         variant === 'secondary'
-          ? 'border border-white/10 bg-white/[0.075] text-white/88 enabled:hover:-translate-y-0.5 hover:bg-white/[0.11]'
+          ? 'border border-white/10 bg-white/7.5 text-white/88 enabled:hover:-translate-y-0.5 hover:bg-white/11'
           : '',
         variant === 'outline'
-          ? 'border border-white/16 bg-transparent text-white/88 enabled:hover:-translate-y-0.5 hover:bg-white/[0.06]'
+          ? 'border border-white/16 bg-transparent text-white/88 enabled:hover:-translate-y-0.5 hover:bg-white/6'
           : '',
         variant === 'danger'
           ? 'bg-[#0f0f0f] text-white enabled:hover:-translate-y-0.5 hover:bg-[#1a1a1a]'

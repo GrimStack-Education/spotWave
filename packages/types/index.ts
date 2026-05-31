@@ -1,4 +1,4 @@
-// Global API Response wrapper
+// Интерфейсы и типы для API ответов и сущностей
 export interface ApiResponse<T> {
   status: 'success' | 'error';
   data: T;
@@ -9,7 +9,7 @@ export interface ApiResponse<T> {
   };
 }
 
-// User Entity Types
+// Интерфейсы для пользователей
 export interface User {
   id: string;
   email: string;
@@ -18,10 +18,13 @@ export interface User {
   createdAt: string;
 }
 
+// Интерфейсы для событий
 export interface CreateUserDto {
   email: string;
   name?: string;
   password?: string;
 }
 
-export interface UpdateUserDto extends Partial<CreateUserDto> {}
+export interface UpdateUserDto extends Partial<CreateUserDto> {} // Все поля необязательные для обновления
+
+export * from './firebase'; // Экспорт типов из firebase.types.ts

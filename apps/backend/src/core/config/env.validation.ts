@@ -4,6 +4,10 @@ type EnvConfig = {
   JWT_SECRET: string;
   CORS_ORIGIN?: string;
   NODE_ENV: string;
+  FIREBASE_PROJECT_ID?: string;
+  FIREBASE_CLIENT_EMAIL?: string;
+  FIREBASE_PRIVATE_KEY?: string;
+  FIREBASE_CREDENTIALS_PATH?: string;
 };
 
 function parseRequiredString(
@@ -50,5 +54,11 @@ export function validateEnv(config: Record<string, unknown>): EnvConfig {
     JWT_SECRET: jwtSecret,
     CORS_ORIGIN: parseOptionalString(config.CORS_ORIGIN),
     NODE_ENV: parseOptionalString(config.NODE_ENV) ?? 'development',
+    FIREBASE_PROJECT_ID: parseOptionalString(config.FIREBASE_PROJECT_ID),
+    FIREBASE_CLIENT_EMAIL: parseOptionalString(config.FIREBASE_CLIENT_EMAIL),
+    FIREBASE_PRIVATE_KEY: parseOptionalString(config.FIREBASE_PRIVATE_KEY),
+    FIREBASE_CREDENTIALS_PATH: parseOptionalString(
+      config.FIREBASE_CREDENTIALS_PATH,
+    ),
   };
 }

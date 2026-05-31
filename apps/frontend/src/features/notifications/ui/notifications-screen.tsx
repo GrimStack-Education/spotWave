@@ -36,7 +36,7 @@ export function NotificationsScreen() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div className="max-w-[860px]">
+      <div className="max-w-215">
         <h1 className="text-[46px] leading-[0.98] tracking-[-0.04em] text-white md:text-[84px] md:tracking-[-0.07em] xl:text-[96px]">
           Центр
           <br />
@@ -49,10 +49,10 @@ export function NotificationsScreen() {
             key={item.id}
             type="button"
             onClick={() => (item.readAt ? undefined : readMutation.mutate(item.id))}
-            className="rounded-[24px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 text-left transition hover:border-white/18 hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sw-neutral-900)]"
+            className="rounded-[24px] border border-white/10 bg-(--sw-neutral-800) p-5 text-left transition hover:border-white/18 hover:bg-white/4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-(--sw-neutral-900)"
           >
             <div className="flex items-start gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[rgba(var(--sw-accent-4-rgb),0.14)] text-[var(--sw-accent-3)]">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[rgba(var(--sw-accent-4-rgb),0.14)] text-brand">
                 <Bell size={20} />
               </span>
               <div className="min-w-0">

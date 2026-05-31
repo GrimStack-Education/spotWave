@@ -35,6 +35,9 @@ venv/
 .env.production.local
 *.env
 
+# Firebase service account credentials
+infrastructure/firebase/credentials/
+
 # IDE
 .idea/
 .vscode/

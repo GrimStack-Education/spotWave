@@ -54,7 +54,7 @@ export function ProfileScreen() {
                 className="h-24 w-24 rounded-[30px] text-2xl shadow-[0_20px_60px_rgba(0,0,0,0.24)]"
               />
               <div className="min-w-0">
-                <p className="text-sm uppercase tracking-[0.12em] text-[var(--sw-accent-3)]">
+                <p className="text-sm uppercase tracking-[0.12em] text-brand">
                   Trust {trust?.level ?? '18+'}
                 </p>
                 <h1 className="mt-3 max-w-4xl text-[50px] leading-[0.95] tracking-[-0.065em] text-white md:text-[76px]">
@@ -82,7 +82,7 @@ export function ProfileScreen() {
               interests.map((interest) => (
                 <span
                   key={interest.id}
-                  className="rounded-full border border-white/10 bg-white/[0.055] px-4 py-2 text-sm text-white/72"
+                  className="rounded-full border border-white/10 bg-white/5.5 px-4 py-2 text-sm text-white/72"
                 >
                   {toRussianInterestLabel(interest.name, interest.slug)}
                 </span>
@@ -94,7 +94,7 @@ export function ProfileScreen() {
         </UiCard>
 
         <UiCard className="p-6">
-          <h2 className="text-3xl tracking-[-0.05em]">Активность</h2>
+          <h2 className="text-3xl tracking-tighter">Активность</h2>
           <div className="mt-5 grid grid-cols-2 gap-3">
             <Metric
               icon={<Users size={17} />}
@@ -123,7 +123,7 @@ export function ProfileScreen() {
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <UiCard className="p-6 md:p-7">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-3xl tracking-[-0.05em]">Ближайшие события</h2>
+            <h2 className="text-3xl tracking-tighter">Ближайшие события</h2>
           </div>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {(activity?.upcomingEvents ?? []).length ? (
@@ -151,7 +151,7 @@ export function ProfileScreen() {
         </UiCard>
 
         <UiCard className="p-6 md:p-7">
-          <h2 className="text-3xl tracking-[-0.05em]">Trust summary</h2>
+          <h2 className="text-3xl tracking-tighter">Trust summary</h2>
           <div className="mt-5 space-y-3">
             <TrustRow label="Отзывы" value={String(trust?.reviewsCount ?? 0)} tone="accent" />
             <TrustRow
@@ -170,8 +170,8 @@ export function ProfileScreen() {
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <UiCard className="p-6 md:p-7">
-          <h2 className="flex items-center gap-2 text-3xl tracking-[-0.05em]">
-            <MessageSquare size={24} className="text-[var(--sw-accent-3)]" /> Последние отзывы
+          <h2 className="flex items-center gap-2 text-3xl tracking-tighter">
+            <MessageSquare size={24} className="text-brand" /> Последние отзывы
           </h2>
           <div className="mt-5 grid gap-3 md:grid-cols-3">
             {(trust?.recentReviews ?? []).length ? (
@@ -181,7 +181,7 @@ export function ProfileScreen() {
                   href={`/events/${review.eventId}`}
                   key={`${review.eventId}-${review.createdAt}`}
                 >
-                  <p className="flex items-center gap-2 text-[var(--sw-accent-3)]">
+                  <p className="flex items-center gap-2 text-brand">
                     <Star size={15} /> {review.rating.toFixed(1)}
                   </p>
                   <p className="mt-3 text-lg leading-tight tracking-[-0.035em] text-white">
@@ -200,7 +200,7 @@ export function ProfileScreen() {
         </UiCard>
 
         <UiCard className="p-6 md:p-7">
-          <h2 className="text-3xl tracking-[-0.05em]">Данные профиля</h2>
+          <h2 className="text-3xl tracking-tighter">Данные профиля</h2>
           <div className="mt-5 space-y-3">
             <TrustRow label="Email" value={meData?.email ?? '—'} tone="muted" />
             <TrustRow label="Радиус" value={`${radius} км`} tone="accent" />
@@ -222,12 +222,12 @@ export function ProfileScreen() {
 
 function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.045] p-4">
-      <div className="flex items-center gap-2 text-[var(--sw-accent-3)]">
+    <div className="rounded-3xl border border-white/10 bg-white/4.5 p-4">
+      <div className="flex items-center gap-2 text-brand">
         {icon}
         <span className="text-xs uppercase tracking-[0.12em] text-white/42">{label}</span>
       </div>
-      <p className="mt-3 text-3xl tracking-[-0.05em] text-white">{value}</p>
+      <p className="mt-3 text-3xl tracking-tighter text-white">{value}</p>
     </div>
   );
 }
@@ -242,13 +242,9 @@ function TrustRow({
   tone: 'accent' | 'danger' | 'muted';
 }) {
   const toneClass =
-    tone === 'accent'
-      ? 'text-[var(--sw-accent-3)]'
-      : tone === 'danger'
-        ? 'text-red-300'
-        : 'text-white/68';
+    tone === 'accent' ? 'text-brand' : tone === 'danger' ? 'text-red-300' : 'text-white/68';
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/4 px-4 py-3">
       <span className="text-sm text-white/52">{label}</span>
       <span className={['text-lg tracking-[-0.03em]', toneClass].join(' ')}>{value}</span>
     </div>

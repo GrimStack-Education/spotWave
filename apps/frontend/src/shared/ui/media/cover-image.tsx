@@ -44,7 +44,7 @@ export function CoverImage({
         className="object-cover"
         sizes="(max-width: 768px) 100vw, 50vw"
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
     </div>
   );
 }

@@ -98,7 +98,7 @@ export function MapScreen() {
       markerNode.className = [
         'group min-w-9 rounded-full border px-3 py-2 text-xs font-semibold text-white shadow-2xl backdrop-blur transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.65)] focus-visible:ring-offset-2 focus-visible:ring-offset-black',
         selectedEvent?.id === event.id
-          ? 'border-[rgba(var(--sw-accent-2-rgb),0.72)] bg-[var(--sw-accent-3)]'
+          ? 'border-[rgba(var(--sw-accent-2-rgb),0.72)] bg-brand'
           : 'border-white/16 bg-black/70 hover:border-[rgba(var(--sw-accent-2-rgb),0.5)] hover:bg-[#1b1510]',
       ].join(' ');
       markerNode.textContent = event.rsvpCount ? `${event.rsvpCount}` : '•';
@@ -139,7 +139,7 @@ export function MapScreen() {
     <div className="min-w-0 space-y-5">
       <section className="grid min-w-0 items-start gap-5 2xl:grid-cols-[minmax(0,1fr)_390px]">
         <div className="min-w-0 space-y-4">
-          <div className="flex min-w-0 flex-col gap-4 rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-4 md:flex-row md:items-center md:justify-between md:rounded-[30px] md:p-5">
+          <div className="flex min-w-0 flex-col gap-4 rounded-[26px] border border-white/10 bg-(--sw-neutral-800) p-4 md:flex-row md:items-center md:justify-between md:rounded-[30px] md:p-5">
             <div className="min-w-0">
               <h1 className="text-[38px] leading-[0.96] tracking-[-0.055em] text-white md:text-[58px]">
                 Карта событий
@@ -149,9 +149,9 @@ export function MapScreen() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3">
+              <div className="rounded-2xl border border-white/10 bg-white/4.5 px-4 py-3">
                 <p className="text-xs uppercase tracking-[0.12em] text-white/42">Найдено</p>
-                <p className="mt-1 text-2xl tracking-[-0.05em] text-white">{events.length}</p>
+                <p className="mt-1 text-2xl tracking-tighter text-white">{events.length}</p>
               </div>
               <UiButton
                 variant="secondary"
@@ -166,7 +166,7 @@ export function MapScreen() {
           </div>
 
           <div className="min-w-0 overflow-hidden rounded-[26px] border border-white/10 bg-[#101010] md:rounded-[30px]">
-            <div className="relative h-[68vh] min-h-[500px] w-full max-h-[760px]">
+            <div className="relative h-[68vh] min-h-125 w-full max-h-190">
               <div ref={mapNodeRef} className="absolute inset-0 min-w-0" />
               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(10,10,10,0.04),rgba(10,10,10,0.32))]" />
               <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/68 p-3 backdrop-blur md:bottom-5 md:left-5 md:right-5 md:p-4">
@@ -174,11 +174,11 @@ export function MapScreen() {
                   <p className="text-sm uppercase tracking-[0.12em] text-white/45">Радиус поиска</p>
                   <p className="mt-1 text-2xl tracking-[-0.04em] text-white">{radiusKm} км</p>
                 </div>
-                <label className="flex min-w-0 flex-[1_1_180px] items-center gap-3 text-white/70 sm:max-w-[360px]">
-                  <SlidersHorizontal size={16} className="text-[var(--sw-accent-3)]" />
+                <label className="flex min-w-0 flex-[1_1_180px] items-center gap-3 text-white/70 sm:max-w-90">
+                  <SlidersHorizontal size={16} className="text-brand" />
                   <input
                     aria-label="Радиус поиска"
-                    className="h-2 w-full accent-[var(--sw-accent-3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]"
+                    className="h-2 w-full accent-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]"
                     max={30}
                     min={1}
                     onChange={(event) => setRadiusKm(Number(event.target.value))}
@@ -194,7 +194,7 @@ export function MapScreen() {
           </div>
         </div>
 
-        <aside className="min-w-0 rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 md:rounded-[30px] md:p-6">
+        <aside className="min-w-0 rounded-[26px] border border-white/10 bg-(--sw-neutral-800) p-5 md:rounded-[30px] md:p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h2 className="text-[34px] leading-[0.96] tracking-[-0.06em] text-white md:text-[40px]">
@@ -202,10 +202,10 @@ export function MapScreen() {
               </h2>
               <p className="mt-2 text-sm text-white/48">Выберите пин или карточку для перехода.</p>
             </div>
-            <MapPin className="text-[var(--sw-accent-3)]" size={22} />
+            <MapPin className="text-brand" size={22} />
           </div>
           {events.length ? (
-            <div className="mt-5 max-h-[680px] space-y-3 overflow-y-auto pr-1">
+            <div className="mt-5 max-h-170 space-y-3 overflow-y-auto pr-1">
               {events.map((event) => (
                 <EventRow
                   event={event}
@@ -241,7 +241,7 @@ function EventRow({
   return (
     <button
       className={[
-        'group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-white/84 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sw-neutral-800)]',
+        'group flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-white/84 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-(--sw-neutral-800)',
         isSelected
           ? 'border-[rgba(var(--sw-accent-2-rgb),0.52)] bg-[rgba(var(--sw-accent-4-rgb),0.22)]'
           : 'border-white/10 bg-[#101010] hover:border-[rgba(var(--sw-accent-2-rgb),0.35)]',
@@ -259,7 +259,7 @@ function EventRow({
       </div>
       <Link
         aria-label={`Открыть ${event.title}`}
-        className="rounded-full border border-white/10 p-2 text-white/45 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.38)] hover:text-[var(--sw-accent-3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]"
+        className="rounded-full border border-white/10 p-2 text-white/45 transition hover:border-[rgba(var(--sw-accent-2-rgb),0.38)] hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.55)]"
         href={`/events/${event.id}`}
       >
         <ArrowRight size={16} />

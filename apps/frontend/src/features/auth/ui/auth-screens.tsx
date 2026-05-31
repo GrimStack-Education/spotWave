@@ -16,9 +16,9 @@ import { UiInput } from '@/shared/ui/input/input';
 import { ErrorState } from '@/shared/ui/states/states';
 
 const orangeButtonClassName =
-  'h-14 rounded-full bg-[var(--sw-accent-3)] text-base font-medium text-white !shadow-none transition-colors hover:!bg-[var(--sw-accent-3)] hover:!shadow-none focus:!bg-[var(--sw-accent-3)] focus:!shadow-none focus-visible:!border-transparent focus-visible:!bg-[var(--sw-accent-3)] focus-visible:!ring-0 focus-visible:!shadow-none active:!bg-[var(--sw-accent-3)] active:!shadow-none data-[hover=true]:bg-[var(--sw-accent-3)] md:h-16 md:text-lg';
+  'h-14 rounded-full bg-brand text-base font-medium text-white !shadow-none transition-colors hover:!bg-brand hover:!shadow-none focus:!bg-brand focus:!shadow-none focus-visible:!border-transparent focus-visible:!bg-brand focus-visible:!ring-0 focus-visible:!shadow-none active:!bg-brand active:!shadow-none data-[hover=true]:bg-brand md:h-16 md:text-lg';
 const authInputClassName =
-  'h-14 w-full rounded-[22px] border border-white/12 bg-[#101010] px-12 text-base text-white outline-none ring-0 transition-colors placeholder:text-white/32 focus:border-[var(--sw-accent-3)] md:h-16 md:rounded-[24px] md:px-14 md:text-lg';
+  'h-14 w-full rounded-[22px] border border-white/12 bg-[#101010] px-12 text-base text-white outline-none ring-0 transition-colors placeholder:text-white/32 focus:border-brand md:h-16 md:rounded-[24px] md:px-14 md:text-lg';
 const authCardClassName =
   'w-full rounded-[28px] border border-white/12 bg-[#161616] p-5 shadow-none md:rounded-[32px] md:p-9';
 const authHeroGridClassName =
@@ -85,7 +85,7 @@ export function SignInScreen() {
         </div>
         <div className="mt-5 flex items-center justify-between gap-4 md:mt-6">
           <UiCheckbox defaultChecked label="Запомнить меня" />
-          <Link href="/forgot-password" className="text-base text-[var(--sw-accent-3)]">
+          <Link href="/forgot-password" className="text-base text-brand">
             Забыли пароль?
           </Link>
         </div>
@@ -99,7 +99,7 @@ export function SignInScreen() {
         </UiButton>
         <p className="mt-5 text-center text-base text-white/46 md:mt-7">
           Еще нет аккаунта?{' '}
-          <Link href="/sign-up" className="text-[var(--sw-accent-3)]">
+          <Link href="/sign-up" className="text-brand">
             Создать
           </Link>
         </p>
@@ -185,7 +185,7 @@ export function SignUpScreen() {
         </UiButton>
         <p className="mt-5 text-center text-base text-white/46 md:mt-7">
           Уже есть аккаунт?{' '}
-          <Link href="/sign-in" className="text-[var(--sw-accent-3)]">
+          <Link href="/sign-in" className="text-brand">
             Войти
           </Link>
         </p>
@@ -212,7 +212,7 @@ export function ForgotPasswordScreen() {
             Отправить ссылку
           </UiButton>
           <p className="text-base text-white/48">
-            <Link href="/sign-in" className="text-[var(--sw-accent-3)]">
+            <Link href="/sign-in" className="text-brand">
               Вернуться ко входу
             </Link>
           </p>
@@ -253,10 +253,10 @@ function AuthField({
 
 function AuthPage({ children, topBadge }: { children: ReactNode; topBadge: string }) {
   return (
-    <main className="min-h-screen overflow-hidden bg-[var(--background)] px-3 py-3 text-white md:px-8 md:py-8">
-      <section className="relative mx-auto max-w-[1460px] overflow-hidden rounded-[28px] border border-white/10 bg-[var(--background)] px-4 py-5 md:rounded-[34px] md:px-10 md:py-10 xl:px-12 xl:py-10">
+    <main className="min-h-screen overflow-hidden bg-background px-3 py-3 text-white md:px-8 md:py-8">
+      <section className="relative mx-auto max-w-365 overflow-hidden rounded-[28px] border border-white/10 bg-background px-4 py-5 md:rounded-[34px] md:px-10 md:py-10 xl:px-12 xl:py-10">
         <div className="relative flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3 rounded-full border border-white/10 bg-[var(--sw-brand-capsule)] px-3 py-2 shadow-none md:gap-4 md:px-5 md:py-3">
+          <div className="flex min-w-0 items-center gap-3 rounded-full border border-white/10 bg-(--sw-brand-capsule) px-3 py-2 shadow-none md:gap-4 md:px-5 md:py-3">
             <Image
               src="/brand/spotwave-logo.png"
               alt="SpotWave"
@@ -267,7 +267,7 @@ function AuthPage({ children, topBadge }: { children: ReactNode; topBadge: strin
               className="md:h-[54px] md:w-[54px]"
             />
             <span className="text-[27px] leading-none md:text-[34px]">
-              Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
+              Spot<span className="text-brand">Wave</span>
             </span>
           </div>
           <span className="shrink-0 text-xs uppercase tracking-[0.14em] text-white/54 md:text-sm md:tracking-[0.18em]">
@@ -275,12 +275,12 @@ function AuthPage({ children, topBadge }: { children: ReactNode; topBadge: strin
           </span>
         </div>
         <div className={authHeroGridClassName}>
-          <div className="max-w-[620px]">
+          <div className="max-w-155">
             <h1 className="text-[44px] leading-[0.98] tracking-[-0.04em] text-white md:text-[84px] xl:text-[100px]">
               Находи
               <br />
               события
-              <br />и <span className="text-[var(--sw-accent-3)]">своих</span>
+              <br />и <span className="text-brand">своих</span>
             </h1>
             <p className="mt-4 max-w-[540px] text-base leading-7 text-white/58 md:mt-6 md:text-xl md:leading-8">
               Локальные события, живые сообщества и встречи рядом в одном аккуратном продукте.

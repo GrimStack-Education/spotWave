@@ -7,7 +7,7 @@ export default function NotFound() {
       <div className="mx-auto max-w-2xl">
         <EmptyState title="Page not found" description="The page does not exist." />
         <div className="mt-4">
-          <Link href="/start" className="text-[var(--sw-accent-3)]">
+          <Link href="/start" className="text-brand">
             Back to start
           </Link>
         </div>

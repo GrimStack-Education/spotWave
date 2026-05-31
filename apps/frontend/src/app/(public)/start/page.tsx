@@ -10,7 +10,7 @@ export default function StartPage() {
       topBadge="СТАРТ"
     >
       <Link href="/sign-up" className="block">
-        <UiButton className="h-14 w-full border border-[rgba(var(--sw-accent-2-rgb),0.55)] bg-[var(--sw-accent-3)] text-lg font-semibold text-white shadow-[0_0_0_1px_rgba(var(--sw-accent-2-rgb),0.45),0_14px_35px_rgba(var(--sw-accent-3-rgb),0.35)] hover:bg-[#ff8c1a]">
+        <UiButton className="h-14 w-full border border-[rgba(var(--sw-accent-2-rgb),0.55)] bg-brand text-lg font-semibold text-white shadow-[0_0_0_1px_rgba(var(--sw-accent-2-rgb),0.45),0_14px_35px_rgba(var(--sw-accent-3-rgb),0.35)] hover:bg-[#ff8c1a]">
           Создать аккаунт
         </UiButton>
       </Link>

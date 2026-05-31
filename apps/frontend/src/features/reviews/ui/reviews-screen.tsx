@@ -83,7 +83,7 @@ export function ReviewsScreen() {
           <CalendarDays size={16} /> Событие
         </span>
         <select
-          className="mt-2 min-h-12 w-full rounded-2xl border border-white/12 bg-[#151515] px-4 text-white outline-none transition focus:border-[var(--sw-accent-3)]"
+          className="mt-2 min-h-12 w-full rounded-2xl border border-white/12 bg-[#151515] px-4 text-white outline-none transition focus:border-brand"
           value={resolvedEventId}
           onChange={(e) => {
             setEventId(e.target.value);
@@ -107,7 +107,7 @@ export function ReviewsScreen() {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
           <UiCard className="space-y-5 p-5 md:p-6">
             <div className="flex items-center gap-3">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-3)]">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-brand">
                 <Star size={20} />
               </span>
               <div className="min-w-0">
@@ -145,19 +145,19 @@ export function ReviewsScreen() {
                 (reviewsQuery.data?.items ?? []).map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-2xl border border-white/10 bg-white/[0.035] p-4"
+                    className="rounded-2xl border border-white/10 bg-white/3.5 p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-medium text-white/86">
                         {item.author.displayName ?? item.author.email}
                       </p>
-                      <span className="text-sm text-[var(--sw-accent-3)]">{item.rating}/5</span>
+                      <span className="text-sm text-brand">{item.rating}/5</span>
                     </div>
                     <p className="mt-2 text-sm leading-6 text-white/62">{item.text}</p>
                   </div>
                 ))
               ) : (
-                <p className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/52">
+                <p className="rounded-2xl border border-white/10 bg-white/3 p-4 text-sm text-white/52">
                   Для этого события отзывов пока нет.
                 </p>
               )}
@@ -166,14 +166,14 @@ export function ReviewsScreen() {
 
           <UiCard className="space-y-5 p-5 md:p-6">
             <div className="flex items-center gap-3">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-[var(--sw-accent-3)]">
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[rgba(var(--sw-accent-4-rgb),0.16)] text-brand">
                 <MessageSquareWarning size={20} />
               </span>
               <h2 className="text-2xl tracking-[-0.04em]">Сообщить о проблеме</h2>
             </div>
             <textarea
               aria-label="Жалоба"
-              className="min-h-32 w-full rounded-2xl border border-white/12 bg-white/[0.04] px-4 py-3 text-white placeholder:text-white/32 focus:border-[var(--sw-accent-3)] focus:outline-none"
+              className="min-h-32 w-full rounded-2xl border border-white/12 bg-white/4 px-4 py-3 text-white placeholder:text-white/32 focus:border-brand focus:outline-none"
               placeholder="Опишите, что произошло: отмена, небезопасное поведение, спам или другая проблема."
               value={complaint}
               onChange={(e) => setComplaint(e.target.value)}
