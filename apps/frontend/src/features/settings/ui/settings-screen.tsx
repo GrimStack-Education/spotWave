@@ -18,7 +18,11 @@ export function SettingsScreen() {
   const [status, setStatus] = useState<{ tone: 'success' | 'error'; message: string } | null>(null);
 
   const mutation = useMutation({
-    mutationFn: (nextRadius: number) => saveOnboarding({ radiusKm: nextRadius, interestIds: onboardingQuery.data?.interestIds ?? [] }),
+    mutationFn: (nextRadius: number) =>
+      saveOnboarding({
+        radiusKm: nextRadius,
+        interestIds: onboardingQuery.data?.interestIds ?? [],
+      }),
     onSuccess: async () => {
       setStatus({ tone: 'success', message: 'Настройки ленты сохранены.' });
       await queryClient.invalidateQueries({ queryKey: queryKeys.onboarding });
@@ -44,7 +48,11 @@ export function SettingsScreen() {
       </div>
 
       {status ? (
-        status.tone === 'success' ? <SuccessState message={status.message} /> : <ErrorState message={status.message} />
+        status.tone === 'success' ? (
+          <SuccessState message={status.message} />
+        ) : (
+          <ErrorState message={status.message} />
+        )
       ) : null}
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
@@ -85,7 +93,9 @@ export function SettingsScreen() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
               <span className="text-white/58">Текущий радиус</span>
-              <span className="text-3xl tracking-[-0.05em] text-[var(--sw-accent-3)]">{radiusNumber} км</span>
+              <span className="text-3xl tracking-[-0.05em] text-[var(--sw-accent-3)]">
+                {radiusNumber} км
+              </span>
             </div>
             <UiButton isDisabled={mutation.isPending} onClick={() => mutation.mutate(radiusNumber)}>
               {mutation.isPending ? 'Сохраняем...' : 'Сохранить радиус'}
@@ -101,7 +111,9 @@ export function SettingsScreen() {
               </span>
               <h2 className="text-2xl tracking-[-0.04em]">Уведомления</h2>
             </div>
-            <p className="mt-4 text-white/60">Заявки, статусы встреч и новые сообщения собираются в центре обновлений.</p>
+            <p className="mt-4 text-white/60">
+              Заявки, статусы встреч и новые сообщения собираются в центре обновлений.
+            </p>
           </UiCard>
           <UiCard className="p-5 md:p-6">
             <div className="flex items-center gap-3">
@@ -111,8 +123,14 @@ export function SettingsScreen() {
               <h2 className="text-2xl tracking-[-0.04em]">Безопасность</h2>
             </div>
             <div className="mt-4 grid gap-3 text-sm text-white/60">
-              <p className="flex items-center gap-2"><ShieldCheck size={16} className="text-[var(--sw-accent-3)]" /> Сессия проверяется перед входом в app-раздел.</p>
-              <p className="flex items-center gap-2"><ShieldCheck size={16} className="text-[var(--sw-accent-3)]" /> JWT хранится локально и сбрасывается при выходе.</p>
+              <p className="flex items-center gap-2">
+                <ShieldCheck size={16} className="text-[var(--sw-accent-3)]" /> Сессия проверяется
+                перед входом в app-раздел.
+              </p>
+              <p className="flex items-center gap-2">
+                <ShieldCheck size={16} className="text-[var(--sw-accent-3)]" /> JWT хранится
+                локально и сбрасывается при выходе.
+              </p>
             </div>
           </UiCard>
         </div>

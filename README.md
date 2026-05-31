@@ -197,12 +197,12 @@ docker compose -f infrastructure/docker/docker-compose.yml run --rm backend-test
 
 Seed создает несколько пользователей для демонстрации:
 
-| Роль | Email | Пароль |
-| ---- | ----- | ------ |
-| Host | `host@spotwave.local` | `password123` |
-| Guest | `guest@spotwave.local` | `password123` |
+| Роль   | Email                   | Пароль        |
+| ------ | ----------------------- | ------------- |
+| Host   | `host@spotwave.local`   | `password123` |
+| Guest  | `guest@spotwave.local`  | `password123` |
 | Runner | `runner@spotwave.local` | `password123` |
-| Admin | `admin@spotwave.local` | `password123` |
+| Admin  | `admin@spotwave.local`  | `password123` |
 
 Рекомендуемый demo flow:
 

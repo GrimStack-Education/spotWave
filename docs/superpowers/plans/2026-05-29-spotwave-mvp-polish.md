@@ -13,6 +13,7 @@
 ### Task 1: Backend Participation Rules
 
 **Files:**
+
 - Modify: `apps/backend/test/app.e2e-spec.ts`
 - Modify: `apps/backend/src/modules/events/events.service.ts`
 - Modify: `apps/backend/src/modules/checkins/checkins.service.ts`
@@ -26,6 +27,7 @@
 ### Task 2: Frontend MVP Polish
 
 **Files:**
+
 - Modify: `apps/frontend/src/features/events/api/events.api.ts`
 - Modify: `apps/frontend/src/features/events/model/mappers.ts`
 - Modify: `apps/frontend/src/shared/types/domain.ts`
@@ -42,6 +44,7 @@
 ### Task 3: README Demo Presentation
 
 **Files:**
+
 - Modify: `README.md`
 
 - [ ] Add demo credentials for seeded users.

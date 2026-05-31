@@ -21,7 +21,10 @@ export function ReviewsScreen() {
   const [complaint, setComplaint] = useState('');
   const [status, setStatus] = useState<{ tone: 'success' | 'error'; message: string } | null>(null);
 
-  const eventsQuery = useQuery({ queryKey: queryKeys.events('reviews'), queryFn: () => fetchEvents({ limit: 20 }) });
+  const eventsQuery = useQuery({
+    queryKey: queryKeys.events('reviews'),
+    queryFn: () => fetchEvents({ limit: 20 }),
+  });
   const events = eventsQuery.data?.items ?? [];
   const resolvedEventId = eventId || events[0]?.id || '';
   const selectedEvent = events.find((event) => event.id === resolvedEventId);
@@ -33,7 +36,8 @@ export function ReviewsScreen() {
   });
 
   const reviewMutation = useMutation({
-    mutationFn: () => submitEventReview(resolvedEventId, { rating: Number(rating) || 5, text: reviewText }),
+    mutationFn: () =>
+      submitEventReview(resolvedEventId, { rating: Number(rating) || 5, text: reviewText }),
     onSuccess: async () => {
       setReviewText('');
       setStatus({ tone: 'success', message: 'Отзыв опубликован.' });
@@ -43,7 +47,8 @@ export function ReviewsScreen() {
   });
 
   const reportMutation = useMutation({
-    mutationFn: () => createReport({ targetType: 'EVENT', targetId: resolvedEventId, reason: complaint }),
+    mutationFn: () =>
+      createReport({ targetType: 'EVENT', targetId: resolvedEventId, reason: complaint }),
     onSuccess: () => {
       setComplaint('');
       setStatus({ tone: 'success', message: 'Жалоба отправлена модератору.' });
@@ -60,12 +65,17 @@ export function ReviewsScreen() {
           Отзывы и жалобы
         </h1>
         <p className="mt-4 max-w-2xl text-white/58">
-          Социальное доказательство после реальных встреч: участники оставляют оценки, а спорные ситуации уходят в модерацию.
+          Социальное доказательство после реальных встреч: участники оставляют оценки, а спорные
+          ситуации уходят в модерацию.
         </p>
       </div>
 
       {status ? (
-        status.tone === 'success' ? <SuccessState message={status.message} /> : <ErrorState message={status.message} />
+        status.tone === 'success' ? (
+          <SuccessState message={status.message} />
+        ) : (
+          <ErrorState message={status.message} />
+        )
       ) : null}
 
       <label className="block max-w-3xl">
@@ -89,7 +99,10 @@ export function ReviewsScreen() {
       </label>
 
       {!resolvedEventId ? (
-        <EmptyState title="Пока нет событий" description="Отзывы появятся после создания первой встречи." />
+        <EmptyState
+          title="Пока нет событий"
+          description="Отзывы появятся после создания первой встречи."
+        />
       ) : (
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px]">
           <UiCard className="space-y-5 p-5 md:p-6">
@@ -103,10 +116,26 @@ export function ReviewsScreen() {
               </div>
             </div>
             <div className="grid gap-3 sm:grid-cols-[120px_1fr]">
-              <UiInput aria-label="Оценка" inputMode="numeric" max="5" min="1" placeholder="5" value={rating} onChange={(e) => setRating(e.target.value)} />
-              <UiInput aria-label="Отзыв" placeholder="Что было полезно или неудобно?" value={reviewText} onChange={(e) => setReviewText(e.target.value)} />
+              <UiInput
+                aria-label="Оценка"
+                inputMode="numeric"
+                max="5"
+                min="1"
+                placeholder="5"
+                value={rating}
+                onChange={(e) => setRating(e.target.value)}
+              />
+              <UiInput
+                aria-label="Отзыв"
+                placeholder="Что было полезно или неудобно?"
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+              />
             </div>
-            <UiButton isDisabled={!reviewText || reviewMutation.isPending} onClick={() => reviewMutation.mutate()}>
+            <UiButton
+              isDisabled={!reviewText || reviewMutation.isPending}
+              onClick={() => reviewMutation.mutate()}
+            >
               {reviewMutation.isPending ? 'Публикуем...' : 'Опубликовать отзыв'}
             </UiButton>
 
@@ -114,9 +143,14 @@ export function ReviewsScreen() {
             <div className="space-y-3">
               {(reviewsQuery.data?.items ?? []).length ? (
                 (reviewsQuery.data?.items ?? []).map((item) => (
-                  <div key={item.id} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                  <div
+                    key={item.id}
+                    className="rounded-2xl border border-white/10 bg-white/[0.035] p-4"
+                  >
                     <div className="flex items-center justify-between gap-3">
-                      <p className="font-medium text-white/86">{item.author.displayName ?? item.author.email}</p>
+                      <p className="font-medium text-white/86">
+                        {item.author.displayName ?? item.author.email}
+                      </p>
                       <span className="text-sm text-[var(--sw-accent-3)]">{item.rating}/5</span>
                     </div>
                     <p className="mt-2 text-sm leading-6 text-white/62">{item.text}</p>
@@ -144,7 +178,11 @@ export function ReviewsScreen() {
               value={complaint}
               onChange={(e) => setComplaint(e.target.value)}
             />
-            <UiButton variant="danger" isDisabled={!complaint || reportMutation.isPending} onClick={() => reportMutation.mutate()}>
+            <UiButton
+              variant="danger"
+              isDisabled={!complaint || reportMutation.isPending}
+              onClick={() => reportMutation.mutate()}
+            >
               {reportMutation.isPending ? 'Отправляем...' : 'Отправить модератору'}
             </UiButton>
           </UiCard>

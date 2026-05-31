@@ -28,5 +28,15 @@ export type RSVP = {
 };
 
 export type Chat = { eventId: string; messages: string[]; isArchived: boolean };
-export type CheckIn = { eventId: string; userId: string; status: 'verified' | 'pending' | 'rejected'; method: 'geo' | 'qr' | 'code' };
-export type Trust = { verificationLevel: '12+' | '18+' | '25+'; rating: number; reviewsCount: number; complaintsCount: number };
+export type CheckIn = {
+  eventId: string;
+  userId: string;
+  status: 'verified' | 'pending' | 'rejected';
+  method: 'geo' | 'qr' | 'code';
+};
+export type Trust = {
+  verificationLevel: '12+' | '18+' | '25+';
+  rating: number;
+  reviewsCount: number;
+  complaintsCount: number;
+};

@@ -23,13 +23,27 @@ function pickCover(seed: string) {
   return covers[Math.abs(hash) % covers.length];
 }
 
-export function CoverImage({ seed = 'spotwave', className, alt = 'Event cover', priority = false }: CoverImageProps) {
+export function CoverImage({
+  seed = 'spotwave',
+  className,
+  alt = 'Event cover',
+  priority = false,
+}: CoverImageProps) {
   return (
-    <div className={[
-      'relative overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f0f]',
-      className ?? '',
-    ].join(' ')}>
-      <Image src={pickCover(seed)} alt={alt} fill priority={priority} className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+    <div
+      className={[
+        'relative overflow-hidden rounded-2xl border border-white/10 bg-[#0f0f0f]',
+        className ?? '',
+      ].join(' ')}
+    >
+      <Image
+        src={pickCover(seed)}
+        alt={alt}
+        fill
+        priority={priority}
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, 50vw"
+      />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
     </div>
   );

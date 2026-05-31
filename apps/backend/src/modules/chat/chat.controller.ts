@@ -10,12 +10,19 @@ export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
   @Get()
-  list(@Param('eventId') eventId: string, @CurrentUser() user: { sub: string }) {
+  list(
+    @Param('eventId') eventId: string,
+    @CurrentUser() user: { sub: string },
+  ) {
     return this.chatService.list(eventId, user.sub);
   }
 
   @Post()
-  send(@Param('eventId') eventId: string, @CurrentUser() user: { sub: string }, @Body() dto: CreateChatMessageDto) {
+  send(
+    @Param('eventId') eventId: string,
+    @CurrentUser() user: { sub: string },
+    @Body() dto: CreateChatMessageDto,
+  ) {
     return this.chatService.send(eventId, user.sub, dto);
   }
 }

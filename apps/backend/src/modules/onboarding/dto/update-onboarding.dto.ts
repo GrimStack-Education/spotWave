@@ -1,5 +1,15 @@
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, ArrayUnique, IsArray, IsLatitude, IsLongitude, IsOptional, IsUUID, Max, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
+  IsLatitude,
+  IsLongitude,
+  IsOptional,
+  IsUUID,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class UpdateOnboardingDto {
   @IsOptional()

@@ -10,7 +10,11 @@ export class CheckInsController {
   constructor(private readonly checkInsService: CheckInsService) {}
 
   @Post()
-  create(@Param('eventId') eventId: string, @CurrentUser() user: { sub: string }, @Body() dto: CreateCheckInDto) {
+  create(
+    @Param('eventId') eventId: string,
+    @CurrentUser() user: { sub: string },
+    @Body() dto: CreateCheckInDto,
+  ) {
     return this.checkInsService.create(eventId, user.sub, dto);
   }
 }

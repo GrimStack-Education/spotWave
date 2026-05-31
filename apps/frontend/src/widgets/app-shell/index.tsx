@@ -38,9 +38,22 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <header className="relative grid gap-3 border-b border-white/10 pb-4 md:flex md:flex-wrap md:items-center md:justify-between md:gap-4 md:pb-6">
           <div className="flex items-center justify-between gap-3">
-            <Link href="/home" className="inline-flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-[var(--sw-brand-capsule)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:gap-3 md:px-5 md:py-3">
-              <Image src="/brand/spotwave-logo.png" alt="SpotWave" width={38} height={38} priority unoptimized className="md:h-[42px] md:w-[42px]" />
-              <span className="text-[24px] tracking-[-0.04em] md:text-[30px]">Spot<span className="text-[var(--sw-accent-3)]">Wave</span></span>
+            <Link
+              href="/home"
+              className="inline-flex min-w-0 items-center gap-2 rounded-full border border-white/10 bg-[var(--sw-brand-capsule)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] md:gap-3 md:px-5 md:py-3"
+            >
+              <Image
+                src="/brand/spotwave-logo.png"
+                alt="SpotWave"
+                width={38}
+                height={38}
+                priority
+                unoptimized
+                className="md:h-[42px] md:w-[42px]"
+              />
+              <span className="text-[24px] tracking-[-0.04em] md:text-[30px]">
+                Spot<span className="text-[var(--sw-accent-3)]">Wave</span>
+              </span>
             </Link>
 
             <div className="flex items-center gap-2 md:hidden">

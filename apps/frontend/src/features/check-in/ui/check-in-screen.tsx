@@ -16,12 +16,16 @@ export function CheckInScreen({ initialEventId = '' }: { initialEventId?: string
   const [eventId, setEventId] = useState(initialEventId);
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<{ tone: 'success' | 'error'; message: string } | null>(null);
-  const eventsQuery = useQuery({ queryKey: queryKeys.events('check-in'), queryFn: () => fetchEvents({ limit: 30 }) });
+  const eventsQuery = useQuery({
+    queryKey: queryKeys.events('check-in'),
+    queryFn: () => fetchEvents({ limit: 30 }),
+  });
   const events = eventsQuery.data?.items ?? [];
   const resolvedEventId = eventId || events[0]?.id || '';
 
   const mutation = useMutation({
-    mutationFn: (payload: { method: 'GEO' | 'QR' | 'CODE'; code?: string }) => createCheckIn(resolvedEventId, payload),
+    mutationFn: (payload: { method: 'GEO' | 'QR' | 'CODE'; code?: string }) =>
+      createCheckIn(resolvedEventId, payload),
     onSuccess: () => setStatus({ tone: 'success', message: 'Участие подтверждено.' }),
     onError: (error) => setStatus({ tone: 'error', message: toErrorMessage(error) }),
   });
@@ -31,9 +35,12 @@ export function CheckInScreen({ initialEventId = '' }: { initialEventId?: string
   return (
     <UiCard className="space-y-6 p-5 md:p-8">
       <div>
-        <h1 className="text-[44px] leading-[0.98] tracking-[-0.04em] md:text-7xl md:tracking-[-0.06em]">Check-in</h1>
+        <h1 className="text-[44px] leading-[0.98] tracking-[-0.04em] md:text-7xl md:tracking-[-0.06em]">
+          Check-in
+        </h1>
         <p className="mt-4 max-w-2xl text-white/58">
-          Подтвердите реальное присутствие на встрече: по геолокации, QR или короткому коду организатора.
+          Подтвердите реальное присутствие на встрече: по геолокации, QR или короткому коду
+          организатора.
         </p>
       </div>
 
@@ -55,22 +62,71 @@ export function CheckInScreen({ initialEventId = '' }: { initialEventId?: string
           </select>
         </label>
       ) : (
-        <EmptyState title="Нет доступных событий" description="Check-in появится после создания первой встречи." />
+        <EmptyState
+          title="Нет доступных событий"
+          description="Check-in появится после создания первой встречи."
+        />
       )}
 
-      <UiInput placeholder="Код организатора, если нужен" value={code} onChange={(e) => setCode(e.target.value)} />
+      <UiInput
+        placeholder="Код организатора, если нужен"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+      />
       {status ? (
-        status.tone === 'success' ? <SuccessState message={status.message} /> : <ErrorState message={status.message} />
+        status.tone === 'success' ? (
+          <SuccessState message={status.message} />
+        ) : (
+          <ErrorState message={status.message} />
+        )
       ) : null}
       <div className="grid gap-3 md:grid-cols-3">
-        <Action disabled={!resolvedEventId || mutation.isPending} icon={<MapPinned size={22} />} title="По геолокации" onClick={() => mutation.mutate({ method: 'GEO' })} />
-        <Action disabled={!resolvedEventId || mutation.isPending} icon={<QrCode size={22} />} title="Сканировать QR" onClick={() => mutation.mutate({ method: 'QR', code })} />
-        <Action disabled={!resolvedEventId || mutation.isPending} icon={<ScanLine size={22} />} title="Ввести код" primary onClick={() => mutation.mutate({ method: 'CODE', code })} />
+        <Action
+          disabled={!resolvedEventId || mutation.isPending}
+          icon={<MapPinned size={22} />}
+          title="По геолокации"
+          onClick={() => mutation.mutate({ method: 'GEO' })}
+        />
+        <Action
+          disabled={!resolvedEventId || mutation.isPending}
+          icon={<QrCode size={22} />}
+          title="Сканировать QR"
+          onClick={() => mutation.mutate({ method: 'QR', code })}
+        />
+        <Action
+          disabled={!resolvedEventId || mutation.isPending}
+          icon={<ScanLine size={22} />}
+          title="Ввести код"
+          primary
+          onClick={() => mutation.mutate({ method: 'CODE', code })}
+        />
       </div>
     </UiCard>
   );
 }
 
-function Action({ disabled, icon, primary, title, onClick }: { disabled?: boolean; icon: React.ReactNode; primary?: boolean; title: string; onClick: () => void }) {
-  return <UiButton className="h-24 flex-col gap-2" isDisabled={disabled} variant={primary ? 'primary' : 'secondary'} onClick={onClick}>{icon}{title}</UiButton>;
+function Action({
+  disabled,
+  icon,
+  primary,
+  title,
+  onClick,
+}: {
+  disabled?: boolean;
+  icon: React.ReactNode;
+  primary?: boolean;
+  title: string;
+  onClick: () => void;
+}) {
+  return (
+    <UiButton
+      className="h-24 flex-col gap-2"
+      isDisabled={disabled}
+      variant={primary ? 'primary' : 'secondary'}
+      onClick={onClick}
+    >
+      {icon}
+      {title}
+    </UiButton>
+  );
 }

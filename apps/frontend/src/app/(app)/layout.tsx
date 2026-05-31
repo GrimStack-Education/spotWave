@@ -45,7 +45,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }, [token, meQuery.isError, onboardingQuery.data?.completed, pathname, router]);
 
   if (!token || meQuery.isLoading || (meQuery.isSuccess && onboardingQuery.isLoading)) {
-    return <div className="p-6"><LoadingState /></div>;
+    return (
+      <div className="p-6">
+        <LoadingState />
+      </div>
+    );
   }
 
   return <AppShell>{children}</AppShell>;

@@ -21,7 +21,13 @@ export type MeResponse = {
     hostedEventsCount: number;
     joinedEventsCount: number;
     checkInsCount: number;
-    upcomingEvents: Array<{ id: string; title: string; startsAt: string; addressText?: string | null; status: string }>;
+    upcomingEvents: Array<{
+      id: string;
+      title: string;
+      startsAt: string;
+      addressText?: string | null;
+      status: string;
+    }>;
   };
   trust?: {
     level: string;
@@ -32,7 +38,14 @@ export type MeResponse = {
     joinedEventsCount: number;
     openReports: number;
     resolvedReports: number;
-    recentReviews: Array<{ eventId: string; eventTitle: string; rating: number; text: string; createdAt: string; authorName: string }>;
+    recentReviews: Array<{
+      eventId: string;
+      eventTitle: string;
+      rating: number;
+      text: string;
+      createdAt: string;
+      authorName: string;
+    }>;
   };
   createdAt: string;
   updatedAt: string;

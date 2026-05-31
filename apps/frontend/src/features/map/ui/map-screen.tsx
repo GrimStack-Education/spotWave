@@ -39,7 +39,8 @@ export function MapScreen() {
   const selectedEvent = events.find((event) => event.id === selectedId) ?? events[0] ?? null;
 
   useEffect(() => {
-    if (eventsQuery.isLoading || eventsQuery.isError || !mapNodeRef.current || mapRef.current) return;
+    if (eventsQuery.isLoading || eventsQuery.isError || !mapNodeRef.current || mapRef.current)
+      return;
 
     mapRef.current = new maplibregl.Map({
       container: mapNodeRef.current,
@@ -49,11 +50,11 @@ export function MapScreen() {
       attributionControl: false,
     });
 
+    mapRef.current.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
     mapRef.current.addControl(
-      new maplibregl.AttributionControl({ compact: true }),
-      'bottom-right',
+      new maplibregl.NavigationControl({ showCompass: false }),
+      'top-right',
     );
-    mapRef.current.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
     return () => {
       markersRef.current.forEach((marker) => marker.remove());
@@ -66,7 +67,11 @@ export function MapScreen() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    map.easeTo({ center: [center.lng, center.lat], zoom: radiusKm > 20 ? 10.5 : 12, duration: 650 });
+    map.easeTo({
+      center: [center.lng, center.lat],
+      zoom: radiusKm > 20 ? 10.5 : 12,
+      duration: 650,
+    });
   }, [center, radiusKm]);
 
   useEffect(() => {
@@ -78,9 +83,14 @@ export function MapScreen() {
 
     const centerMarker = document.createElement('button');
     centerMarker.type = 'button';
-    centerMarker.className = 'grid h-4 w-4 place-items-center rounded-full bg-white shadow-[0_0_0_6px_rgba(255,123,0,0.24),0_0_36px_rgba(255,123,0,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.65)] focus-visible:ring-offset-2 focus-visible:ring-offset-black';
+    centerMarker.className =
+      'grid h-4 w-4 place-items-center rounded-full bg-white shadow-[0_0_0_6px_rgba(255,123,0,0.24),0_0_36px_rgba(255,123,0,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(var(--sw-accent-2-rgb),0.65)] focus-visible:ring-offset-2 focus-visible:ring-offset-black';
     centerMarker.setAttribute('aria-label', 'Текущая позиция поиска');
-    markersRef.current.push(new maplibregl.Marker({ element: centerMarker }).setLngLat([center.lng, center.lat]).addTo(map));
+    markersRef.current.push(
+      new maplibregl.Marker({ element: centerMarker })
+        .setLngLat([center.lng, center.lat])
+        .addTo(map),
+    );
 
     for (const event of events) {
       const markerNode = document.createElement('button');
@@ -143,7 +153,12 @@ export function MapScreen() {
                 <p className="text-xs uppercase tracking-[0.12em] text-white/42">Найдено</p>
                 <p className="mt-1 text-2xl tracking-[-0.05em] text-white">{events.length}</p>
               </div>
-              <UiButton variant="secondary" className="h-12" onPress={locate} isDisabled={isLocating}>
+              <UiButton
+                variant="secondary"
+                className="h-12"
+                onPress={locate}
+                isDisabled={isLocating}
+              >
                 <Navigation size={16} />
                 {isLocating ? 'Ищем...' : 'Моя геопозиция'}
               </UiButton>
@@ -182,7 +197,9 @@ export function MapScreen() {
         <aside className="min-w-0 rounded-[26px] border border-white/10 bg-[var(--sw-neutral-800)] p-5 md:rounded-[30px] md:p-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-[34px] leading-[0.96] tracking-[-0.06em] text-white md:text-[40px]">События рядом</h2>
+              <h2 className="text-[34px] leading-[0.96] tracking-[-0.06em] text-white md:text-[40px]">
+                События рядом
+              </h2>
               <p className="mt-2 text-sm text-white/48">Выберите пин или карточку для перехода.</p>
             </div>
             <MapPin className="text-[var(--sw-accent-3)]" size={22} />
@@ -200,7 +217,10 @@ export function MapScreen() {
             </div>
           ) : (
             <div className="mt-6">
-              <EmptyState title="Рядом пока тихо" description="Расширьте радиус или создайте первое событие в этой зоне." />
+              <EmptyState
+                title="Рядом пока тихо"
+                description="Расширьте радиус или создайте первое событие в этой зоне."
+              />
             </div>
           )}
         </aside>
@@ -233,7 +253,8 @@ function EventRow({
       <div className="min-w-0 flex-1">
         <p className="truncate">{event.title}</p>
         <p className="truncate text-sm text-white/52">
-          {event.distanceKm != null ? `${event.distanceKm.toFixed(1)} км` : event.radius + ' км'} · {event.rsvpCount}/{event.capacity}
+          {event.distanceKm != null ? `${event.distanceKm.toFixed(1)} км` : event.radius + ' км'} ·{' '}
+          {event.rsvpCount}/{event.capacity}
         </p>
       </div>
       <Link

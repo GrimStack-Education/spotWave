@@ -17,8 +17,11 @@ export class NotificationsService {
   }
 
   async markRead(userId: string, id: string) {
-    const item = await this.db.client.notification.findUnique({ where: { id } });
-    if (!item || item.userId !== userId) throw new NotFoundException('Notification not found');
+    const item = await this.db.client.notification.findUnique({
+      where: { id },
+    });
+    if (!item || item.userId !== userId)
+      throw new NotFoundException('Notification not found');
 
     return this.db.client.notification.update({
       where: { id },

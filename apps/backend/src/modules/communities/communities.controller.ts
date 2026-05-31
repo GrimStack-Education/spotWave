@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '../../core/auth/current-user.decorator';
 import { JwtAuthGuard } from '../../core/auth/jwt-auth.guard';
@@ -25,27 +33,39 @@ export class CommunitiesController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60000 } })
-  create(@CurrentUser() user: { sub: string }, @Body() dto: CreateCommunityDto) {
+  create(
+    @CurrentUser() user: { sub: string },
+    @Body() dto: CreateCommunityDto,
+  ) {
     return this.communitiesService.create(user.sub, dto);
   }
 
   @Post(':id/join')
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 30, ttl: 60000 } })
-  join(@Param() params: CommunityIdParamDto, @CurrentUser() user: { sub: string }) {
+  join(
+    @Param() params: CommunityIdParamDto,
+    @CurrentUser() user: { sub: string },
+  ) {
     return this.communitiesService.join(params.id, user.sub);
   }
 
   @Post(':id/leave')
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 30, ttl: 60000 } })
-  leave(@Param() params: CommunityIdParamDto, @CurrentUser() user: { sub: string }) {
+  leave(
+    @Param() params: CommunityIdParamDto,
+    @CurrentUser() user: { sub: string },
+  ) {
     return this.communitiesService.leave(params.id, user.sub);
   }
 
   @Get(':id/messages')
   @UseGuards(JwtAuthGuard)
-  listMessages(@Param() params: CommunityIdParamDto, @CurrentUser() user: { sub: string }) {
+  listMessages(
+    @Param() params: CommunityIdParamDto,
+    @CurrentUser() user: { sub: string },
+  ) {
     return this.communitiesService.listMessages(params.id, user.sub);
   }
 

@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ParticipantStatus } from '@spotwave/database';
 import { DatabaseService } from '../../core/database/database.service';
 import { CreateChatMessageDto } from './dto/create-chat-message.dto';
@@ -12,7 +16,9 @@ export class ChatService {
 
     const items = await this.db.client.eventChatMessage.findMany({
       where: { eventId },
-      include: { user: { select: { id: true, displayName: true, email: true } } },
+      include: {
+        user: { select: { id: true, displayName: true, email: true } },
+      },
       orderBy: { createdAt: 'asc' },
       take: 300,
     });
@@ -25,7 +31,9 @@ export class ChatService {
 
     return this.db.client.eventChatMessage.create({
       data: { eventId, userId, message: dto.message.trim() },
-      include: { user: { select: { id: true, displayName: true, email: true } } },
+      include: {
+        user: { select: { id: true, displayName: true, email: true } },
+      },
     });
   }
 
@@ -39,7 +47,10 @@ export class ChatService {
       throw new ForbiddenException('Only active participants can access chat');
     }
 
-    const event = await this.db.client.event.findUnique({ where: { id: eventId }, select: { id: true } });
+    const event = await this.db.client.event.findUnique({
+      where: { id: eventId },
+      select: { id: true },
+    });
     if (!event) throw new NotFoundException('Event not found');
   }
 }

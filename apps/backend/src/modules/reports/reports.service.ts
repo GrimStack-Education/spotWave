@@ -113,7 +113,9 @@ export class ReportsService {
       });
 
       if (!event) {
-        throw new NotFoundException(`Event with id "${targetId}" was not found`);
+        throw new NotFoundException(
+          `Event with id "${targetId}" was not found`,
+        );
       }
 
       return;

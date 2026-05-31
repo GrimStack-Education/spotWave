@@ -64,7 +64,9 @@ export class AuthService {
     }
 
     if (!user.password) {
-      throw new UnauthorizedException('Password login is not available for this user');
+      throw new UnauthorizedException(
+        'Password login is not available for this user',
+      );
     }
 
     const isPasswordValid = await compare(dto.password, user.password);
@@ -185,9 +187,16 @@ export class AuthService {
     );
     const averageRating =
       reviews.length > 0
-        ? Number((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1))
+        ? Number(
+            (
+              reviews.reduce((sum, review) => sum + review.rating, 0) /
+              reviews.length
+            ).toFixed(1),
+          )
         : null;
-    const resolvedReports = user.reportsAgainstMe.filter((report) => report.status === 'RESOLVED').length;
+    const resolvedReports = user.reportsAgainstMe.filter(
+      (report) => report.status === 'RESOLVED',
+    ).length;
     const openReports = user.reportsAgainstMe.length - resolvedReports;
 
     return {
@@ -212,16 +221,21 @@ export class AuthService {
         hostedEventsCount,
         joinedEventsCount,
         checkInsCount,
-        upcomingEvents: user.eventParticipants.slice(0, 4).map((participant) => ({
-          id: participant.event.id,
-          title: participant.event.title,
-          startsAt: participant.event.startsAt,
-          addressText: participant.event.addressText,
-          status: participant.status,
-        })),
+        upcomingEvents: user.eventParticipants
+          .slice(0, 4)
+          .map((participant) => ({
+            id: participant.event.id,
+            title: participant.event.title,
+            startsAt: participant.event.startsAt,
+            addressText: participant.event.addressText,
+            status: participant.status,
+          })),
       },
       trust: {
-        level: checkInsCount >= 4 && averageRating && averageRating >= 4.7 ? '25+' : '18+',
+        level:
+          checkInsCount >= 4 && averageRating && averageRating >= 4.7
+            ? '25+'
+            : '18+',
         averageRating,
         reviewsCount: reviews.length,
         checkInsCount,

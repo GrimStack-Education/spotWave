@@ -20,7 +20,10 @@ export class OnboardingController {
   }
 
   @Put('me')
-  updateMyOnboarding(@CurrentUser() user: { sub: string }, @Body() dto: UpdateOnboardingDto) {
+  updateMyOnboarding(
+    @CurrentUser() user: { sub: string },
+    @Body() dto: UpdateOnboardingDto,
+  ) {
     return this.onboardingService.update(user.sub, dto);
   }
 }

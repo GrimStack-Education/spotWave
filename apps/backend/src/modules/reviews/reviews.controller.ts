@@ -15,7 +15,11 @@ export class ReviewsController {
   }
 
   @Post()
-  create(@Param('eventId') eventId: string, @CurrentUser() user: { sub: string }, @Body() dto: CreateReviewDto) {
+  create(
+    @Param('eventId') eventId: string,
+    @CurrentUser() user: { sub: string },
+    @Body() dto: CreateReviewDto,
+  ) {
     return this.reviewsService.create(eventId, user.sub, dto);
   }
 }

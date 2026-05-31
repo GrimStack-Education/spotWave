@@ -20,7 +20,6 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { CheckInsModule } from './modules/checkins/checkins.module';
 import { CommunitiesModule } from './modules/communities/communities.module';
-  
 
 @Module({
   imports: [

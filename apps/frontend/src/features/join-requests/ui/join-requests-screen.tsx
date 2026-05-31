@@ -5,7 +5,11 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { CalendarDays, ShieldAlert, UserPlus } from 'lucide-react';
 import { me } from '@/features/auth/api/auth.api';
 import { fetchEvents } from '@/features/events/api/events.api';
-import { approveJoinRequest, fetchJoinRequests, rejectJoinRequest } from '@/features/join-requests/api/join-requests.api';
+import {
+  approveJoinRequest,
+  fetchJoinRequests,
+  rejectJoinRequest,
+} from '@/features/join-requests/api/join-requests.api';
 import { toErrorMessage } from '@/shared/lib/api/error';
 import { queryClient } from '@/shared/lib/query/query-client';
 import { queryKeys } from '@/shared/lib/query/keys';
@@ -15,12 +19,17 @@ import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/states/states'
 
 export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: string }) {
   const [eventId, setEventId] = useState(initialEventId);
-  const eventsQuery = useQuery({ queryKey: queryKeys.events('join-requests'), queryFn: () => fetchEvents({ limit: 30 }) });
+  const eventsQuery = useQuery({
+    queryKey: queryKeys.events('join-requests'),
+    queryFn: () => fetchEvents({ limit: 30 }),
+  });
   const events = eventsQuery.data?.items ?? [];
   const resolvedEventId = eventId || events[0]?.id || '';
   const selectedEvent = events.find((event) => event.id === resolvedEventId);
   const meQuery = useQuery({ queryKey: queryKeys.me, queryFn: me });
-  const isOrganizer = Boolean(selectedEvent?.creator?.id && meQuery.data?.id === selectedEvent.creator.id);
+  const isOrganizer = Boolean(
+    selectedEvent?.creator?.id && meQuery.data?.id === selectedEvent.creator.id,
+  );
   const requestsQuery = useQuery({
     queryKey: queryKeys.joinRequests(resolvedEventId),
     queryFn: () => fetchJoinRequests(resolvedEventId),
@@ -29,12 +38,14 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
 
   const approveMutation = useMutation({
     mutationFn: (userId: string) => approveJoinRequest(resolvedEventId, userId),
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: queryKeys.joinRequests(resolvedEventId) }),
+    onSuccess: async () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.joinRequests(resolvedEventId) }),
   });
 
   const rejectMutation = useMutation({
     mutationFn: (userId: string) => rejectJoinRequest(resolvedEventId, userId),
-    onSuccess: async () => queryClient.invalidateQueries({ queryKey: queryKeys.joinRequests(resolvedEventId) }),
+    onSuccess: async () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.joinRequests(resolvedEventId) }),
   });
 
   if (eventsQuery.isLoading || meQuery.isLoading) return <LoadingState />;
@@ -46,7 +57,8 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
           Заявки на участие
         </h1>
         <p className="mt-4 max-w-2xl text-white/58">
-          Организатор видит, кто хочет попасть на встречу, и быстро подтверждает или отклоняет запрос.
+          Организатор видит, кто хочет попасть на встречу, и быстро подтверждает или отклоняет
+          запрос.
         </p>
       </div>
 
@@ -68,7 +80,10 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
           </select>
         </label>
       ) : (
-        <EmptyState title="Событий пока нет" description="Заявки появятся после публикации первой встречи." />
+        <EmptyState
+          title="Событий пока нет"
+          description="Заявки появятся после публикации первой встречи."
+        />
       )}
 
       {!isOrganizer && resolvedEventId ? (
@@ -79,13 +94,16 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
           <div>
             <h2 className="text-2xl tracking-[-0.04em]">Доступно организатору</h2>
             <p className="mt-2 text-white/58">
-              Заявки может смотреть только автор события. Для демо войдите как host или выберите свое событие.
+              Заявки может смотреть только автор события. Для демо войдите как host или выберите
+              свое событие.
             </p>
           </div>
         </UiCard>
       ) : null}
       {isOrganizer && requestsQuery.isLoading ? <LoadingState /> : null}
-      {isOrganizer && requestsQuery.isError ? <ErrorState message={toErrorMessage(requestsQuery.error)} /> : null}
+      {isOrganizer && requestsQuery.isError ? (
+        <ErrorState message={toErrorMessage(requestsQuery.error)} />
+      ) : null}
 
       {isOrganizer && !requestsQuery.isLoading && !requestsQuery.isError && resolvedEventId ? (
         (requestsQuery.data?.items ?? []).length ? (
@@ -98,15 +116,28 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
                       <UserPlus size={20} />
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate text-white/86">{request.user.displayName ?? request.user.email}</p>
-                      <p className="text-sm text-white/46">Хочет присоединиться к {selectedEvent?.title}</p>
+                      <p className="truncate text-white/86">
+                        {request.user.displayName ?? request.user.email}
+                      </p>
+                      <p className="text-sm text-white/46">
+                        Хочет присоединиться к {selectedEvent?.title}
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <UiButton size="sm" isDisabled={approveMutation.isPending} onClick={() => approveMutation.mutate(request.userId)}>
+                    <UiButton
+                      size="sm"
+                      isDisabled={approveMutation.isPending}
+                      onClick={() => approveMutation.mutate(request.userId)}
+                    >
                       Принять
                     </UiButton>
-                    <UiButton size="sm" variant="secondary" isDisabled={rejectMutation.isPending} onClick={() => rejectMutation.mutate(request.userId)}>
+                    <UiButton
+                      size="sm"
+                      variant="secondary"
+                      isDisabled={rejectMutation.isPending}
+                      onClick={() => rejectMutation.mutate(request.userId)}
+                    >
                       Отклонить
                     </UiButton>
                   </div>
@@ -115,7 +146,10 @@ export function JoinRequestsScreen({ initialEventId = '' }: { initialEventId?: s
             ))}
           </div>
         ) : (
-          <EmptyState title="Новых заявок нет" description="Когда участники отправят запрос, он появится здесь." />
+          <EmptyState
+            title="Новых заявок нет"
+            description="Когда участники отправят запрос, он появится здесь."
+          />
         )
       ) : null}
     </div>

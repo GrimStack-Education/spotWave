@@ -105,7 +105,8 @@ describe('Backend e2e', () => {
       .set('Authorization', `Bearer ${hostToken}`)
       .send({
         name: 'Local makers circle',
-        description: 'A small community for nearby makers, operators and hosts to coordinate useful meetups.',
+        description:
+          'A small community for nearby makers, operators and hosts to coordinate useful meetups.',
         city: 'Almaty',
       })
       .expect(201);
@@ -114,7 +115,9 @@ describe('Backend e2e', () => {
     expect(createCommunity.body.data.members.activeCount).toBe(1);
 
     await request(app.getHttpServer()).get('/communities').expect(200);
-    await request(app.getHttpServer()).get(`/communities/${communityId}`).expect(200);
+    await request(app.getHttpServer())
+      .get(`/communities/${communityId}`)
+      .expect(200);
 
     await request(app.getHttpServer())
       .get(`/communities/${communityId}/messages`)
@@ -132,7 +135,9 @@ describe('Backend e2e', () => {
       .set('Authorization', `Bearer ${guestToken}`)
       .send({ message: 'I can help host the next small meetup.' })
       .expect(201);
-    expect(sendCommunityMessage.body.data.message).toBe('I can help host the next small meetup.');
+    expect(sendCommunityMessage.body.data.message).toBe(
+      'I can help host the next small meetup.',
+    );
 
     const communityMessages = await request(app.getHttpServer())
       .get(`/communities/${communityId}/messages`)
@@ -182,9 +187,7 @@ describe('Backend e2e', () => {
     const eventId: string = createEvent.body.data.id;
     expect(createEvent.body.data.tags).toHaveLength(2);
 
-    await request(app.getHttpServer())
-      .get(`/events/${eventId}`)
-      .expect(200);
+    await request(app.getHttpServer()).get(`/events/${eventId}`).expect(200);
 
     const listEvents = await request(app.getHttpServer())
       .get('/events')
@@ -231,7 +234,9 @@ describe('Backend e2e', () => {
       .expect(403);
 
     await request(app.getHttpServer())
-      .post(`/events/${eventId}/requests/${joinWaitlist.body.data.userId}/approve`)
+      .post(
+        `/events/${eventId}/requests/${joinWaitlist.body.data.userId}/approve`,
+      )
       .set('Authorization', `Bearer ${hostToken}`)
       .expect(409);
 

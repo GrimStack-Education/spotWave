@@ -79,7 +79,10 @@ export class EventsController {
   @Post(':id/leave')
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 30, ttl: 60000 } })
-  leave(@Param() params: EventIdParamDto, @CurrentUser() user: { sub: string }) {
+  leave(
+    @Param() params: EventIdParamDto,
+    @CurrentUser() user: { sub: string },
+  ) {
     return this.eventsService.leave(params.id, user.sub);
   }
 

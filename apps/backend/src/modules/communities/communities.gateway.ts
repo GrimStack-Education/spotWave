@@ -67,7 +67,9 @@ export class CommunitiesGateway implements OnGatewayConnection {
     const communityId = payload.communityId;
     const userId = client.data.userId as string | undefined;
     if (!communityId || !userId) {
-      client.emit('community:error', { message: 'Invalid community subscription' });
+      client.emit('community:error', {
+        message: 'Invalid community subscription',
+      });
       return;
     }
 
@@ -77,7 +79,9 @@ export class CommunitiesGateway implements OnGatewayConnection {
     });
 
     if (!member || member.status !== MemberStatus.ACTIVE) {
-      client.emit('community:error', { message: 'Only active members can join community chat' });
+      client.emit('community:error', {
+        message: 'Only active members can join community chat',
+      });
       return;
     }
 
@@ -96,7 +100,9 @@ export class CommunitiesGateway implements OnGatewayConnection {
   }
 
   emitMessage(message: CommunityMessagePayload) {
-    this.server.to(this.roomName(message.communityId)).emit('community:message', message);
+    this.server
+      .to(this.roomName(message.communityId))
+      .emit('community:message', message);
   }
 
   private async resolveUserId(client: Socket) {
