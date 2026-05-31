@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { prisma } from '@spotwave/database';
+import { PrismaClient } from '@prisma/client';
 import type { DocumentData, Firestore } from 'firebase-admin/firestore';
 import { createFirestoreFromEnv } from '../core/firebase/firebase-admin.service';
 import {
@@ -13,6 +13,8 @@ type FirestoreWrite = {
   path: string;
   data: DocumentData;
 };
+
+const prisma = new PrismaClient();
 
 type MigrationStats = {
   users: number;
